@@ -1,8 +1,8 @@
 {
   "name": "contact-list",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Simple contact management app",
+  "author": "Isah Ohieku",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
