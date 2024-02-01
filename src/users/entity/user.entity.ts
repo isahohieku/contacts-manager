@@ -9,8 +9,10 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { Contact } from 'src/contacts/entities/contact.entity';
 
 @Entity('users')
 export class User {
@@ -59,4 +61,7 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @OneToMany(() => Contact, (contact) => contact.owner)
+  contacts: Contact[];
 }

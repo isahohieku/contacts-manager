@@ -1,4 +1,10 @@
-import { AfterLoad, BaseEntity } from 'typeorm';
+import {
+  AfterLoad,
+  BaseEntity,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 
 export class EntityHelper extends BaseEntity {
   __entity?: string;
@@ -7,4 +13,15 @@ export class EntityHelper extends BaseEntity {
   setEntityName() {
     this.__entity = this.constructor.name;
   }
+}
+
+export class EntityBase {
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
