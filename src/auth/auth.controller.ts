@@ -18,7 +18,9 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthUpdateDto } from './dto/auth-update.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller({
   path: 'auth',
   version: '1',
@@ -65,6 +67,7 @@ export class AuthController {
     );
   }
 
+  @ApiBearerAuth()
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
@@ -72,6 +75,7 @@ export class AuthController {
     return this.service.me(request.user);
   }
 
+  @ApiBearerAuth()
   @Patch('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
@@ -79,6 +83,7 @@ export class AuthController {
     return this.service.update(request.user, userDto);
   }
 
+  @ApiBearerAuth()
   @Delete('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
