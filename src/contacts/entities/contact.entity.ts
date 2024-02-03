@@ -9,7 +9,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-@Entity('users')
+@Entity()
 export class Contact extends EntityBase {
   @PrimaryGeneratedColumn()
   id: number;
