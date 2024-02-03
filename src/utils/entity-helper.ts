@@ -15,7 +15,7 @@ export class EntityHelper extends BaseEntity {
   }
 }
 
-export class EntityBase {
+export class EntityBase extends EntityHelper {
   @CreateDateColumn()
   createdAt: Date;
 

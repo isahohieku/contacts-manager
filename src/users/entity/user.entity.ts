@@ -1,21 +1,23 @@
 import {
   Column,
   AfterLoad,
-  CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   Index,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Contact } from 'src/contacts/entities/contact.entity';
+import { EntityBase } from 'src/utils/entity-helper';
+import { AuthProvidersEnum } from 'src/auth/auth-providers.enum';
+import { Role } from 'src/roles/entities/role.entity';
+import { Status } from 'src/statuses/entities/status.entity';
 
 @Entity('users')
-export class User {
+export class User extends EntityBase {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -41,6 +43,9 @@ export class User {
     }
   }
 
+  @Column({ default: AuthProvidersEnum.email })
+  provider: string;
+
   @Index()
   @Column({ nullable: true })
   firstName: string | null;
@@ -49,18 +54,19 @@ export class User {
   @Column({ nullable: true })
   lastName: string | null;
 
+  @ManyToOne(() => Role, {
+    eager: true,
+  })
+  role?: Role | null;
+
+  @ManyToOne(() => Status, {
+    eager: true,
+  })
+  status?: Status;
+
   @Column({ nullable: true })
   @Index()
   hash: string | null;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @DeleteDateColumn()
-  deletedAt: Date;
 
   @OneToMany(() => Contact, (contact) => contact.owner)
   contacts: Contact[];
