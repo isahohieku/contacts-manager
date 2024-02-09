@@ -30,6 +30,17 @@ export class AuthService {
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
   ): Promise<{ token: string; user: User }> {
+    if (!loginDto.email) {
+      throw new HttpException(
+        {
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            email: 'notFound',
+          },
+        },
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
     const user = await this.usersService.findOne({
       email: loginDto.email,
     });
@@ -89,11 +100,23 @@ export class AuthService {
     }
   }
 
-  async register(dto: AuthRegisterLoginDto): Promise<void> {
+  async register(dto: AuthRegisterLoginDto): Promise<User> {
     const hash = crypto
       .createHash('sha256')
       .update(randomStringGenerator())
       .digest('hex');
+
+    const found = await this.usersService.findOne({ email: dto.email });
+
+    if (found) {
+      throw new HttpException(
+        {
+          status: HttpStatus.CONFLICT,
+          error: `emailAlreadyExist`,
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
 
     const user = await this.usersService.create({
       ...dto,
@@ -106,6 +129,8 @@ export class AuthService {
       } as Status,
       hash,
     });
+
+    return user;
 
     // await this.mailService.userSignUp({
     //   to: user.email,
