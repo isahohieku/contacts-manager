@@ -1,7 +1,7 @@
 import { EntityBase } from 'src/utils/entity-helper';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { PhoneTypeEnum } from '../phone-type.enum';
 import { Contact } from 'src/contacts/entities/contact.entity';
+import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
 
 @Entity()
 export class Phone extends EntityBase {
@@ -12,7 +12,7 @@ export class Phone extends EntityBase {
   phone_number?: string | null;
 
   @Column({ nullable: true, type: 'varchar', length: 20 })
-  phone_type?: PhoneTypeEnum | null;
+  phone_type?: PhoneType | null;
 
   @ManyToOne(() => Contact, (contact) => contact.phone_numbers)
   contact: Contact;
