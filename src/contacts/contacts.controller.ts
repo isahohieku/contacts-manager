@@ -55,7 +55,7 @@ export class ContactsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contactsService.remove(+id);
+  remove(@Request() request, @Param('id') id: string) {
+    return this.contactsService.remove(request.user, +id);
   }
 }

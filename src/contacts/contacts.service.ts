@@ -70,7 +70,11 @@ export class ContactsService {
     return this.findOne(user, id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contact`;
+  async remove(user: User, id: number) {
+    const contact = await this.findOne(user, id);
+
+    await this.contactsRepository.softDelete(id);
+
+    return contact;
   }
 }
