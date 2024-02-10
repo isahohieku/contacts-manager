@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import { Repository } from 'typeorm';
+import { User } from 'src/users/entity/user.entity';
 
 @Injectable()
 export class ContactsService {
@@ -12,19 +13,49 @@ export class ContactsService {
     private contactsRepository: Repository<Contact>,
   ) {}
 
-  async create(createContactDto: CreateContactDto) {
+  async create(user: User, createContactDto: CreateContactDto) {
     const contact = await this.contactsRepository.save(
-      this.contactsRepository.create(createContactDto),
+      this.contactsRepository.create({
+        ...createContactDto,
+        owner: user,
+      }),
     );
     return contact;
   }
 
-  findAll() {
-    return `This action returns all contacts`;
+  async findAll(user: User) {
+    const contacts = await this.contactsRepository.find({
+      where: {
+        owner: {
+          id: user.id,
+        },
+      },
+    });
+    return contacts;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contact`;
+  async findOne(user: User, id: number) {
+    const contact = await this.contactsRepository.findOne({
+      where: {
+        id,
+        owner: {
+          id: user.id,
+        },
+      },
+    });
+
+    if (contact) {
+      return contact;
+    }
+    throw new HttpException(
+      {
+        status: HttpStatus.NOT_FOUND,
+        errors: {
+          contact: 'notFound',
+        },
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   update(id: number, updateContactDto: UpdateContactDto) {
