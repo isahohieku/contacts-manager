@@ -1,3 +1,4 @@
+import { Phone } from 'src/phones/entities/phone.entity';
 import { User } from 'src/users/entity/user.entity';
 import { EntityBase } from 'src/utils/entity-helper';
 import {
@@ -6,6 +7,7 @@ import {
   Index,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -43,4 +45,7 @@ export class Contact extends EntityBase {
 
   @ManyToOne(() => User, (user) => user.contacts)
   owner: User;
+
+  @OneToMany(() => Phone, (phone) => phone.contact)
+  phone_numbers: Phone;
 }

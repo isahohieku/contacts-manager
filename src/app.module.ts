@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailConfigService } from './mail/mail-config.service';
 import { ForgotModule } from './forgot/forgot.module';
 import { MailModule } from './mail/mail.module';
+import { PhonesModule } from './phones/phones.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MailModule } from './mail/mail.module';
     AuthModule,
     ForgotModule,
     MailModule,
+    PhonesModule,
   ],
 })
 export class AppModule {}
