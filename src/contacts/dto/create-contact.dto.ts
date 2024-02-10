@@ -1,6 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
+import { CreatePhoneDto } from 'src/phones/dto/create-phone.dto';
+import { Phone } from 'src/phones/entities/phone.entity';
 
+@ApiExtraModels(CreatePhoneDto)
 export class CreateContactDto {
   @ApiProperty({ example: 'John' })
   @IsNotEmpty({ message: 'firstnameRequired' })
@@ -33,4 +36,11 @@ export class CreateContactDto {
   @ApiProperty({ example: 'Wonderful note' })
   @IsOptional()
   notes?: string | null;
+
+  @ApiProperty({
+    type: 'array',
+    items: { oneOf: [{ $ref: getSchemaPath(CreatePhoneDto) }] },
+  })
+  @IsOptional()
+  phones?: Phone[] | null;
 }
