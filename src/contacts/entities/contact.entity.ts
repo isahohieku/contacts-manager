@@ -2,7 +2,6 @@ import { User } from 'src/users/entity/user.entity';
 import { EntityBase } from 'src/utils/entity-helper';
 import {
   Column,
-  AfterLoad,
   Entity,
   Index,
   PrimaryGeneratedColumn,
@@ -13,19 +12,6 @@ import {
 export class Contact extends EntityBase {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ unique: true, nullable: true })
-  email: string | null;
-
-  @Column({ nullable: true })
-  password: string;
-
-  public previousPassword: string;
-
-  @AfterLoad()
-  public loadPreviousPassword(): void {
-    this.previousPassword = this.password;
-  }
 
   @Index()
   @Column({ nullable: false, type: 'varchar', length: 45 })
@@ -44,19 +30,15 @@ export class Contact extends EntityBase {
   job_title?: string | null;
 
   @Column({ nullable: true, type: 'date' })
-  @Index()
   birthday?: Date;
 
   @Column({ nullable: true, type: 'date' })
-  @Index()
   anniversary?: Date;
 
   @Column({ nullable: true, type: 'varchar', length: 100 })
-  @Index()
   avatar?: string | null;
 
   @Column({ nullable: true, type: 'text' })
-  @Index()
   notes?: string | null;
 
   @ManyToOne(() => User, (user) => user.contacts)
