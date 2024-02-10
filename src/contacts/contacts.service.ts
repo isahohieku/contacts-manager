@@ -58,8 +58,16 @@ export class ContactsService {
     );
   }
 
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
+  async update(user: User, id: number, updateContactDto: UpdateContactDto) {
+    await this.findOne(user, id);
+
+    await this.contactsRepository.save(
+      this.contactsRepository.create({
+        id,
+        ...updateContactDto,
+      }),
+    );
+    return this.findOne(user, id);
   }
 
   remove(id: number) {

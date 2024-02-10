@@ -42,8 +42,16 @@ export class ContactsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto) {
-    return this.contactsService.update(+id, updateContactDto);
+  update(
+    @Request() request,
+    @Param('id') id: string,
+    @Body() updateContactDto: UpdateContactDto,
+  ) {
+    return this.contactsService.update(
+      request.user as User,
+      +id,
+      updateContactDto,
+    );
   }
 
   @Delete(':id')
