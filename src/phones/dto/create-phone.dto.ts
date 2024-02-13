@@ -4,11 +4,12 @@ import { IsExist } from 'src/utils/validators/is-exists.validator';
 import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
 
 export class CreatePhoneDto {
-  @ApiProperty({ example: 'Doe' })
+  @ApiProperty({ example: '+2348036133002' })
   @IsOptional()
   phone_number?: string | null;
 
   @ApiProperty({ type: PhoneType })
+  @IsOptional()
   @Validate(IsExist, ['PhoneType', 'id'], {
     message: 'phoneTypeNotExists',
   })

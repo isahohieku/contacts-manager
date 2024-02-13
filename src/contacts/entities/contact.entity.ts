@@ -46,6 +46,9 @@ export class Contact extends EntityBase {
   @ManyToOne(() => User, (user) => user.contacts)
   owner: User;
 
-  @OneToMany(() => Phone, (phone) => phone.contact)
-  phone_numbers: Phone;
+  @OneToMany(() => Phone, (phone) => phone.contact, {
+    cascade: true,
+    eager: true,
+  })
+  phone_numbers: Phone[];
 }

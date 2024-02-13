@@ -42,5 +42,5 @@ export class CreateContactDto {
     items: { oneOf: [{ $ref: getSchemaPath(CreatePhoneDto) }] },
   })
   @IsOptional()
-  phones?: Phone[] | null;
+  phone_numbers?: Phone[] | null;
 }
