@@ -1,3 +1,4 @@
+import { User } from 'src/users/entity/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
@@ -40,12 +41,29 @@ export class AddressesService {
     return address;
   }
 
-  findAll() {
-    return `This action returns all addresses`;
-  }
+  async findOne(user: User, id: number) {
+    const address = await this.addressRepository.findOne({
+      where: {
+        id,
+        contact: {
+          owner: {
+            id: user.id,
+          },
+        },
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} address`;
+    if (address) return address;
+
+    throw new HttpException(
+      {
+        status: HttpStatus.NOT_FOUND,
+        errors: {
+          address: 'notFound',
+        },
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   update(id: number, updateAddressDto: UpdateAddressDto) {
