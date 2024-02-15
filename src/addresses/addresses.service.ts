@@ -66,8 +66,16 @@ export class AddressesService {
     );
   }
 
-  update(id: number, updateAddressDto: UpdateAddressDto) {
-    return `This action updates a #${id} address`;
+  async update(user: User, id: number, updateAddressDto: UpdateAddressDto) {
+    await this.findOne(user, id);
+
+    await this.addressRepository.save(
+      this.addressRepository.create({
+        id,
+        ...updateAddressDto,
+      }),
+    );
+    return this.findOne(user, id);
   }
 
   remove(id: number) {
