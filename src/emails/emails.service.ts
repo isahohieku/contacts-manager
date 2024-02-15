@@ -41,12 +41,29 @@ export class EmailsService {
     return phoneNumber;
   }
 
-  findAll() {
-    return `This action returns all emails`;
-  }
+  async findOne(user: User, id: number) {
+    const email = await this.emailRepository.findOne({
+      where: {
+        id,
+        contact: {
+          owner: {
+            id: user.id,
+          },
+        },
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} email`;
+    if (email) return email;
+
+    throw new HttpException(
+      {
+        status: HttpStatus.NOT_FOUND,
+        errors: {
+          email: 'notFound',
+        },
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   update(id: number, updateEmailDto: UpdateEmailDto) {

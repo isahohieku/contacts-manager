@@ -30,14 +30,9 @@ export class EmailsController {
     return this.emailsService.create(request.user, createEmailDto);
   }
 
-  @Get()
-  findAll() {
-    return this.emailsService.findAll();
-  }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.emailsService.findOne(+id);
+  findOne(@Request() request, @Param('id') id: string) {
+    return this.emailsService.findOne(request.user, +id);
   }
 
   @Patch(':id')
