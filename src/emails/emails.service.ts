@@ -11,9 +11,9 @@ import { Contact } from 'src/contacts/entities/contact.entity';
 export class EmailsService {
   constructor(
     @InjectRepository(Email)
-    private emailRepository: Repository<Email>,
+    private readonly emailRepository: Repository<Email>,
     @InjectRepository(Contact)
-    private contactsRepository: Repository<Contact>,
+    private readonly contactsRepository: Repository<Contact>,
   ) {}
 
   async create(user: User, createEmailDto: CreateEmailDto) {
@@ -33,12 +33,12 @@ export class EmailsService {
       );
     }
 
-    const phoneNumber = await this.emailRepository.save(
+    const email = await this.emailRepository.save(
       this.emailRepository.create({
         ...createEmailDto,
       }),
     );
-    return phoneNumber;
+    return email;
   }
 
   async findOne(user: User, id: number) {

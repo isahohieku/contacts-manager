@@ -1,15 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AddressesService } from './addresses.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 
-@Controller('addresses')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@ApiTags('Addresses')
+@Controller({
+  path: 'addresses',
+  version: '1',
+})
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
   @Post()
-  create(@Body() createAddressDto: CreateAddressDto) {
-    return this.addressesService.create(createAddressDto);
+  create(@Request() request, @Body() createAddressDto: CreateAddressDto) {
+    return this.addressesService.create(request.user, createAddressDto);
   }
 
   @Get()
