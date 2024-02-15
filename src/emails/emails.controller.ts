@@ -45,7 +45,7 @@ export class EmailsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.emailsService.remove(+id);
+  remove(@Request() request, @Param('id') id: string) {
+    return this.emailsService.remove(request.user, +id);
   }
 }

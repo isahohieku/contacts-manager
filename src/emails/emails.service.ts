@@ -78,7 +78,9 @@ export class EmailsService {
     return this.findOne(user, id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} email`;
+  async remove(user: User, id: number) {
+    const email = await this.findOne(user, id);
+    await this.emailRepository.softDelete(id);
+    return email;
   }
 }
