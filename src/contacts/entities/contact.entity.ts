@@ -1,3 +1,4 @@
+import { Email } from 'src/emails/entities/email.entity';
 import { Phone } from 'src/phones/entities/phone.entity';
 import { User } from 'src/users/entity/user.entity';
 import { EntityBase } from 'src/utils/entity-helper';
@@ -51,4 +52,10 @@ export class Contact extends EntityBase {
     eager: true,
   })
   phone_numbers: Phone[];
+
+  @OneToMany(() => Email, (email) => email.contact, {
+    cascade: true,
+    eager: true,
+  })
+  emails: Email[];
 }

@@ -4,13 +4,13 @@ import { Allow } from 'class-validator';
 import { EntityHelper } from 'src/utils/entity-helper';
 
 @Entity()
-export class PhoneType extends EntityHelper {
+export class EmailType extends EntityHelper {
   @ApiProperty({ example: 1 })
   @PrimaryColumn()
   id: number;
 
   @Allow()
-  @ApiProperty({ example: 'Mobile' })
+  @ApiProperty({ example: 'Work' })
   @Column()
   name?: string;
 }
