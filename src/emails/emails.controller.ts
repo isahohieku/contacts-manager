@@ -1,15 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { EmailsService } from './emails.service';
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 
-@Controller('emails')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@ApiTags('Emails')
+@Controller({
+  path: 'emails',
+  version: '1',
+})
 export class EmailsController {
   constructor(private readonly emailsService: EmailsService) {}
 
   @Post()
-  create(@Body() createEmailDto: CreateEmailDto) {
-    return this.emailsService.create(createEmailDto);
+  create(@Request() request, @Body() createEmailDto: CreateEmailDto) {
+    return this.emailsService.create(request.user, createEmailDto);
   }
 
   @Get()
