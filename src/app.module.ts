@@ -14,6 +14,7 @@ import { MailConfigService } from './mail/mail-config.service';
 import { ForgotModule } from './forgot/forgot.module';
 import { MailModule } from './mail/mail.module';
 import { PhonesModule } from './phones/phones.module';
+import { EmailsModule } from './emails/emails.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PhonesModule } from './phones/phones.module';
     ForgotModule,
     MailModule,
     PhonesModule,
+    EmailsModule,
   ],
 })
 export class AppModule {}
