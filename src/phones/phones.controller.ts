@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Request,
+} from '@nestjs/common';
 import { PhonesService } from './phones.service';
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
@@ -8,8 +17,8 @@ export class PhonesController {
   constructor(private readonly phonesService: PhonesService) {}
 
   @Post()
-  create(@Body() createPhoneDto: CreatePhoneDto) {
-    return this.phonesService.create(createPhoneDto);
+  create(@Request() request, @Body() createPhoneDto: CreatePhoneDto) {
+    return this.phonesService.create(request.user, createPhoneDto);
   }
 
   @Get()
