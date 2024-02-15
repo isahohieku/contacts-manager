@@ -17,7 +17,7 @@ export class PhonesService {
   ) {}
   async create(user: User, createPhoneDto: CreatePhoneDto) {
     const contact = await this.contactsRepository.findOne({
-      where: { owner: user, id: createPhoneDto.contact.id },
+      where: { owner: { id: user.id }, id: createPhoneDto.contact.id },
     });
 
     if (!contact) {
@@ -40,12 +40,29 @@ export class PhonesService {
     return phoneNumber;
   }
 
-  findAll() {
-    return `This action returns all phones`;
-  }
+  async findOne(user: User, id: number) {
+    const phoneNumber = await this.phoneRepository.findOne({
+      where: {
+        id,
+        contact: {
+          owner: {
+            id: user.id,
+          },
+        },
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} phone`;
+    if (phoneNumber) return phoneNumber;
+
+    throw new HttpException(
+      {
+        status: HttpStatus.NOT_FOUND,
+        errors: {
+          phone: 'notFound',
+        },
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   update(id: number, updatePhoneDto: UpdatePhoneDto) {

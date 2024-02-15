@@ -7,12 +7,21 @@ import {
   Param,
   Delete,
   Request,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { PhonesService } from './phones.service';
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
 
-@Controller('phones')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@ApiTags('Phones')
+@Controller({
+  path: 'phones',
+  version: '1',
+})
 export class PhonesController {
   constructor(private readonly phonesService: PhonesService) {}
 
@@ -21,14 +30,9 @@ export class PhonesController {
     return this.phonesService.create(request.user, createPhoneDto);
   }
 
-  @Get()
-  findAll() {
-    return this.phonesService.findAll();
-  }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.phonesService.findOne(+id);
+  findOne(@Request() request, @Param('id') id: string) {
+    return this.phonesService.findOne(request.user, +id);
   }
 
   @Patch(':id')
