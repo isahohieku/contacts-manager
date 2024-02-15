@@ -36,8 +36,12 @@ export class EmailsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEmailDto: UpdateEmailDto) {
-    return this.emailsService.update(+id, updateEmailDto);
+  update(
+    @Request() request,
+    @Param('id') id: string,
+    @Body() updateEmailDto: UpdateEmailDto,
+  ) {
+    return this.emailsService.update(request.user, +id, updateEmailDto);
   }
 
   @Delete(':id')

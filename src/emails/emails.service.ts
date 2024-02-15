@@ -66,8 +66,16 @@ export class EmailsService {
     );
   }
 
-  update(id: number, updateEmailDto: UpdateEmailDto) {
-    return `This action updates a #${id} email`;
+  async update(user: User, id: number, updateEmailDto: UpdateEmailDto) {
+    await this.findOne(user, id);
+
+    await this.emailRepository.save(
+      this.emailRepository.create({
+        id,
+        ...updateEmailDto,
+      }),
+    );
+    return this.findOne(user, id);
   }
 
   remove(id: number) {
