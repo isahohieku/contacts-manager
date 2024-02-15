@@ -45,7 +45,7 @@ export class PhonesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.phonesService.remove(+id);
+  remove(@Request() request, @Param('id') id: string) {
+    return this.phonesService.remove(request.user, +id);
   }
 }
