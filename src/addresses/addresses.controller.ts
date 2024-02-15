@@ -45,7 +45,7 @@ export class AddressesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.addressesService.remove(+id);
+  remove(@Request() request, @Param('id') id: string) {
+    return this.addressesService.remove(request.user, +id);
   }
 }

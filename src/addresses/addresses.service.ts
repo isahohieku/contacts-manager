@@ -78,7 +78,9 @@ export class AddressesService {
     return this.findOne(user, id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} address`;
+  async remove(user: User, id: number) {
+    const address = await this.findOne(user, id);
+    await this.addressRepository.softDelete(id);
+    return address;
   }
 }
