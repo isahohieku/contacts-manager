@@ -65,8 +65,16 @@ export class PhonesService {
     );
   }
 
-  update(id: number, updatePhoneDto: UpdatePhoneDto) {
-    return `This action updates a #${id} phone`;
+  async update(user: User, id: number, updatePhoneDto: UpdatePhoneDto) {
+    await this.findOne(user, id);
+
+    await this.phoneRepository.save(
+      this.phoneRepository.create({
+        id,
+        ...updatePhoneDto,
+      }),
+    );
+    return this.findOne(user, id);
   }
 
   remove(id: number) {
