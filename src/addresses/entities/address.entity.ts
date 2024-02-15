@@ -1,3 +1,4 @@
+import { AddressType } from 'src/address-types/entities/address-type.entity';
 import { Contact } from 'src/contacts/entities/contact.entity';
 import { EntityBase } from 'src/utils/entity-helper';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
@@ -21,6 +22,9 @@ export class Address extends EntityBase {
 
   @Column({ nullable: true, type: 'varchar', length: 50 })
   country?: string | null;
+
+  @Column({ nullable: true, type: 'varchar', length: 20 })
+  address_type?: AddressType | null;
 
   @ManyToOne(() => Contact, (contact) => contact.addresses)
   contact: Contact;
