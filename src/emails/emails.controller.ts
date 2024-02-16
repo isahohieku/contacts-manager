@@ -35,6 +35,11 @@ export class EmailsController {
     return this.emailsService.findOne(request.user, +id);
   }
 
+  @Get('email-types')
+  getEmailTypes() {
+    return this.emailsService.getEmailTypes();
+  }
+
   @Patch(':id')
   update(
     @Request() request,

@@ -6,6 +6,7 @@ import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { Email } from './entities/email.entity';
 import { Contact } from 'src/contacts/entities/contact.entity';
+import { EmailType } from 'src/email-types/entities/email-type.entity';
 
 @Injectable()
 export class EmailsService {
@@ -82,5 +83,10 @@ export class EmailsService {
     const email = await this.findOne(user, id);
     await this.emailRepository.softDelete(id);
     return email;
+  }
+
+  async getEmailTypes() {
+    const emailTypes = await EmailType.find();
+    return emailTypes;
   }
 }
