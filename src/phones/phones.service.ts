@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Phone } from './entities/phone.entity';
 import { Repository } from 'typeorm';
 import { Contact } from 'src/contacts/entities/contact.entity';
+import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
 
 @Injectable()
 export class PhonesService {
@@ -81,5 +82,10 @@ export class PhonesService {
     const phoneNumber = await this.findOne(user, id);
     await this.phoneRepository.softDelete(id);
     return phoneNumber;
+  }
+
+  async getPhoneTypes() {
+    const phoneTypes = await PhoneType.find();
+    return phoneTypes;
   }
 }

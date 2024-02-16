@@ -30,9 +30,9 @@ export class PhonesController {
     return this.phonesService.create(request.user, createPhoneDto);
   }
 
-  @Get(':id')
-  findOne(@Request() request, @Param('id') id: string) {
-    return this.phonesService.findOne(request.user, +id);
+  @Get('phone-types')
+  getPhoneTypes() {
+    return this.phonesService.getPhoneTypes();
   }
 
   @Patch(':id')
@@ -47,5 +47,10 @@ export class PhonesController {
   @Delete(':id')
   remove(@Request() request, @Param('id') id: string) {
     return this.phonesService.remove(request.user, +id);
+  }
+
+  @Get(':id')
+  findOne(@Request() request, @Param('id') id: string) {
+    return this.phonesService.findOne(request.user, +id);
   }
 }
