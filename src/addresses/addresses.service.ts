@@ -6,6 +6,7 @@ import { Address } from './entities/address.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from 'src/contacts/entities/contact.entity';
 import { Repository } from 'typeorm';
+import { AddressType } from 'src/address-types/entities/address-type.entity';
 
 @Injectable()
 export class AddressesService {
@@ -82,5 +83,10 @@ export class AddressesService {
     const address = await this.findOne(user, id);
     await this.addressRepository.softDelete(id);
     return address;
+  }
+
+  async getAddressTypes() {
+    const addressTypes = await AddressType.find();
+    return addressTypes;
   }
 }

@@ -30,6 +30,11 @@ export class AddressesController {
     return this.addressesService.create(request.user, createAddressDto);
   }
 
+  @Get('address-types')
+  getAddressTypes() {
+    return this.addressesService.getAddressTypes();
+  }
+
   @Get(':id')
   findOne(@Request() request, @Param('id') id: string) {
     return this.addressesService.findOne(request.user, +id);
