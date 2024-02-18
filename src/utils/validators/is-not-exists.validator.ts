@@ -2,8 +2,8 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { getRepository } from 'typeorm';
 import { ValidationArguments } from 'class-validator/types/validation/ValidationArguments';
+import { repositories } from './all-entities';
 
 type ValidationEntity =
   | {
@@ -14,10 +14,12 @@ type ValidationEntity =
 @ValidatorConstraint({ name: 'IsNotExist', async: true })
 export class IsNotExist implements ValidatorConstraintInterface {
   async validate(value: string, validationArguments: ValidationArguments) {
-    const repository = validationArguments.constraints[0] as string;
+    const repository =
+      repositories[validationArguments.constraints[0] as string];
     const currentValue = validationArguments.object as ValidationEntity;
-    const entity = (await getRepository(repository).findOne({
-      [validationArguments.property]: value,
+
+    const entity = (await repository.findOne({
+      where: { [validationArguments.property]: value },
     })) as ValidationEntity;
 
     if (entity?.id === currentValue?.id) {
