@@ -1,6 +1,7 @@
 import { Address } from 'src/addresses/entities/address.entity';
 import { Email } from 'src/emails/entities/email.entity';
 import { Phone } from 'src/phones/entities/phone.entity';
+import { Tag } from 'src/tags/entities/tag.entity';
 import { User } from 'src/users/entity/user.entity';
 import { EntityBase } from 'src/utils/entity-helper';
 import {
@@ -10,6 +11,8 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity()
@@ -65,4 +68,11 @@ export class Contact extends EntityBase {
     eager: true,
   })
   addresses: Address[];
+
+  @ManyToMany(() => Tag, (tag) => tag.contact, {
+    cascade: true,
+    eager: true,
+  })
+  @JoinTable()
+  tags: Tag[];
 }

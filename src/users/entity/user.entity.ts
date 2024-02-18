@@ -15,6 +15,7 @@ import { EntityBase } from 'src/utils/entity-helper';
 import { AuthProvidersEnum } from 'src/auth/auth-providers.enum';
 import { Role } from 'src/roles/entities/role.entity';
 import { Status } from 'src/statuses/entities/status.entity';
+import { Tag } from 'src/tags/entities/tag.entity';
 
 @Entity('users')
 export class User extends EntityBase {
@@ -70,4 +71,7 @@ export class User extends EntityBase {
 
   @OneToMany(() => Contact, (contact) => contact.owner)
   contacts: Contact[];
+
+  @OneToMany(() => Tag, (tag) => tag.owner)
+  tags: Tag[];
 }

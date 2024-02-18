@@ -1,3 +1,4 @@
+import { Tag } from 'src/tags/entities/tag.entity';
 import { AddressType } from '../../address-types/entities/address-type.entity';
 import { Phone } from 'src/phones/entities/phone.entity';
 import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
@@ -20,4 +21,5 @@ export const repositories = {
   Email,
   PhoneType,
   Phone,
+  Tag,
 };
