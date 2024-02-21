@@ -1,4 +1,13 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreatePhoneDto } from './create-phone.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional } from 'class-validator';
+import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
 
-export class UpdatePhoneDto extends PartialType(CreatePhoneDto) {}
+export class UpdatePhoneDto {
+  @ApiProperty({ example: '+2348036133002' })
+  @IsOptional()
+  phone_number: string | null;
+
+  @ApiProperty({ type: PhoneType })
+  @IsOptional()
+  phone_type?: PhoneType;
+}
