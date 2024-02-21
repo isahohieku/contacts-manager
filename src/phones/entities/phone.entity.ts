@@ -11,7 +11,7 @@ export class Phone extends EntityBase {
   @Column({ nullable: true, type: 'varchar', length: 20 })
   phone_number?: string | null;
 
-  @Column({ nullable: true, type: 'varchar', length: 20 })
+  @ManyToOne(() => PhoneType, (phone) => phone.phone_numbers, { eager: true })
   phone_type?: PhoneType | null;
 
   @ManyToOne(() => Contact, (contact) => contact.phone_numbers)
