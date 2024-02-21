@@ -51,6 +51,7 @@ export class PhonesService {
           },
         },
       },
+      loadEagerRelations: true,
     });
 
     if (phoneNumber) return phoneNumber;
