@@ -19,7 +19,7 @@ import { UpdatePhoneDto } from './dto/update-phone.dto';
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Phones')
 @Controller({
-  path: 'phones',
+  path: 'contacts/phones',
   version: '1',
 })
 export class PhonesController {
