@@ -75,6 +75,16 @@ export class AuthService {
       );
     }
 
+    if (user.status.id !== StatusEnum.active) {
+      throw new HttpException(
+        {
+          status: HttpStatus.UNAUTHORIZED,
+          message: 'Please verify your email address',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     const isValidPassword = await bcrypt.compare(
       loginDto.password,
       user.password,
@@ -84,9 +94,10 @@ export class AuthService {
       const token = await this.jwtService.sign({
         id: user.id,
         role: user.role,
+        status: user.status,
       });
 
-      return { token, user: user };
+      return { token, user };
     } else {
       throw new HttpException(
         {
