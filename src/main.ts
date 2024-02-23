@@ -22,9 +22,13 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe(validationOptions));
 
   const options = new DocumentBuilder()
-    .setTitle('API')
-    .setDescription('API docs')
+    .setTitle('Contacts Management API')
+    .setDescription(
+      'Contact Manager API provides developers with a robust set of endpoints to manage contacts efficiently within their applications. It allows users to create, retrieve, update, and delete contacts, as well as perform various operations such as searching, sorting, and filtering.',
+    )
     .setVersion('1.0')
+    .setContact('Isah Ohieku', 'https://isahohieku.com', 'isahohieku@gmail.com')
+    .addServer('http://localhost:3000')
     .addBearerAuth()
     .build();
 
