@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailData } from './interfaces/mail-data.interface';
 
+import confirmEmail from '../translations/confirm-email.json';
+
 @Injectable()
 export class MailService {
   constructor(
@@ -17,7 +19,7 @@ export class MailService {
       text: `${this.configService.get('app.frontendDomain')}/confirm-email/${
         mailData.data.hash
       } Comfirm email address`,
-      template: '/activation',
+      template: './activation',
       context: {
         title: 'Comfirm email address',
         url: `${this.configService.get('app.frontendDomain')}/confirm-email/${
@@ -25,9 +27,9 @@ export class MailService {
         }`,
         actionTitle: 'Comfirm email address',
         app_name: this.configService.get('app.name'),
-        // text1: await this.i18n.t('confirm-email.text1'),
-        // text2: await this.i18n.t('confirm-email.text2'),
-        // text3: await this.i18n.t('confirm-email.text3'),
+        text1: confirmEmail.text1,
+        text2: confirmEmail.text2,
+        text3: confirmEmail.text3,
       },
     });
   }

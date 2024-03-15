@@ -141,14 +141,14 @@ export class AuthService {
       hash,
     });
 
-    return user;
+    await this.mailService.userSignUp({
+      to: user.email,
+      data: {
+        hash,
+      },
+    });
 
-    // await this.mailService.userSignUp({
-    //   to: user.email,
-    //   data: {
-    //     hash,
-    //   },
-    // });
+    return user;
   }
 
   async confirmEmail(hash: string): Promise<void> {
