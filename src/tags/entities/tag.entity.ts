@@ -1,7 +1,7 @@
 import { Allow } from 'class-validator';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { User } from 'src/users/entity/user.entity';
-import { EntityBase } from 'src/utils/entity-helper';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { User } from '../../users/entity/user.entity';
+import { EntityBase } from '../../utils/entity-helper';
 import {
   Column,
   Entity,

@@ -1,9 +1,9 @@
-import { Address } from 'src/addresses/entities/address.entity';
-import { Email } from 'src/emails/entities/email.entity';
-import { Phone } from 'src/phones/entities/phone.entity';
-import { Tag } from 'src/tags/entities/tag.entity';
-import { User } from 'src/users/entity/user.entity';
-import { EntityBase } from 'src/utils/entity-helper';
+import { Address } from '../../addresses/entities/address.entity';
+import { Email } from '../../emails/entities/email.entity';
+import { Phone } from '../../phones/entities/phone.entity';
+import { Tag } from '../../tags/entities/tag.entity';
+import { User } from '../../users/entity/user.entity';
+import { EntityBase } from '../../utils/entity-helper';
 import {
   Column,
   Entity,

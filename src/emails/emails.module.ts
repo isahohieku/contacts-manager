@@ -3,7 +3,7 @@ import { EmailsService } from './emails.service';
 import { EmailsController } from './emails.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Email } from './entities/email.entity';
-import { Contact } from 'src/contacts/entities/contact.entity';
+import { Contact } from '../contacts/entities/contact.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Email, Contact])],

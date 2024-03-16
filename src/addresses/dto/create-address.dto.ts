@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
-import { AddressType } from 'src/address-types/entities/address-type.entity';
-import { Contact } from 'src/contacts/entities/contact.entity';
+import { AddressType } from '../../address-types/entities/address-type.entity';
+import { Contact } from '../../contacts/entities/contact.entity';
 
 export class CreateAddressDto {
   @ApiProperty({ example: 'No. 1, Wakili street' })

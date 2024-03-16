@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { EntityBase } from 'src/utils/entity-helper';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { EmailType } from 'src/email-types/entities/email-type.entity';
+import { EntityBase } from '../../utils/entity-helper';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { EmailType } from '../../email-types/entities/email-type.entity';
 
 @Entity()
 export class Email extends EntityBase {

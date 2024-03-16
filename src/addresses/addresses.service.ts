@@ -1,12 +1,12 @@
-import { User } from 'src/users/entity/user.entity';
+import { User } from '../users/entity/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Address } from './entities/address.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Contact } from 'src/contacts/entities/contact.entity';
+import { Contact } from '../contacts/entities/contact.entity';
 import { Repository } from 'typeorm';
-import { AddressType } from 'src/address-types/entities/address-type.entity';
+import { AddressType } from '../address-types/entities/address-type.entity';
 
 @Injectable()
 export class AddressesService {

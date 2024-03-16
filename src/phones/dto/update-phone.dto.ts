@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
-import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
+import { PhoneType } from '../../phone-types/entities/phone-type.entity';
 
 export class UpdatePhoneDto {
   @ApiProperty({ example: '+2348036133002' })

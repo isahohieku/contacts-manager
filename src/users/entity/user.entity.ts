@@ -10,12 +10,12 @@ import {
   ManyToOne,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { EntityBase } from 'src/utils/entity-helper';
-import { AuthProvidersEnum } from 'src/auth/auth-providers.enum';
-import { Role } from 'src/roles/entities/role.entity';
-import { Status } from 'src/statuses/entities/status.entity';
-import { Tag } from 'src/tags/entities/tag.entity';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { EntityBase } from '../../utils/entity-helper';
+import { AuthProvidersEnum } from '../../auth/auth-providers.enum';
+import { Role } from '../../roles/entities/role.entity';
+import { Status } from '../../statuses/entities/status.entity';
+import { Tag } from '../../tags/entities/tag.entity';
 
 @Entity('users')
 export class User extends EntityBase {

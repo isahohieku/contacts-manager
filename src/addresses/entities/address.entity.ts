@@ -1,6 +1,6 @@
-import { AddressType } from 'src/address-types/entities/address-type.entity';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { EntityBase } from 'src/utils/entity-helper';
+import { AddressType } from '../../address-types/entities/address-type.entity';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { EntityBase } from '../../utils/entity-helper';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

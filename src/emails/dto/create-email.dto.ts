@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { EmailType } from 'src/email-types/entities/email-type.entity';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { EmailType } from '../../email-types/entities/email-type.entity';
 
 export class CreateEmailDto {
   @ApiProperty({ example: 'isahohieku@gmail.com' })

@@ -1,4 +1,4 @@
-import { User } from 'src/users/entity/user.entity';
+import { User } from '../users/entity/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';

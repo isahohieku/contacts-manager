@@ -3,9 +3,9 @@ import { ContactsService } from './contacts.service';
 import { ContactsController } from './contacts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
-import { Phone } from 'src/phones/entities/phone.entity';
-import { Tag } from 'src/tags/entities/tag.entity';
-import { Email } from 'src/emails/entities/email.entity';
+import { Phone } from '../phones/entities/phone.entity';
+import { Tag } from '../tags/entities/tag.entity';
+import { Email } from '../emails/entities/email.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Contact, Phone, Tag, Email])],

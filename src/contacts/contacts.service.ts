@@ -4,7 +4,7 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/users/entity/user.entity';
+import { User } from '../users/entity/user.entity';
 
 @Injectable()
 export class ContactsService {

@@ -1,14 +1,14 @@
-import { Tag } from 'src/tags/entities/tag.entity';
+import { Tag } from '../../tags/entities/tag.entity';
 import { AddressType } from '../../address-types/entities/address-type.entity';
-import { Phone } from 'src/phones/entities/phone.entity';
-import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
+import { Phone } from '../../phones/entities/phone.entity';
+import { PhoneType } from '../../phone-types/entities/phone-type.entity';
 import { Email } from '../../emails/entities/email.entity';
-import { EmailType } from 'src/email-types/entities/email-type.entity';
-import { Address } from 'src/addresses/entities/address.entity';
-import { Role } from 'src/roles/entities/role.entity';
-import { Status } from 'src/statuses/entities/status.entity';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { User } from 'src/users/entity/user.entity';
+import { EmailType } from '../../email-types/entities/email-type.entity';
+import { Address } from '../../addresses/entities/address.entity';
+import { Role } from '../../roles/entities/role.entity';
+import { Status } from '../../statuses/entities/status.entity';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { User } from '../../users/entity/user.entity';
 
 export const repositories = {
   User,

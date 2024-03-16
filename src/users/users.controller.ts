@@ -17,10 +17,10 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { infinityPagination } from '../utils/infinity-pagination';
-import { RoleEnum } from 'src/roles/roles.enum';
-import { RolesGuard } from 'src/roles/roles.guard';
+import { RoleEnum } from '../roles/roles.enum';
+import { RolesGuard } from '../roles/roles.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { Roles } from 'src/roles/roles.decorator';
+import { Roles } from '../roles/roles.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()

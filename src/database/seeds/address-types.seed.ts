@@ -1,7 +1,7 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
-import { AddressType } from 'src/address-types/entities/address-type.entity';
-import { AddressTypeEnum } from 'src/address-types/address-type.enum';
+import { AddressType } from '../../address-types/entities/address-type.entity';
+import { AddressTypeEnum } from '../../address-types/address-type.enum';
 
 export default class CreateAddressType implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {

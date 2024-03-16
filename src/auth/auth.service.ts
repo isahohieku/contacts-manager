@@ -5,7 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
 import { AuthUpdateDto } from './dto/auth-update.dto';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { RoleEnum } from 'src/roles/roles.enum';
+import { RoleEnum } from '../roles/roles.enum';
 import { StatusEnum } from '../utils/types/statuses.type';
 import * as crypto from 'crypto';
 import { plainToClass } from 'class-transformer';

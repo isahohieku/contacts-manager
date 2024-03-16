@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'src/users/entity/user.entity';
+import { User } from '../users/entity/user.entity';
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { Email } from './entities/email.entity';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { EmailType } from 'src/email-types/entities/email-type.entity';
+import { Contact } from '../contacts/entities/contact.entity';
+import { EmailType } from '../email-types/entities/email-type.entity';
 
 @Injectable()
 export class EmailsService {

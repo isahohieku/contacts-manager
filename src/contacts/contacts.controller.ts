@@ -14,7 +14,7 @@ import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { User } from 'src/users/entity/user.entity';
+import { User } from '../users/entity/user.entity';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))

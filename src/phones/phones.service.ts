@@ -1,12 +1,12 @@
-import { User } from 'src/users/entity/user.entity';
+import { User } from '../users/entity/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Phone } from './entities/phone.entity';
 import { Repository } from 'typeorm';
-import { Contact } from 'src/contacts/entities/contact.entity';
-import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
+import { Contact } from '../contacts/entities/contact.entity';
+import { PhoneType } from '../phone-types/entities/phone-type.entity';
 
 @Injectable()
 export class PhonesService {
