@@ -12,9 +12,9 @@ import { PhoneType } from 'src/phone-types/entities/phone-type.entity';
 export class PhonesService {
   constructor(
     @InjectRepository(Phone)
-    private phoneRepository: Repository<Phone>,
+    private readonly phoneRepository: Repository<Phone>,
     @InjectRepository(Contact)
-    private contactsRepository: Repository<Contact>,
+    private readonly contactsRepository: Repository<Contact>,
   ) {}
   async create(user: User, createPhoneDto: CreatePhoneDto) {
     const contact = await this.contactsRepository.findOne({

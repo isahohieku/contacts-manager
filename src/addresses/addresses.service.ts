@@ -27,7 +27,7 @@ export class AddressesService {
         {
           status: HttpStatus.NOT_FOUND,
           errors: {
-            address: 'addressNotFound',
+            address: 'contactNotFound',
           },
         },
         HttpStatus.NOT_FOUND,
@@ -52,6 +52,7 @@ export class AddressesService {
           },
         },
       },
+      loadEagerRelations: true,
     });
 
     if (address) return address;

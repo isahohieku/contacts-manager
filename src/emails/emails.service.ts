@@ -27,7 +27,7 @@ export class EmailsService {
         {
           status: HttpStatus.NOT_FOUND,
           errors: {
-            email: 'emailNotFound',
+            contact: 'contactNotFound',
           },
         },
         HttpStatus.NOT_FOUND,
@@ -52,6 +52,7 @@ export class EmailsService {
           },
         },
       },
+      loadEagerRelations: true,
     });
 
     if (email) return email;
