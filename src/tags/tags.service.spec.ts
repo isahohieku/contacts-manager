@@ -31,4 +31,8 @@ describe('TagsService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should get all tags by user', () => {
+    expect(service).toBeDefined();
+  });
 });

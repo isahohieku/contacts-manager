@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailData } from './interfaces/mail-data.interface';
 
 import confirmEmail from '../translations/confirm-email.json';
+import resetPassword from '../translations/reset-password.json';
 
 @Injectable()
 export class MailService {
@@ -41,7 +42,7 @@ export class MailService {
       text: `${this.configService.get('app.frontendDomain')}/password-change/${
         mailData.data.hash
       } ${'Reset Password'}`,
-      template: '/reset-password',
+      template: './reset-password',
       context: {
         title: 'Reset Password',
         url: `${this.configService.get('app.frontendDomain')}/password-change/${
@@ -49,10 +50,10 @@ export class MailService {
         }`,
         actionTitle: 'Reset Password',
         app_name: this.configService.get('app.name'),
-        // text1: await this.i18n.t('reset-password.text1'),
-        // text2: await this.i18n.t('reset-password.text2'),
-        // text3: await this.i18n.t('reset-password.text3'),
-        // text4: await this.i18n.t('reset-password.text4'),
+        text1: await resetPassword.text1,
+        text2: await resetPassword.text2,
+        text3: await resetPassword.text3,
+        text4: await resetPassword.text4,
       },
     });
   }

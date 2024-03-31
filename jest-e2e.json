@@ -1,5 +1,6 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
+  "coveragePathIgnorePatterns": ["/node_modules/", "./src/database/migrations"],
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
