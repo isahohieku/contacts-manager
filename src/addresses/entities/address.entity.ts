@@ -23,7 +23,7 @@ export class Address extends EntityBase {
   @Column({ nullable: true, type: 'varchar', length: 50 })
   country?: string | null;
 
-  @Column({ nullable: true, type: 'varchar', length: 20 })
+  @ManyToOne(() => AddressType, (address) => address.addresses, { eager: true })
   address_type?: AddressType | null;
 
   @ManyToOne(() => Contact, (contact) => contact.addresses)

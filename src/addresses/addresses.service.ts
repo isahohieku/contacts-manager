@@ -17,7 +17,7 @@ export class AddressesService {
     private readonly contactsRepository: Repository<Contact>,
   ) {}
 
-  async create(user, createAddressDto: CreateAddressDto) {
+  async create(user: User, createAddressDto: CreateAddressDto) {
     const contact = await this.contactsRepository.findOne({
       where: { owner: { id: user.id }, id: createAddressDto.contact.id },
     });

@@ -24,11 +24,9 @@ export class CreateAddressDto {
   @IsOptional()
   country: string | null;
 
-  @ApiProperty({ type: AddressType })
-  @IsOptional()
+  @ApiProperty({ type: AddressType, default: 1 })
   address_type?: AddressType | null;
 
   @ApiProperty({ example: 1 })
-  @IsOptional()
   contact: Contact;
 }
