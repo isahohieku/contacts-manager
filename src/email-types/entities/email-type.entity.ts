@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Allow } from 'class-validator';
 import { EntityHelper } from '../../utils/entity-helper';
-import { Email } from 'src/emails/entities/email.entity';
+import { Email } from '../../emails/entities/email.entity';
 
 @Entity()
 export class EmailType extends EntityHelper {

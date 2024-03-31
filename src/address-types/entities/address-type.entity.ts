@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Allow } from 'class-validator';
 import { EntityHelper } from '../../utils/entity-helper';
-import { Address } from 'src/addresses/entities/address.entity';
+import { Address } from '../../addresses/entities/address.entity';
 
 @Entity()
 export class AddressType extends EntityHelper {
