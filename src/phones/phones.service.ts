@@ -70,12 +70,10 @@ export class PhonesService {
   async update(user: User, id: number, updatePhoneDto: UpdatePhoneDto) {
     await this.findOne(user, id);
 
-    await this.phoneRepository.save(
-      this.phoneRepository.create({
-        id,
-        ...updatePhoneDto,
-      }),
-    );
+    await this.phoneRepository.save({
+      id,
+      ...updatePhoneDto,
+    });
     return this.findOne(user, id);
   }
 

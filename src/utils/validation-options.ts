@@ -13,6 +13,9 @@ const validationOptions: ValidationPipeOptions = {
     new HttpException(
       {
         status: HttpStatus.UNPROCESSABLE_ENTITY,
+        message:
+          'The request data failed validation checks. Please review the errors.',
+        error: true,
         errors: errors.reduce(
           (accumulator, currentValue) => ({
             ...accumulator,

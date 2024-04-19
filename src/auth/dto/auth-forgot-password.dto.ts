@@ -5,6 +5,6 @@ import { ApiProperty } from '@nestjs/swagger';
 export class AuthForgotPasswordDto {
   @ApiProperty({ example: 'john.doe@example.com' })
   @Transform(({ value }) => value.toLowerCase().trim())
-  @IsEmail()
+  @IsEmail({}, { message: 'A valid email address required' })
   email: string;
 }

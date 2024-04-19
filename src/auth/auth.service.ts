@@ -35,7 +35,7 @@ export class AuthService {
         {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
-            email: 'notFound',
+            email: 'emailNotProvided',
           },
         },
         HttpStatus.UNPROCESSABLE_ENTITY,

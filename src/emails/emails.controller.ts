@@ -19,7 +19,7 @@ import { UpdateEmailDto } from './dto/update-email.dto';
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Emails')
 @Controller({
-  path: 'emails',
+  path: 'contacts/emails',
   version: '1',
 })
 export class EmailsController {

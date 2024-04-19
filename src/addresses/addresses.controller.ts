@@ -19,7 +19,7 @@ import { UpdateAddressDto } from './dto/update-address.dto';
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Addresses')
 @Controller({
-  path: 'addresses',
+  path: 'contacts/addresses',
   version: '1',
 })
 export class AddressesController {
