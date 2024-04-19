@@ -1,0 +1,4 @@
+export enum ContactErrorCodes {
+  NOT_FOUND = 'ERR_CONTACT_NOT_FOUND',
+  ALREADY_EXISTS = 'ERR_CONTACT_ALREADY_EXISTS',
+}

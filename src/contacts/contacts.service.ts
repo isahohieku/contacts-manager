@@ -1,10 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entity/user.entity';
+import { handleError } from '../utils/handlers/error.handler';
+import { ContactErrorCodes } from '../utils/constants/contacts/errors';
 
 @Injectable()
 export class ContactsService {
@@ -47,15 +49,12 @@ export class ContactsService {
     if (contact) {
       return contact;
     }
-    throw new HttpException(
-      {
-        status: HttpStatus.NOT_FOUND,
-        errors: {
-          contact: 'notFound',
-        },
-      },
-      HttpStatus.NOT_FOUND,
-    );
+
+    const errors = {
+      contact: ContactErrorCodes.NOT_FOUND,
+    };
+
+    return handleError(HttpStatus.NOT_FOUND, errors);
   }
 
   async update(user: User, id: number, updateContactDto: UpdateContactDto) {
