@@ -70,11 +70,11 @@ export class PhonesService {
   async update(user: User, id: number, updatePhoneDto: UpdatePhoneDto) {
     await this.findOne(user, id);
 
-    await this.phoneRepository.save({
-      id,
+    await this.phoneRepository.update(id, {
       ...updatePhoneDto,
     });
-    return this.findOne(user, id);
+    const phoneNumber = await this.findOne(user, id);
+    return phoneNumber;
   }
 
   async remove(user: User, id: number) {
