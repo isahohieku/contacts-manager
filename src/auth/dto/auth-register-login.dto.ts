@@ -1,12 +1,11 @@
 import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
-import { IsNotExist } from '../../utils/validators/is-not-exists.validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotExist } from '../../utils/validators/is-not-exists.validator';
 
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'john.doe@example.com' })
   @Transform(({ value }) => {
-    console.log(value);
     return value.toLowerCase().trim();
   })
   @Validate(IsNotExist, ['User'], {

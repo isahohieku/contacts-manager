@@ -22,10 +22,13 @@ export class IsNotExist implements ValidatorConstraintInterface {
       where: { [validationArguments.property]: value },
     })) as ValidationEntity;
 
-    if (entity?.id === currentValue?.id) {
-      return true;
+    if (
+      entity?.[validationArguments.property] ===
+      currentValue?.[validationArguments.property]
+    ) {
+      return false;
     }
 
-    return !entity;
+    return true;
   }
 }

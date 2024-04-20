@@ -194,6 +194,7 @@ export class AuthService {
         .createHash('sha256')
         .update(randomStringGenerator())
         .digest('hex');
+
       await this.forgotService.create({
         hash,
         user,
