@@ -7,12 +7,14 @@ import { Repository } from 'typeorm';
 import { User } from '../users/entity/user.entity';
 import { handleError } from '../utils/handlers/error.handler';
 import { ContactErrorCodes } from '../utils/constants/contacts/errors';
+import { TagsService } from '../tags/tags.service';
 
 @Injectable()
 export class ContactsService {
   constructor(
     @InjectRepository(Contact)
     private contactsRepository: Repository<Contact>,
+    private tagsService: TagsService,
   ) {}
 
   async create(user: User, createContactDto: CreateContactDto) {
@@ -59,6 +61,14 @@ export class ContactsService {
 
   async update(user: User, id: number, updateContactDto: UpdateContactDto) {
     await this.findOne(user, id);
+
+    const tags = updateContactDto.tags;
+
+    if (tags && tags.length) {
+      for (let i = 0; i <= tags.length - 1; i++) {
+        await this.tagsService.findOne(user, tags[i].id);
+      }
+    }
 
     await this.contactsRepository.save(
       this.contactsRepository.create({
