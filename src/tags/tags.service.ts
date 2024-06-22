@@ -14,13 +14,13 @@ export class TagsService {
   ) {}
 
   async create(user: User, createTagDto: CreateTagDto) {
-    const tags = await this.tagsRepository.save(
+    const tag = await this.tagsRepository.save(
       this.tagsRepository.create({
         ...createTagDto,
         owner: user,
       }),
     );
-    return tags;
+    return tag;
   }
 
   async findAll(user: User) {
