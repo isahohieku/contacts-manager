@@ -5,6 +5,7 @@ import databaseConfig from './configs/database.config';
 import authConfig from './configs/auth.config';
 import mailConfig from './configs/mail.config';
 import appConfig from './configs/app.config';
+import fileConfig from './configs/file.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { UsersModule } from './users/users.module';
@@ -17,12 +18,13 @@ import { PhonesModule } from './phones/phones.module';
 import { EmailsModule } from './emails/emails.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { TagsModule } from './tags/tags.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, authConfig, appConfig, mailConfig],
+      load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig],
       envFilePath: ['.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -31,15 +33,16 @@ import { TagsModule } from './tags/tags.module';
     MailerModule.forRootAsync({
       useClass: MailConfigService,
     }),
-    UsersModule,
-    ContactsModule,
+    AddressesModule,
     AuthModule,
+    ContactsModule,
+    EmailsModule,
+    FilesModule,
     ForgotModule,
     MailModule,
     PhonesModule,
-    EmailsModule,
-    AddressesModule,
     TagsModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
