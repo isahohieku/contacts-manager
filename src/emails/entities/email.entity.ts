@@ -12,6 +12,7 @@ export class Email extends EntityBase {
   email_address?: string | null;
 
   @Column({ nullable: true, type: 'varchar', length: 20 })
+  @ManyToOne(() => EmailType, (emailType) => emailType.emails, { eager: true })
   email_type?: EmailType | null;
 
   @ManyToOne(() => Contact, (contact) => contact.emails)
