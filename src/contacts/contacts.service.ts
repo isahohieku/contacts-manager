@@ -8,6 +8,8 @@ import { User } from '../users/entity/user.entity';
 import { handleError } from '../utils/handlers/error.handler';
 import { ContactErrorCodes } from '../utils/constants/contacts/errors';
 import { TagsService } from '../tags/tags.service';
+import { IPaginationOptions } from '../utils/types/pagination-options';
+import { genericFindManyWithPagination } from '../utils/infinity-pagination';
 
 @Injectable()
 export class ContactsService {
@@ -27,15 +29,20 @@ export class ContactsService {
     return contact;
   }
 
-  async findAll(user: User) {
-    const contacts = await this.contactsRepository.find({
+  async findAllWithPagination(options: IPaginationOptions, user: User) {
+    const baseQuery = {
       where: {
         owner: {
           id: user.id,
         },
       },
-    });
-    return contacts;
+    };
+
+    return genericFindManyWithPagination(
+      this.contactsRepository,
+      baseQuery,
+      options,
+    );
   }
 
   async findOne(user: User, id: number) {
@@ -56,7 +63,11 @@ export class ContactsService {
       contact: ContactErrorCodes.NOT_FOUND,
     };
 
-    return handleError(HttpStatus.NOT_FOUND, errors);
+    throw handleError(
+      HttpStatus.NOT_FOUND,
+      `Contact with id ${id} could not be found`,
+      errors,
+    );
   }
 
   async update(user: User, id: number, updateContactDto: UpdateContactDto) {
@@ -70,6 +81,7 @@ export class ContactsService {
       }
     }
 
+    // TODO: Remove avatar from S3 before update if avatar is part of the update object
     await this.contactsRepository.save(
       this.contactsRepository.create({
         id,
@@ -83,7 +95,8 @@ export class ContactsService {
     const contact = await this.findOne(user, id);
 
     await this.contactsRepository.softDelete(id);
-
+    // TODO: Remove avatar from S3 before removing contact if contact has an avatar
+    // TODO: Cascade removal of all emails, phone numbers, and addresses after deletion
     return contact;
   }
 }

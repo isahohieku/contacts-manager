@@ -8,6 +8,9 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -32,8 +35,22 @@ export class ContactsController {
   }
 
   @Get()
-  findAll(@Request() request) {
-    return this.contactsService.findAll(request.user as User);
+  async findAll(
+    @Request() request,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    if (limit > 50) {
+      limit = 50;
+    }
+
+    return await this.contactsService.findAllWithPagination(
+      {
+        page,
+        limit,
+      },
+      request.user as User,
+    );
   }
 
   @Get(':id')
