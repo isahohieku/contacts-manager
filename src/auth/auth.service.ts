@@ -16,6 +16,8 @@ import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { UsersService } from '../users/users.service';
 import { ForgotService } from '../forgot/forgot.service';
 import { MailService } from '../mail/mail.service';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -128,7 +130,7 @@ export class AuthService {
         id: StatusEnum.inactive,
       } as Status,
       hash,
-    });
+    } as CreateUserDto);
 
     await this.mailService.userSignUp({
       to: user.email,
@@ -265,7 +267,7 @@ export class AuthService {
       }
     }
 
-    await this.usersService.update(user.id, userDto);
+    await this.usersService.update(user.id, userDto as UpdateUserDto);
 
     return this.usersService.findOne({
       id: user.id,

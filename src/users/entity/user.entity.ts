@@ -28,6 +28,9 @@ export class User extends EntityBase {
   @Column({ nullable: true })
   password: string;
 
+  @Column({ nullable: true })
+  avatar: string | null;
+
   public previousPassword: string;
 
   @AfterLoad()

@@ -1,7 +1,13 @@
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../roles/entities/role.entity';
-import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  MinLength,
+  Validate,
+  IsOptional,
+} from 'class-validator';
 import { IsNotExist } from '../../utils/validators/is-not-exists.validator';
 import { IsExist } from '../../utils/validators/is-exists.validator';
 import { Status } from '../../statuses/entities/status.entity';
@@ -27,6 +33,10 @@ export class CreateUserDto {
   @ApiProperty({ example: 'Doe' })
   @IsNotEmpty()
   lastName: string | null;
+
+  @ApiProperty({ example: 'https://s3.....' })
+  @IsOptional()
+  avatar: string | null;
 
   @ApiProperty({ type: Role })
   @Validate(IsExist, ['Role', 'id'], {

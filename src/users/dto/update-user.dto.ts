@@ -14,4 +14,8 @@ export class UpdateUserDto {
   @ApiProperty({ example: 'Doe' })
   @IsOptional()
   lastName?: string | null;
+
+  @ApiProperty({ example: 'https://s3.....' })
+  @IsOptional()
+  avatar: string | null;
 }
