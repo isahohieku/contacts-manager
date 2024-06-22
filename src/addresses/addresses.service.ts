@@ -1,5 +1,5 @@
 import { User } from '../users/entity/user.entity';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Address } from './entities/address.entity';
@@ -7,6 +7,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from '../contacts/entities/contact.entity';
 import { Repository } from 'typeorm';
 import { AddressType } from '../address-types/entities/address-type.entity';
+import { ContactErrorCodes } from '../utils/constants/contacts/errors';
+import { AddressErrorCodes } from '../utils/constants/addresses/errors';
+import { handleError } from '../utils/handlers/error.handler';
 
 @Injectable()
 export class AddressesService {
@@ -23,14 +26,14 @@ export class AddressesService {
     });
 
     if (!contact) {
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          errors: {
-            address: 'contactNotFound',
-          },
-        },
+      const errors = {
+        contact: ContactErrorCodes.NOT_FOUND,
+      };
+
+      throw handleError(
         HttpStatus.NOT_FOUND,
+        `Contact with id ${createAddressDto.contact.id} could not be found`,
+        errors,
       );
     }
 
@@ -57,14 +60,14 @@ export class AddressesService {
 
     if (address) return address;
 
-    throw new HttpException(
-      {
-        status: HttpStatus.NOT_FOUND,
-        errors: {
-          address: 'notFound',
-        },
-      },
+    const errors = {
+      address: AddressErrorCodes.NOT_FOUND,
+    };
+
+    throw handleError(
       HttpStatus.NOT_FOUND,
+      `Address with id ${id} could not be found`,
+      errors,
     );
   }
 
