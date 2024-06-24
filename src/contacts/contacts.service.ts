@@ -10,6 +10,7 @@ import { ContactErrorCodes } from '../utils/constants/contacts/errors';
 import { TagsService } from '../tags/tags.service';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { genericFindManyWithPagination } from '../utils/infinity-pagination';
+import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 
 @Injectable()
 export class ContactsService {
@@ -65,7 +66,7 @@ export class ContactsService {
 
     throw handleError(
       HttpStatus.NOT_FOUND,
-      `Contact with id ${id} could not be found`,
+      ERROR_MESSAGES.NOT_FOUND('Contact', id),
       errors,
     );
   }
