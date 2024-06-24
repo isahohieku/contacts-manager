@@ -9,10 +9,12 @@ import { Role } from '../../roles/entities/role.entity';
 import { Status } from '../../statuses/entities/status.entity';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { User } from '../../users/entity/user.entity';
+import { Country } from '../../countries/entities/country.entity';
 
 export const repositories = {
   User,
   Contact,
+  Country,
   Status,
   Role,
   Address,
