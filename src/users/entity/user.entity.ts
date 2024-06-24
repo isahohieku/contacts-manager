@@ -16,6 +16,7 @@ import { AuthProvidersEnum } from '../../auth/auth-providers.enum';
 import { Role } from '../../roles/entities/role.entity';
 import { Status } from '../../statuses/entities/status.entity';
 import { Tag } from '../../tags/entities/tag.entity';
+import { Country } from 'src/countries/entities/country.entity';
 
 @Entity('users')
 export class User extends EntityBase {
@@ -67,6 +68,11 @@ export class User extends EntityBase {
     eager: true,
   })
   status?: Status;
+
+  @ManyToOne(() => Country, {
+    eager: true,
+  })
+  country: Country;
 
   @Column({ nullable: true })
   @Index()
