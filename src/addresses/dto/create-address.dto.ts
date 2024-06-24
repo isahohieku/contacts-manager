@@ -24,10 +24,11 @@ export class CreateAddressDto {
   @IsOptional()
   country?: string | null;
 
-  @ApiProperty({ type: AddressType, default: { id: 1 } })
-  address_type?: AddressType | null;
+  @ApiProperty({ type: AddressType, example: { id: 1 } })
+  @IsOptional()
+  address_type = { id: 1 };
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ example: { id: 1 } })
   @IsNotEmpty({ message: 'Contact id is required' })
   contact: Contact;
 }

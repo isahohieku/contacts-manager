@@ -4,38 +4,23 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Address } from './entities/address.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Contact } from '../contacts/entities/contact.entity';
 import { Repository } from 'typeorm';
 import { AddressType } from '../address-types/entities/address-type.entity';
-import { ContactErrorCodes } from '../utils/constants/contacts/errors';
 import { AddressErrorCodes } from '../utils/constants/addresses/errors';
 import { handleError } from '../utils/handlers/error.handler';
+import { ContactsService } from '../contacts/contacts.service';
+import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 
 @Injectable()
 export class AddressesService {
   constructor(
     @InjectRepository(Address)
     private readonly addressRepository: Repository<Address>,
-    @InjectRepository(Contact)
-    private readonly contactsRepository: Repository<Contact>,
+    private readonly contactsService: ContactsService,
   ) {}
 
   async create(user: User, createAddressDto: CreateAddressDto) {
-    const contact = await this.contactsRepository.findOne({
-      where: { owner: { id: user.id }, id: createAddressDto.contact.id },
-    });
-
-    if (!contact) {
-      const errors = {
-        contact: ContactErrorCodes.NOT_FOUND,
-      };
-
-      throw handleError(
-        HttpStatus.NOT_FOUND,
-        `Contact with id ${createAddressDto.contact.id} could not be found`,
-        errors,
-      );
-    }
+    await this.contactsService.findOne(user, createAddressDto.contact.id);
 
     const address = await this.addressRepository.save(
       this.addressRepository.create({
@@ -66,7 +51,7 @@ export class AddressesService {
 
     throw handleError(
       HttpStatus.NOT_FOUND,
-      `Address with id ${id} could not be found`,
+      ERROR_MESSAGES.NOT_FOUND('Address', id),
       errors,
     );
   }
