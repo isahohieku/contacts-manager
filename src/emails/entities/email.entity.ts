@@ -3,6 +3,7 @@ import { EntityBase } from '../../utils/entity-helper';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { EmailType } from '../../email-types/entities/email-type.entity';
 
+// TODO: Email should be unique to a contact
 @Entity()
 export class Email extends EntityBase {
   @PrimaryGeneratedColumn()
@@ -11,9 +12,8 @@ export class Email extends EntityBase {
   @Column({ nullable: true, type: 'varchar', length: 100 })
   email_address?: string | null;
 
-  @Column({ nullable: true, type: 'varchar', length: 20 })
   @ManyToOne(() => EmailType, (emailType) => emailType.emails, { eager: true })
-  email_type?: EmailType | null;
+  email_type: EmailType;
 
   @ManyToOne(() => Contact, (contact) => contact.emails)
   contact: Contact;
