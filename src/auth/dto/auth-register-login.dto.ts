@@ -1,7 +1,14 @@
-import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  MaxLength,
+  MinLength,
+  Validate,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotExist } from '../../utils/validators/is-not-exists.validator';
+import { Country } from 'src/countries/entities/country.entity';
 
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'john.doe@example.com' })
@@ -26,4 +33,9 @@ export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'Doe' })
   @IsNotEmpty({ message: 'User last name required' })
   lastName: string;
+
+  @ApiProperty({ type: Country, example: { id: 1 } })
+  @IsNotEmpty({ message: 'Country is required' })
+  @MaxLength(2, { message: 'Country should be 2 letter' })
+  country: Country;
 }
