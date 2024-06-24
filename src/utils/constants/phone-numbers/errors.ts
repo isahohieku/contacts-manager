@@ -1,0 +1,4 @@
+export enum PhoneNumberErrorCodes {
+  NOT_FOUND = 'ERR_PHONE_NUMBER_NOT_FOUND',
+  ALREADY_EXISTS = 'ERR_PHONE_NUMBER_ALREADY_EXISTS',
+}
