@@ -1,37 +1,26 @@
 import { User } from '../users/entity/user.entity';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Phone } from './entities/phone.entity';
 import { Repository } from 'typeorm';
-import { Contact } from '../contacts/entities/contact.entity';
 import { PhoneType } from '../phone-types/entities/phone-type.entity';
+import { handleError } from '../utils/handlers/error.handler';
+import { PhoneNumberErrorCodes } from '../utils/constants/phone-numbers/errors';
+import { ContactsService } from '../contacts/contacts.service';
+import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 
 @Injectable()
 export class PhonesService {
   constructor(
     @InjectRepository(Phone)
     private readonly phoneRepository: Repository<Phone>,
-    @InjectRepository(Contact)
-    private readonly contactsRepository: Repository<Contact>,
+    private readonly contactsService: ContactsService,
   ) {}
   async create(user: User, createPhoneDto: CreatePhoneDto) {
-    const contact = await this.contactsRepository.findOne({
-      where: { owner: { id: user.id }, id: createPhoneDto.contact.id },
-    });
-
-    if (!contact) {
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          errors: {
-            contact: 'contactNotFound',
-          },
-        },
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    console.log({ createPhoneDto });
+    await this.contactsService.findOne(user, createPhoneDto.contact.id);
 
     const phoneNumber = await this.phoneRepository.save(
       this.phoneRepository.create({
@@ -56,14 +45,14 @@ export class PhonesService {
 
     if (phoneNumber) return phoneNumber;
 
-    throw new HttpException(
-      {
-        status: HttpStatus.NOT_FOUND,
-        errors: {
-          phone: 'notFound',
-        },
-      },
+    const errors = {
+      phone: PhoneNumberErrorCodes.NOT_FOUND,
+    };
+
+    throw handleError(
       HttpStatus.NOT_FOUND,
+      ERROR_MESSAGES.NOT_FOUND('Phone Number', id),
+      errors,
     );
   }
 
