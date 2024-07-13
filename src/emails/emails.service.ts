@@ -31,17 +31,16 @@ export class EmailsService {
   }
 
   async findOne(user: User, id: number) {
-    const email = await this.emailRepository.findOne({
-      where: {
-        id,
-        contact: {
-          owner: {
-            id: user.id,
-          },
-        },
-      },
-      loadEagerRelations: true,
-    });
+    const userId = user.id;
+
+    const email = await this.emailRepository
+      .createQueryBuilder('email')
+      .leftJoinAndSelect('email.contact', 'contact')
+      .leftJoinAndSelect('email.email_type', 'email_type')
+      .where('email.id = :id', { id })
+      .andWhere('contact.owner.id = :userId', { userId })
+      .select(['email', 'contact.id', 'email_type'])
+      .getOne();
 
     if (email) return email;
 

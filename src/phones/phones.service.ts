@@ -10,6 +10,8 @@ import { handleError } from '../utils/handlers/error.handler';
 import { PhoneNumberErrorCodes } from '../utils/constants/phone-numbers/errors';
 import { ContactsService } from '../contacts/contacts.service';
 import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
+import { CountryCode } from 'libphonenumber-js';
+import { validatePhoneNumber } from '../utils/validators/phone-number';
 
 @Injectable()
 export class PhonesService {
@@ -18,8 +20,30 @@ export class PhonesService {
     private readonly phoneRepository: Repository<Phone>,
     private readonly contactsService: ContactsService,
   ) {}
-  async create(user: User, createPhoneDto: CreatePhoneDto) {
-    console.log({ createPhoneDto });
+  async create(
+    user: User,
+    createPhoneDto: CreatePhoneDto,
+    validateNumber: boolean,
+  ) {
+    if (validateNumber) {
+      if (
+        !validatePhoneNumber(
+          createPhoneDto.phone_number,
+          user.country as unknown as CountryCode,
+        )
+      ) {
+        const errors = {
+          phone: PhoneNumberErrorCodes.INVALID,
+        };
+
+        throw handleError(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          ERROR_MESSAGES.INVALID('Phone Number'),
+          errors,
+        );
+      }
+    }
+
     await this.contactsService.findOne(user, createPhoneDto.contact.id);
 
     const phoneNumber = await this.phoneRepository.save(
@@ -31,17 +55,16 @@ export class PhonesService {
   }
 
   async findOne(user: User, id: number) {
-    const phoneNumber = await this.phoneRepository.findOne({
-      where: {
-        id,
-        contact: {
-          owner: {
-            id: user.id,
-          },
-        },
-      },
-      loadEagerRelations: true,
-    });
+    const userId = user.id;
+
+    const phoneNumber = await this.phoneRepository
+      .createQueryBuilder('phone')
+      .leftJoinAndSelect('phone.contact', 'contact')
+      .leftJoinAndSelect('phone.phone_type', 'phone_type')
+      .where('phone.id = :id', { id })
+      .andWhere('contact.owner.id = :userId', { userId })
+      .select(['phone', 'contact', 'phone_type'])
+      .getOne();
 
     if (phoneNumber) return phoneNumber;
 

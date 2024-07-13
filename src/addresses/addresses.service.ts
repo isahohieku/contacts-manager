@@ -31,17 +31,17 @@ export class AddressesService {
   }
 
   async findOne(user: User, id: number) {
-    const address = await this.addressRepository.findOne({
-      where: {
-        id,
-        contact: {
-          owner: {
-            id: user.id,
-          },
-        },
-      },
-      loadEagerRelations: true,
-    });
+    const userId = user.id;
+
+    const address = await this.addressRepository
+      .createQueryBuilder('address')
+      .leftJoinAndSelect('address.contact', 'contact')
+      .leftJoinAndSelect('address.address_type', 'address_type')
+      .leftJoinAndSelect('address.country', 'country')
+      .where('address.id = :id', { id })
+      .andWhere('contact.owner.id = :userId', { userId })
+      .select(['address', 'contact.id', 'address_type', 'country'])
+      .getOne();
 
     if (address) return address;
 
