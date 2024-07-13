@@ -40,8 +40,10 @@ export const genericFindManyWithPagination = async <T>(
   if (count === 0 || (page - 1) * limit >= count) {
     return {
       data: [],
-      total_items: count,
-      hasNextPage: false,
+      metadata: {
+        total_items: count,
+        hasNextPage: false,
+      },
     };
   }
 

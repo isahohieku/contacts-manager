@@ -16,7 +16,6 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { infinityPagination } from '../utils/infinity-pagination';
 import { RoleEnum } from '../roles/roles.enum';
 import { RolesGuard } from '../roles/roles.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -37,6 +36,7 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
+    // TODO: Also send an email to the user with the new login details
     return this.usersService.create(createUserDto);
   }
 
@@ -50,13 +50,10 @@ export class UsersController {
       limit = 50;
     }
 
-    return infinityPagination(
-      await this.usersService.findManyWithPagination({
-        page,
-        limit,
-      }),
-      { page, limit },
-    );
+    return await this.usersService.findManyWithPagination({
+      page,
+      limit,
+    });
   }
 
   @Get(':id')
