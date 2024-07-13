@@ -11,15 +11,15 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Contact } from '../../contacts/entities/contact.entity';
-import { EntityBase } from '../../utils/entity-helper';
+import { EntityUser } from '../../utils/entity-helper';
 import { AuthProvidersEnum } from '../../auth/auth-providers.enum';
 import { Role } from '../../roles/entities/role.entity';
 import { Status } from '../../statuses/entities/status.entity';
 import { Tag } from '../../tags/entities/tag.entity';
-import { Country } from 'src/countries/entities/country.entity';
+import { Country } from '../../countries/entities/country.entity';
 
 @Entity('users')
-export class User extends EntityBase {
+export class User extends EntityUser {
   @PrimaryGeneratedColumn()
   id: number;
 

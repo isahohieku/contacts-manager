@@ -19,6 +19,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '../users/entity/user.entity';
 
+// TODO: Generic search that includes both phone numbers, emails, Addresses and tags
+
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Contacts')

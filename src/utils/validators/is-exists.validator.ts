@@ -1,8 +1,8 @@
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
+  ValidationArguments,
 } from 'class-validator';
-import { ValidationArguments } from 'class-validator/types/validation/ValidationArguments';
 import { repositories } from './all-entities';
 
 @ValidatorConstraint({ name: 'IsExist', async: true })

@@ -12,6 +12,8 @@ import { IPaginationOptions } from '../utils/types/pagination-options';
 import { genericFindManyWithPagination } from '../utils/infinity-pagination';
 import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 
+// TODO: Bulk import and export of contacts
+
 @Injectable()
 export class ContactsService {
   constructor(

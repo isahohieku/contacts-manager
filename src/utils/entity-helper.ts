@@ -25,3 +25,12 @@ export class EntityBase extends BaseEntity {
   @DeleteDateColumn()
   deletedAt: Date;
 }
+
+export class EntityUser extends EntityBase {
+  __entity?: string;
+
+  @AfterLoad()
+  setEntityName() {
+    this.__entity = this.constructor.name;
+  }
+}

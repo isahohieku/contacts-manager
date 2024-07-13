@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsNotEmpty } from 'class-validator';
 import { AddressType } from '../../address-types/entities/address-type.entity';
 import { Contact } from '../../contacts/entities/contact.entity';
+import { Country } from '../../countries/entities/country.entity';
 
 export class CreateAddressDto {
   @ApiProperty({ example: 'No. 1, Wakili street' })
@@ -20,9 +21,9 @@ export class CreateAddressDto {
   @IsOptional()
   postal_code?: string | null;
 
-  @ApiProperty({ example: 'Nigeria' })
+  @ApiProperty({ type: Country, example: { id: 1 } })
   @IsOptional()
-  country?: string | null;
+  country?: Country;
 
   @ApiProperty({ type: AddressType, example: { id: 1 } })
   @IsOptional()

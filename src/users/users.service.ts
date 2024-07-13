@@ -6,6 +6,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entity/user.entity';
 import { handleError } from '../utils/handlers/error.handler';
+import { genericFindManyWithPagination } from '../utils/infinity-pagination';
+import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
+import { UserErrorCodes } from '../utils/constants/users/errors';
 
 @Injectable()
 export class UsersService {
@@ -20,27 +23,49 @@ export class UsersService {
     );
   }
 
-  findManyWithPagination(paginationOptions: IPaginationOptions) {
-    return this.usersRepository.find({
-      skip: (paginationOptions.page - 1) * paginationOptions.limit,
-      take: paginationOptions.limit,
-    });
+  findManyWithPagination(options: IPaginationOptions) {
+    const baseQuery = {
+      where: {},
+    };
+
+    return genericFindManyWithPagination(
+      this.usersRepository,
+      baseQuery,
+      options,
+    );
   }
 
-  findOne(fields: FindOptionsWhere<User>) {
-    return this.usersRepository.findOne({
+  async findOne(fields: FindOptionsWhere<User>) {
+    const user = await this.usersRepository.findOne({
       where: fields,
     });
+
+    if (user) {
+      return user;
+    }
+
+    const errors = {
+      user: UserErrorCodes.NOT_FOUND,
+    };
+
+    throw handleError(
+      HttpStatus.NOT_FOUND,
+      ERROR_MESSAGES.NOT_FOUND('User', fields.id),
+      errors,
+    );
   }
 
   async update(id: number, updateProfileDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
-      // TODO: Handle error message
-      throw handleError(HttpStatus.UNPROCESSABLE_ENTITY, '', {
-        user: 'notFound',
-      });
+      throw handleError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.NOT_FOUND('User', id),
+        {
+          user: UserErrorCodes.NOT_FOUND,
+        },
+      );
     }
 
     Object.assign(user, updateProfileDto);
