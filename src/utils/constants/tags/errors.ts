@@ -1,0 +1,4 @@
+export enum TagErrorCodes {
+  NOT_FOUND = 'ERR_TAG_NOT_FOUND',
+  ALREADY_EXISTS = 'ERR_TAG_ALREADY_EXISTS',
+}

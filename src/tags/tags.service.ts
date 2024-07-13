@@ -1,10 +1,13 @@
 import { User } from '../users/entity/user.entity';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tag } from './entities/tag.entity';
 import { Repository } from 'typeorm';
+import { TagErrorCodes } from '../utils/constants/tags/errors';
+import { handleError } from '../utils/handlers/error.handler';
+import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 
 @Injectable()
 export class TagsService {
@@ -47,14 +50,15 @@ export class TagsService {
     if (tag) {
       return tag;
     }
-    throw new HttpException(
-      {
-        status: HttpStatus.NOT_FOUND,
-        errors: {
-          tag: 'notFound',
-        },
-      },
+
+    const errors = {
+      tag: TagErrorCodes.NOT_FOUND,
+    };
+
+    throw handleError(
       HttpStatus.NOT_FOUND,
+      ERROR_MESSAGES.NOT_FOUND('Tag', id),
+      errors,
     );
   }
 
