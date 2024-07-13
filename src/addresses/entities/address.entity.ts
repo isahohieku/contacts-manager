@@ -1,3 +1,4 @@
+import { Country } from '../../countries/entities/country.entity';
 import { AddressType } from '../../address-types/entities/address-type.entity';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { EntityBase } from '../../utils/entity-helper';
@@ -20,8 +21,10 @@ export class Address extends EntityBase {
   @Column({ nullable: true, type: 'varchar', length: 20 })
   postal_code?: string | null;
 
-  @Column({ nullable: true, type: 'varchar', length: 50 })
-  country?: string | null;
+  @ManyToOne(() => Country, {
+    eager: true,
+  })
+  country?: Country | null;
 
   @ManyToOne(() => AddressType, (address) => address.addresses, { eager: true })
   address_type?: AddressType | null;
