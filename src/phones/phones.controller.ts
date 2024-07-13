@@ -5,15 +5,20 @@ import {
   Body,
   Patch,
   Param,
+  Query,
   Delete,
   Request,
   UseGuards,
+  DefaultValuePipe,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { PhonesService } from './phones.service';
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
+
+// TODO: Add nestJS devtool
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -26,8 +31,18 @@ export class PhonesController {
   constructor(private readonly phonesService: PhonesService) {}
 
   @Post()
-  create(@Request() request, @Body() createPhoneDto: CreatePhoneDto) {
-    return this.phonesService.create(request.user, createPhoneDto);
+  create(
+    @Query('validatePhone', new DefaultValuePipe(false), ParseBoolPipe)
+    validatePhone: boolean,
+    @Body()
+    createPhoneDto: CreatePhoneDto,
+    @Request() request,
+  ) {
+    return this.phonesService.create(
+      request.user,
+      createPhoneDto,
+      validatePhone, // Validate phone number if this value is true. Else, just save the number
+    );
   }
 
   @Get('phone-types')
