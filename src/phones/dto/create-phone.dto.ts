@@ -1,14 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PhoneType } from '../../phone-types/entities/phone-type.entity';
 import { Contact } from '../../contacts/entities/contact.entity';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, Validate } from 'class-validator';
+import { IsUniqueToContact } from '../../utils/validators/is-unique-to-contact.validator';
+import { ERROR_MESSAGES } from '../../utils/constants/generic/errors';
+import { Phone } from '../entities/phone.entity';
 
 export class CreatePhoneDto {
   @ApiProperty({ example: '+2348036133002' })
-  // TODO: Install lib phone number and create a decorator to validate phone numbers
   // TODO: Add user current country to user table so that user phone number without
   // country code can be validated based on user current country dial code
   @IsNotEmpty({ message: 'Phone number is required' })
+  @Validate(IsUniqueToContact, [Phone], {
+    message: ERROR_MESSAGES.ALREADY_EXISTS_MAIN('Phone'),
+  })
   phone_number: string;
 
   @ApiProperty({ type: PhoneType, example: { id: 1 } })
