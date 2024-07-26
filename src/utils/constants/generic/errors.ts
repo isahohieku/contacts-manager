@@ -8,4 +8,5 @@ export const ERROR_MESSAGES = {
   REQUIRED: (entity: string) => `${entity} is required`,
   ALREADY_EXIST: (entity: string, property: string) =>
     `${entity} with ${property} already exist`,
+  ALREADY_EXISTS_MAIN: (property: string) => `${property} already exist`,
 };
