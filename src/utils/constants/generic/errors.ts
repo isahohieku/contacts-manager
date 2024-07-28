@@ -9,4 +9,9 @@ export const ERROR_MESSAGES = {
   ALREADY_EXIST: (entity: string, property: string) =>
     `${entity} with ${property} already exist`,
   ALREADY_EXISTS_MAIN: (property: string) => `${property} already exist`,
+  NOT_EXIST: (property: string) => `${property} does not exist`,
+  INVALID_PROVIDER: "This process can't be completed with this provider",
+  UNVERIFIED_USER: 'Please verify your email address',
+  INCORRECT_PASSWORD: 'Please verify user credentials and try again',
+  MISSING_PASSWORD: 'Password is required',
 };
