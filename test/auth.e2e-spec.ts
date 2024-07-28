@@ -104,7 +104,7 @@ describe('AuthController (e2e)', () => {
       .then(async ({ body }) => {
         expect(body.status).toBe(HttpStatus.NOT_FOUND);
         expect(body.error).toBeTruthy();
-        expect(body.errors.user).toBe(UserErrorCodes.NOT_FOUND);
+        expect(body.errors.hash).toBe(UserErrorCodes.HASH_NOT_FOUND);
       });
   });
 
@@ -181,7 +181,7 @@ describe('AuthController (e2e)', () => {
         expect(typeof body).toBe('object');
         expect(body.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
         expect(typeof body.errors).toBe('object');
-        expect(body.errors.password).toBe('incorrectPassword');
+        expect(body.errors.password).toBe(UserErrorCodes.INCORRECT_PASSWORD);
       });
   });
 
@@ -311,7 +311,7 @@ describe('AuthController (e2e)', () => {
         expect(typeof body).toBe('object');
         expect(body.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
         expect(typeof body.errors).toBe('object');
-        expect(body.errors.oldPassword).toBe('incorrectOldPassword');
+        expect(body.errors.oldPassword).toBe(UserErrorCodes.INCORRECT_PASSWORD);
       });
   });
 
@@ -329,7 +329,7 @@ describe('AuthController (e2e)', () => {
         expect(typeof body).toBe('object');
         expect(body.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
         expect(typeof body.errors).toBe('object');
-        expect(body.errors.oldPassword).toBe('missingOldPassword');
+        expect(body.errors.oldPassword).toBe(UserErrorCodes.MISSING_PASSWORD);
       });
   });
 
