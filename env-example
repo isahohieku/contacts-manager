@@ -8,6 +8,7 @@ BACKEND_DOMAIN=http://localhost:3000
 
 DATABASE_TYPE=postgres
 DATABASE_HOST=postgres
+# DATABASE_HOST=host.docker.internal # Use this while running docker on mac
 DATABASE_PORT=5432
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=password
@@ -53,3 +54,5 @@ TWITTER_CONSUMER_KEY=
 TWITTER_CONSUMER_SECRET=
 
 WORKER_HOST=redis://localhost:6379/1
+
+NODE_OPTIONS=--max_old_space_size=4096
