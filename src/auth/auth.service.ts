@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entity/user.entity';
 import * as bcrypt from 'bcryptjs';
@@ -18,6 +18,12 @@ import { ForgotService } from '../forgot/forgot.service';
 import { MailService } from '../mail/mail.service';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UserErrorCodes } from '../utils/constants/users/errors';
+import { handleError } from '../utils/handlers/error.handler';
+import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
+
+// TODO: Add refresh token
+// TODO: Generate documentations
 
 @Injectable()
 export class AuthService {
@@ -32,9 +38,12 @@ export class AuthService {
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
   ): Promise<{ token: string; user: User }> {
-    const user = await this.usersService.findOne({
-      email: loginDto.email,
-    });
+    const user = await this.usersService.findOne(
+      {
+        email: loginDto.email,
+      },
+      false,
+    );
 
     if (
       !user ||
@@ -43,36 +52,38 @@ export class AuthService {
           user.role.id,
         ))
     ) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            email: 'notFound',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
+      const errors = {
+        user: UserErrorCodes.NOT_FOUND,
+      };
+
+      throw handleError(
+        HttpStatus.NOT_FOUND,
+        ERROR_MESSAGES.NOT_EXIST('User'),
+        errors,
       );
     }
 
     if (user.provider !== AuthProvidersEnum.email) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            email: `needLoginViaProvider:${user.provider}`,
-          },
-        },
+      const errors = {
+        provider: UserErrorCodes.INVALID_PROVIDER,
+      };
+
+      throw handleError(
         HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.INVALID_PROVIDER,
+        errors,
       );
     }
 
     if (user.status.id !== StatusEnum.active) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNAUTHORIZED,
-          message: 'Please verify your email address',
-        },
+      const errors = {
+        provider: UserErrorCodes.INVALID_PROVIDER,
+      };
+
+      throw handleError(
         HttpStatus.UNAUTHORIZED,
+        ERROR_MESSAGES.UNVERIFIED_USER,
+        errors,
       );
     }
 
@@ -90,14 +101,13 @@ export class AuthService {
 
       return { token, user };
     } else {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            password: 'incorrectPassword',
-          },
-        },
+      const errors = {
+        password: UserErrorCodes.INCORRECT_PASSWORD,
+      };
+      throw handleError(
         HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.INCORRECT_PASSWORD,
+        errors,
       );
     }
   }
@@ -108,15 +118,16 @@ export class AuthService {
       .update(randomStringGenerator())
       .digest('hex');
 
-    const found = await this.usersService.findOne({ email: dto.email });
+    const found = await this.usersService.findOne({ email: dto.email }, false);
 
     if (found) {
-      throw new HttpException(
-        {
-          status: HttpStatus.CONFLICT,
-          error: `emailAlreadyExist`,
-        },
+      const errors = {
+        email: UserErrorCodes.ALREADY_EXISTS,
+      };
+      throw handleError(
         HttpStatus.CONFLICT,
+        ERROR_MESSAGES.ALREADY_EXIST('User', 'email'),
+        errors,
       );
     }
 
@@ -143,17 +154,21 @@ export class AuthService {
   }
 
   async confirmEmail(hash: string): Promise<void> {
-    const user = await this.usersService.findOne({
-      hash,
-    });
+    const user = await this.usersService.findOne(
+      {
+        hash,
+      },
+      false,
+    );
 
     if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: `notFound`,
-        },
+      const errors = {
+        hash: UserErrorCodes.HASH_NOT_FOUND,
+      };
+      throw handleError(
         HttpStatus.NOT_FOUND,
+        ERROR_MESSAGES.HASH_NOT_FOUND,
+        errors,
       );
     }
 
@@ -166,19 +181,21 @@ export class AuthService {
   }
 
   async forgotPassword(email: string): Promise<void> {
-    const user = await this.usersService.findOne({
-      email,
-    });
+    const user = await this.usersService.findOne(
+      {
+        email,
+      },
+      false,
+    );
 
     if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            email: 'emailNotExists',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
+      const errors = {
+        hash: UserErrorCodes.HASH_NOT_FOUND,
+      };
+      throw handleError(
+        HttpStatus.NOT_FOUND,
+        ERROR_MESSAGES.HASH_NOT_FOUND,
+        errors,
       );
     } else {
       const hash = crypto
@@ -208,14 +225,13 @@ export class AuthService {
     });
 
     if (!forgot) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            hash: `notFound`,
-          },
-        },
+      const errors = {
+        hash: UserErrorCodes.HASH_NOT_FOUND,
+      };
+      throw handleError(
         HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.HASH_NOT_FOUND,
+        errors,
       );
     }
 
@@ -226,17 +242,23 @@ export class AuthService {
   }
 
   async me(user: User): Promise<User> {
-    return this.usersService.findOne({
-      id: user.id,
-    });
+    return this.usersService.findOne(
+      {
+        id: user.id,
+      },
+      false,
+    );
   }
 
   async update(user: User, userDto: AuthUpdateDto): Promise<User> {
     if (userDto.password) {
       if (userDto.oldPassword) {
-        const currentUser = await this.usersService.findOne({
-          id: user.id,
-        });
+        const currentUser = await this.usersService.findOne(
+          {
+            id: user.id,
+          },
+          false,
+        );
 
         const isValidOldPassword = await bcrypt.compare(
           userDto.oldPassword,
@@ -244,34 +266,36 @@ export class AuthService {
         );
 
         if (!isValidOldPassword) {
-          throw new HttpException(
-            {
-              status: HttpStatus.UNPROCESSABLE_ENTITY,
-              errors: {
-                oldPassword: 'incorrectOldPassword',
-              },
-            },
+          const errors = {
+            oldPassword: UserErrorCodes.INCORRECT_PASSWORD,
+          };
+          throw handleError(
             HttpStatus.UNPROCESSABLE_ENTITY,
+            ERROR_MESSAGES.INCORRECT_PASSWORD,
+            errors,
           );
         }
       } else {
-        throw new HttpException(
-          {
-            status: HttpStatus.UNPROCESSABLE_ENTITY,
-            errors: {
-              oldPassword: 'missingOldPassword',
-            },
-          },
+        const errors = {
+          oldPassword: UserErrorCodes.MISSING_PASSWORD,
+        };
+
+        throw handleError(
           HttpStatus.UNPROCESSABLE_ENTITY,
+          ERROR_MESSAGES.MISSING_PASSWORD,
+          errors,
         );
       }
     }
 
     await this.usersService.update(user.id, userDto as UpdateUserDto);
 
-    return this.usersService.findOne({
-      id: user.id,
-    });
+    return this.usersService.findOne(
+      {
+        id: user.id,
+      },
+      false,
+    );
   }
 
   async softDelete(user: User): Promise<void> {
