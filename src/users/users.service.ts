@@ -35,10 +35,12 @@ export class UsersService {
     );
   }
 
-  async findOne(fields: FindOptionsWhere<User>) {
+  async findOne(fields: FindOptionsWhere<User>, throwError = true) {
     const user = await this.usersRepository.findOne({
       where: fields,
     });
+
+    if (!throwError) return user;
 
     if (user) {
       return user;
