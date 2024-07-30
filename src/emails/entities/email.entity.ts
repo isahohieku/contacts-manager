@@ -3,7 +3,6 @@ import { EntityBase } from '../../utils/entity-helper';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { EmailType } from '../../email-types/entities/email-type.entity';
 
-// TODO: Email should be unique to a contact
 @Entity()
 export class Email extends EntityBase {
   @PrimaryGeneratedColumn()
