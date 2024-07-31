@@ -8,8 +8,6 @@ import { Phone } from '../entities/phone.entity';
 
 export class CreatePhoneDto {
   @ApiProperty({ example: '+2348036133002' })
-  // TODO: Add user current country to user table so that user phone number without
-  // country code can be validated based on user current country dial code
   @IsNotEmpty({ message: 'Phone number is required' })
   @Validate(IsUniqueToContact, [Phone], {
     message: ERROR_MESSAGES.ALREADY_EXISTS_MAIN('Phone'),
