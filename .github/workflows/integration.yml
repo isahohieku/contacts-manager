@@ -1,0 +1,61 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  Build-and-Test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Create env file'
+        run: |
+          touch .env
+          echo NODE_ENV=${{ secrets.NODE_ENV }} >> .env
+          echo APP_PORT=${{ secrets.APP_PORT }} >> .env
+          echo APP_NAME=${{ secrets.APP_NAME }} >> .env
+          echo API_PREFIX=${{ secrets.API_PREFIX }} >> .env
+          echo APP_FALLBACK_LANGUAGE=${{ secrets.APP_FALLBACK_LANGUAGE }} >> .env
+          echo FRONTEND_DOMAIN=${{ secrets.FRONTEND_DOMAIN }} >> .env
+          echo BACKEND_DOMAIN=${{ secrets.BACKEND_DOMAIN }} >> .env
+          
+          echo DATABASE_TYPE=${{ secrets.DATABASE_TYPE }} >> .env
+          echo DATABASE_HOST=${{ secrets.DATABASE_HOST }} >> .env
+          echo DATABASE_PORT=${{ secrets.DATABASE_PORT }} >> .env
+          echo DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} >> .env
+          echo DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
+          echo DATABASE_NAME=${{ secrets.DATABASE_NAME }} >> .env
+          echo DATABASE_SYNCHRONIZE=${{ secrets.DATABASE_SYNCHRONIZE }} >> .env
+          echo DATABASE_MAX_CONNECTIONS=${{ secrets.DATABASE_MAX_CONNECTIONS }} >> .env
+          echo DATABASE_SSL_ENABLED=${{ secrets.DATABASE_SSL_ENABLED }} >> .env
+          echo DATABASE_REJECT_UNAUTHORIZED=${{ secrets.DATABASE_REJECT_UNAUTHORIZED }} >> .env
+
+          echo FILE_DRIVER=${{ secrets.FILE_DRIVER }} >> .env
+          echo ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID }} >> .env
+          echo SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }} >> .env
+          echo AWS_S3_REGION=${{ secrets.AWS_S3_REGION }} >> .env
+          echo AWS_DEFAULT_S3_BUCKET=${{ secrets.AWS_DEFAULT_S3_BUCKET }} >> .env
+          
+          echo MAIL_HOST=${{ secrets.MAIL_HOST }} >> .env
+          echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
+          echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
+          echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> .env
+          echo MAIL_IGNORE_TLS=${{ secrets.MAIL_IGNORE_TLS }} >> .env
+          echo MAIL_SECURE=${{ secrets.MAIL_SECURE }} >> .env
+          echo MAIL_REQUIRE_TLS=${{ secrets.MAIL_REQUIRE_TLS }} >> .env
+          echo MAIL_DEFAULT_EMAIL=${{ secrets.MAIL_DEFAULT_EMAIL }} >> .env
+          echo MAIL_DEFAULT_NAME=${{ secrets.MAIL_DEFAULT_NAME }} >> .env
+          echo MAIL_CLIENT_PORT=${{ secrets.MAIL_CLIENT_PORT }} >> .env
+          
+          echo NODE_OPTIONS=${{ secrets.NODE_OPTIONS }} >> .env
+
+      - uses: actions/checkout@v3
+      - name: Run e2e tests
+        run: docker-compose -f docker-compose.ci.yaml --env-file .env -p ci up --build --exit-code-from api
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODE_COV }}
+          file: ./test-coverage-report/lcov.info
