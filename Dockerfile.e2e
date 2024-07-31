@@ -1,0 +1,49 @@
+# Stage: yarn install
+FROM node:22-bullseye-slim AS yarn
+LABEL description="Setting yarn"
+
+WORKDIR /usr/app
+ENTRYPOINT ["yarn"]
+
+# Stage: yarn and migration
+FROM yarn AS yarn-migration
+LABEL description="Run migrations and seeds"
+WORKDIR /tmp/app
+COPY ["package*.json", "./"]
+COPY ["yarn.lock", "./"]
+RUN yarn install
+
+COPY [".", "./"]
+
+# Change to not use the env-example file
+RUN rm -rf .env && cp env-example .env 
+
+# Run Migrations and Seed
+RUN yarn migration:run
+RUN yarn seed:run
+
+RUN yarn build
+
+# Stage: e2e test
+FROM node:22-bullseye-slim AS e2e_test
+LABEL description="Picking only necessary modules to run app"
+WORKDIR /usr/app
+
+COPY --from=yarn-migration ["/tmp/app/jest-e2e.json", \
+    "/tmp/app/package.json", \
+    "/tmp/app/ormconfig.json", \
+    "/tmp/app/tsconfig.json", \
+    "/tmp/app/nest-cli.json", \
+    "/tmp/app/.env", \
+    "./"]
+
+COPY --from=yarn-migration ["/tmp/app/src", "./src"]
+COPY --from=yarn-migration ["/tmp/app/test", "./test"]
+COPY --from=yarn-migration ["/tmp/app/dist", "./dist"]
+COPY --from=yarn-migration ["/tmp/app/node_modules", "./node_modules"]
+
+COPY --from=yarn-migration ["/tmp/app/wait-for-it.sh", \
+    "/tmp/app/startup.ci.sh", \
+    "/opt/"]
+
+CMD ["/bin/bash", "/opt/startup.ci.sh"]
