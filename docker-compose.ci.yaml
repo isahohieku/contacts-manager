@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:14.1
+    expose:
+      - 5432
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.e2e
+    volumes:
+      - ./test-coverage-report/coverage:/usr/app/coverage
+    depends_on:
+      - postgres
+      
+  maildev:
+    build:
+      context: .
+      dockerfile: Dockerfile.maildev
+    expose:
+      - 1080
+      - 1025
