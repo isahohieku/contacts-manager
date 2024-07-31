@@ -17,6 +17,7 @@ lerna-debug.log*
 # Tests
 /coverage
 /.nyc_output
+/test-coverage-report
 
 # IDEs and editors
 /.idea
@@ -34,7 +35,12 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-.env
-ormconfig.json
+# Db and ORM
 .data
+ormconfig.json
+
+# Files
 /files
+
+# Env
+.env
