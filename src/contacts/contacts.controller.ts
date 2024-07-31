@@ -16,10 +16,9 @@ import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { User } from '../users/entity/user.entity';
-
-// TODO: Generic search that includes both phone numbers, emails, Addresses and tags
+import { SearchTypes } from '../utils/types/contacts.type';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -37,10 +36,16 @@ export class ContactsController {
   }
 
   @Get()
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'type', required: false, enum: SearchTypes })
   async findAll(
     @Request() request,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search: string,
+    @Query('type') type: SearchTypes,
   ) {
     if (limit > 50) {
       limit = 50;
@@ -51,6 +56,8 @@ export class ContactsController {
         page,
         limit,
       },
+      search,
+      type,
       request.user as User,
     );
   }

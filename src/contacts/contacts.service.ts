@@ -3,7 +3,8 @@ import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
-import { Repository } from 'typeorm';
+import set from 'lodash/set';
+import { FindManyOptions, ILike, Repository } from 'typeorm';
 import { User } from '../users/entity/user.entity';
 import { handleError } from '../utils/handlers/error.handler';
 import { ContactErrorCodes } from '../utils/constants/contacts/errors';
@@ -11,6 +12,7 @@ import { TagsService } from '../tags/tags.service';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { genericFindManyWithPagination } from '../utils/infinity-pagination';
 import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
+import { SearchTypes } from '../utils/types/contacts.type';
 
 // TODO: Bulk import and export of contacts
 
@@ -32,14 +34,84 @@ export class ContactsService {
     return contact;
   }
 
-  async findAllWithPagination(options: IPaginationOptions, user: User) {
-    const baseQuery = {
+  async findAllWithPagination(
+    options: IPaginationOptions,
+    search: string,
+    type: SearchTypes,
+    user: User,
+  ) {
+    // TODO: Move this properties to utils
+    const contactProperties = [
+      'firstName',
+      'job_title',
+      'lastName',
+      'notes',
+      'organization',
+    ];
+
+    const addressProperties = [
+      'addresses.address_type.name',
+      'addresses.city',
+      'addresses.street',
+      'addresses.country.code',
+    ];
+
+    const emailProperties = ['emails.email_address', 'emails.email_type.name'];
+
+    const phoneProperties = [
+      'phone_numbers.phone_number',
+      'phone_numbers.phone_type.name',
+    ];
+
+    const tagProperties = ['tags.name'];
+
+    const searchTypes = {
+      [SearchTypes.CONTACT]: contactProperties,
+      [SearchTypes.ADDRESS]: addressProperties,
+      [SearchTypes.EMAIL]: emailProperties,
+      [SearchTypes.PHONE_NUMBER]: phoneProperties,
+      [SearchTypes.TAG]: tagProperties,
+    };
+
+    const baseQuery: FindManyOptions<Contact> = {
       where: {
         owner: {
           id: user.id,
         },
       },
     };
+
+    if (search && !type) {
+      const allProperties = [
+        ...contactProperties,
+        ...addressProperties,
+        ...emailProperties,
+        ...phoneProperties,
+        ...tagProperties,
+      ];
+
+      baseQuery.where = [
+        ...allProperties.map((property) => {
+          const query = {
+            owner: { id: user.id },
+          };
+          set(query, property, ILike(`%${search}%`));
+          return query;
+        }),
+      ];
+    }
+
+    if (search && type) {
+      baseQuery.where = [
+        ...[...searchTypes[type]].map((property) => {
+          const query = {
+            owner: { id: user.id },
+          };
+          set(query, property, ILike(`%${search}%`));
+          return query;
+        }),
+      ];
+    }
 
     return genericFindManyWithPagination(
       this.contactsRepository,
