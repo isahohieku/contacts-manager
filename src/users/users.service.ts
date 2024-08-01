@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as crypto from 'crypto';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,18 +10,35 @@ import { handleError } from '../utils/handlers/error.handler';
 import { genericFindManyWithPagination } from '../utils/infinity-pagination';
 import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 import { UserErrorCodes } from '../utils/constants/users/errors';
+import { MailService } from '../mail/mail.service';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private mailService: MailService,
   ) {}
 
-  create(createProfileDto: CreateUserDto) {
-    return this.usersRepository.save(
-      this.usersRepository.create(createProfileDto),
+  async create(createProfileDto: CreateUserDto) {
+    const hash = crypto
+      .createHash('sha256')
+      .update(randomStringGenerator())
+      .digest('hex');
+
+    const user = await this.usersRepository.save(
+      this.usersRepository.create({ ...createProfileDto, hash }),
     );
+
+    await this.mailService.userSignUp({
+      to: user.email,
+      data: {
+        hash,
+      },
+    });
+
+    return user;
   }
 
   findManyWithPagination(options: IPaginationOptions) {

@@ -10,7 +10,6 @@ import { StatusEnum } from '../utils/types/statuses.type';
 import * as crypto from 'crypto';
 import { plainToClass } from 'class-transformer';
 import { Status } from '../statuses/entities/status.entity';
-import { Role } from '../roles/entities/role.entity';
 import { AuthProvidersEnum } from './auth-providers.enum';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { UsersService } from '../users/users.service';
@@ -113,11 +112,6 @@ export class AuthService {
   }
 
   async register(dto: AuthRegisterLoginDto): Promise<User> {
-    const hash = crypto
-      .createHash('sha256')
-      .update(randomStringGenerator())
-      .digest('hex');
-
     const found = await this.usersService.findOne({ email: dto.email }, false);
 
     if (found) {
@@ -134,21 +128,7 @@ export class AuthService {
     const user = await this.usersService.create({
       ...dto,
       email: dto.email,
-      role: {
-        id: RoleEnum.user,
-      } as Role,
-      status: {
-        id: StatusEnum.inactive,
-      } as Status,
-      hash,
     } as CreateUserDto);
-
-    await this.mailService.userSignUp({
-      to: user.email,
-      data: {
-        hash,
-      },
-    });
 
     return user;
   }

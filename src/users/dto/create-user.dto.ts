@@ -13,6 +13,8 @@ import { IsNotExist } from '../../utils/validators/is-not-exists.validator';
 import { IsExist } from '../../utils/validators/is-exists.validator';
 import { Status } from '../../statuses/entities/status.entity';
 import { Country } from '../../countries/entities/country.entity';
+import { RoleEnum } from '../../roles/roles.enum';
+import { StatusEnum } from '../../utils/types/statuses.type';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'john.doe@example.com' })
@@ -48,13 +50,13 @@ export class CreateUserDto {
   @Validate(IsExist, ['Role', 'id'], {
     message: ERROR_MESSAGES.NOT_FOUND_WITHOUT_ID('Role'),
   })
-  role?: Role | null;
+  role?: { id: RoleEnum.user };
 
   @ApiProperty({ type: Status })
   @Validate(IsExist, ['Status', 'id'], {
     message: ERROR_MESSAGES.NOT_FOUND_WITHOUT_ID('Status'),
   })
-  status?: Status;
+  status?: { id: StatusEnum.inactive };
 
   hash?: string | null;
 }

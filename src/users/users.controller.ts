@@ -20,7 +20,7 @@ import { RoleEnum } from '../roles/roles.enum';
 import { RolesGuard } from '../roles/roles.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../roles/roles.decorator';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Roles(RoleEnum.admin)
@@ -36,11 +36,13 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
-    // TODO: Also send an email to the user with the new login details
+    // TODO: Add flag to user created by admin to as to redirect them to setup password
     return this.usersService.create(createUserDto);
   }
 
   @Get()
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: String })
   @HttpCode(HttpStatus.OK)
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
