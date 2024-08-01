@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  AfterInsert,
 } from 'typeorm';
 
 export class EntityHelper extends BaseEntity {
@@ -30,6 +31,7 @@ export class EntityUser extends EntityBase {
   __entity?: string;
 
   @AfterLoad()
+  @AfterInsert()
   setEntityName() {
     this.__entity = this.constructor.name;
   }
