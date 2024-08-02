@@ -1,8 +1,16 @@
-import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  MinLength,
+  Validate,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotExist } from '../../utils/validators/is-not-exists.validator';
 import { Country } from '../../countries/entities/country.entity';
+import { StatusEnum } from '../../statuses/statuses.enum';
+import { RoleEnum } from '../../roles/roles.enum';
 
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'john.doe@example.com' })
@@ -31,4 +39,10 @@ export class AuthRegisterLoginDto {
   @ApiProperty({ type: Country, example: { id: 1 } })
   @IsNotEmpty({ message: 'Country is required' })
   country: Country;
+
+  @IsOptional()
+  status? = { id: StatusEnum.inactive };
+
+  @IsOptional()
+  role? = { id: RoleEnum.user };
 }
