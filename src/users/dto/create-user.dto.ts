@@ -50,13 +50,13 @@ export class CreateUserDto {
   @Validate(IsExist, ['Role', 'id'], {
     message: ERROR_MESSAGES.NOT_FOUND_WITHOUT_ID('Role'),
   })
-  role?: { id: RoleEnum.user };
+  role? = { id: RoleEnum.user };
 
   @ApiProperty({ type: Status })
   @Validate(IsExist, ['Status', 'id'], {
     message: ERROR_MESSAGES.NOT_FOUND_WITHOUT_ID('Status'),
   })
-  status?: { id: StatusEnum.inactive };
+  status? = { id: StatusEnum.inactive };
 
   hash?: string | null;
 }
