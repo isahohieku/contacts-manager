@@ -42,10 +42,8 @@ describe('AuthController (e2e)', () => {
       .then(async ({ body }) => {
         expect(typeof body).toBe('object');
         expect(body.email).toBe(userSignUpDetails.email);
-        expect(body).toHaveProperty('password');
         expect(body.firstName).toBe(userSignUpDetails.firstName);
         expect(body.lastName).toBe(userSignUpDetails.lastName);
-        expect(typeof body.hash).toBe('string');
         const { role, status } = body;
         expect(typeof role).toBe('object');
         expect(role.id).toBe(2);
@@ -85,11 +83,16 @@ describe('AuthController (e2e)', () => {
       });
   });
 
-  it('should verify user account with POST /api/auth/email/confirm', () => {
+  it('should verify user account with POST /api/auth/email/confirm', async () => {
+    const user = await User.findOne({
+      where: {
+        id: userDbData.id,
+      },
+    });
     return request(app.getHttpServer())
       .post('/api/auth/email/confirm')
       .send({
-        hash: userDbData.hash,
+        hash: user.hash,
       })
       .expect(HttpStatus.OK);
   });
@@ -210,7 +213,7 @@ describe('AuthController (e2e)', () => {
   });
 
   it('should reset user password with POST /api/auth/reset/password', async () => {
-    const user = await Forgot.findOne({
+    const userForgotPassword = await Forgot.findOne({
       where: {
         user: {
           id: userDbData.id,
@@ -222,7 +225,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/auth/reset/password')
       .send({
         password: userSignUpDetails.password,
-        hash: user.hash,
+        hash: userForgotPassword.hash,
       })
       .expect(HttpStatus.OK);
   });
