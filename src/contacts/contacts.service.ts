@@ -4,6 +4,7 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import set from 'lodash/set';
+import { Parser } from '@json2csv/plainjs';
 import { FindManyOptions, ILike, Repository } from 'typeorm';
 import { User } from '../users/entity/user.entity';
 import { handleError } from '../utils/handlers/error.handler';
@@ -173,5 +174,43 @@ export class ContactsService {
     // TODO: Remove avatar from S3 before removing contact if contact has an avatar
     // TODO: Cascade removal of all emails, phone numbers, and addresses after deletion
     return contact;
+  }
+
+  async exportContacts(user: User, id?: number) {
+    const query: FindManyOptions<Contact> = {
+      where: {
+        owner: {
+          id: user.id,
+        },
+      },
+    };
+
+    if (id) {
+      query.where = {
+        id,
+        ...query.where,
+      };
+    }
+
+    const contacts = await this.contactsRepository.find({
+      ...query,
+    });
+
+    try {
+      const opts = {};
+      const parser = new Parser(opts);
+      const csv = parser.parse(contacts);
+
+      return csv;
+    } catch (error) {
+      const errors = {
+        contact: ContactErrorCodes.CSV_GENERATION_FAILED,
+      };
+      throw handleError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        errors,
+      );
+    }
   }
 }

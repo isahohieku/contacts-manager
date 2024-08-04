@@ -14,4 +14,6 @@ export const ERROR_MESSAGES = {
   UNVERIFIED_USER: 'Please verify your email address',
   INCORRECT_PASSWORD: 'Please verify user credentials and try again',
   MISSING_PASSWORD: 'Password is required',
+  INTERNAL_SERVER_ERROR:
+    "We're sorry, but something went wrong on our end. Please try again later. If the problem persists, contact our support team for assistance.",
 };

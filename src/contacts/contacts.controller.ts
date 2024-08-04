@@ -8,10 +8,12 @@ import {
   Delete,
   UseGuards,
   Request,
+  Response,
   Query,
   DefaultValuePipe,
   ParseIntPipe,
 } from '@nestjs/common';
+import { Response as Res } from 'express';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -60,6 +62,23 @@ export class ContactsController {
       type,
       request.user as User,
     );
+  }
+
+  @Get('export')
+  @ApiQuery({ name: 'id', required: false, type: String })
+  async exportContacts(
+    @Request() request,
+    @Response() res: Res,
+    @Query('id') id?: string,
+  ) {
+    const csvContacts = await this.contactsService.exportContacts(
+      request.user as User,
+      +id,
+    );
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment('contacts.csv');
+    res.send(csvContacts);
   }
 
   @Get(':id')
