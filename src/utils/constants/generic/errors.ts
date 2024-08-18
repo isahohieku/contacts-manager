@@ -16,4 +16,5 @@ export const ERROR_MESSAGES = {
   MISSING_PASSWORD: 'Password is required',
   INTERNAL_SERVER_ERROR:
     "We're sorry, but something went wrong on our end. Please try again later. If the problem persists, contact our support team for assistance.",
+  NO_FILE: 'File is required',
 };
