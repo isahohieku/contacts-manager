@@ -7,10 +7,18 @@ import { Phone } from './entities/phone.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { ContactsService } from '../contacts/contacts.service';
 import { TagsService } from '../tags/tags.service';
+import { FileStorageService } from '../file-storage/file-storage.service';
+import { FilesService } from '../files/files.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Phone, Contact, Tag])],
   controllers: [PhonesController],
-  providers: [PhonesService, ContactsService, TagsService],
+  providers: [
+    PhonesService,
+    ContactsService,
+    TagsService,
+    FileStorageService,
+    FilesService,
+  ],
 })
 export class PhonesModule {}

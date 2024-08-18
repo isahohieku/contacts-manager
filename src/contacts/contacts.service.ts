@@ -14,6 +14,7 @@ import { IPaginationOptions } from '../utils/types/pagination-options';
 import { genericFindManyWithPagination } from '../utils/infinity-pagination';
 import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 import { SearchTypes } from '../utils/types/contacts.type';
+import { FilesService } from '../files/files.service';
 
 // TODO: Bulk import and export of contacts
 
@@ -23,6 +24,7 @@ export class ContactsService {
     @InjectRepository(Contact)
     private contactsRepository: Repository<Contact>,
     private tagsService: TagsService,
+    private fileService: FilesService,
   ) {}
 
   async create(user: User, createContactDto: CreateContactDto) {
@@ -151,13 +153,25 @@ export class ContactsService {
 
     const tags = updateContactDto.tags;
 
-    if (tags && tags.length) {
-      for (let i = 0; i <= tags.length - 1; i++) {
-        await this.tagsService.findOne(user, tags[i].id);
-      }
+    if (tags?.length) {
+      await Promise.all(
+        updateContactDto.tags.map((tag) =>
+          this.tagsService.findOne(user, tag.id),
+        ),
+      );
     }
 
     // TODO: Remove avatar from S3 before update if avatar is part of the update object
+    if (updateContactDto.avatar) {
+      const existingContact = await this.findOne(user, id);
+      if (
+        existingContact.avatar &&
+        existingContact.avatar !== updateContactDto.avatar
+      ) {
+        await this.fileService.removeFile(existingContact.avatar);
+      }
+    }
+
     await this.contactsRepository.save(
       this.contactsRepository.create({
         id,
