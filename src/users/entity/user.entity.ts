@@ -17,6 +17,7 @@ import { Role } from '../../roles/entities/role.entity';
 import { Status } from '../../statuses/entities/status.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { Country } from '../../countries/entities/country.entity';
+import { FileEntity } from '../../files/entities/file.entity';
 
 @Entity('users')
 export class User extends EntityUser {
@@ -83,4 +84,7 @@ export class User extends EntityUser {
 
   @OneToMany(() => Tag, (tag) => tag.owner)
   tags: Tag[];
+
+  @OneToMany(() => FileEntity, (file) => file.owner)
+  files: FileEntity[];
 }
