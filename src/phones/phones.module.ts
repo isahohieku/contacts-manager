@@ -9,9 +9,10 @@ import { ContactsService } from '../contacts/contacts.service';
 import { TagsService } from '../tags/tags.service';
 import { FileStorageService } from '../file-storage/file-storage.service';
 import { FilesService } from '../files/files.service';
+import { FileEntity } from '../files/entities/file.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Phone, Contact, Tag])],
+  imports: [TypeOrmModule.forFeature([Phone, Contact, Tag, FileEntity])],
   controllers: [PhonesController],
   providers: [
     PhonesService,

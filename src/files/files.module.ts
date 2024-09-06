@@ -6,6 +6,9 @@ import { FilesService } from './files.service';
 import { fileFilter } from '../utils/file-filter';
 import { FileStorageService } from '../file-storage/file-storage.service';
 import { FileStorageModule } from '../file-storage/file-storage.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../users/entity/user.entity';
+import { FileEntity } from './entities/file.entity';
 
 @Module({
   imports: [
@@ -25,6 +28,7 @@ import { FileStorageModule } from '../file-storage/file-storage.module';
         },
       }),
     }),
+    TypeOrmModule.forFeature([FileEntity, User]),
   ],
   controllers: [FilesController],
   providers: [FilesService, FileStorageService],
