@@ -7,13 +7,13 @@ import { ConfigService } from '@nestjs/config';
 import { userData } from './mock-data/user';
 import { User } from '../src/users/entity/user.entity';
 import { FilesErrorCodes } from '../src/utils/constants/files/errors';
-
-// TODO: Write test for s3
+import { FileEntity } from '../src/files/entities/file.entity';
 
 describe('FileController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
+  let file;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -36,6 +36,7 @@ describe('FileController (e2e)', () => {
   });
 
   afterAll(async () => {
+    await FileEntity.delete({ id: file.id });
     await User.delete({ id: userData.id });
     userData.id = undefined;
     await app.close();
@@ -53,6 +54,7 @@ describe('FileController (e2e)', () => {
         expect(typeof body).toBe('object');
         expect(body).toHaveProperty('path');
         expect(typeof body.path).toBe('string');
+        file = body;
       });
   });
 
