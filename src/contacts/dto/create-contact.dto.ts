@@ -1,6 +1,7 @@
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 import { CreatePhoneDto } from '../../phones/dto/create-phone.dto';
+import { FileEntity } from '../../files/entities/file.entity';
 
 @ApiExtraModels(CreatePhoneDto)
 export class CreateContactDto {
@@ -28,9 +29,9 @@ export class CreateContactDto {
   @IsOptional()
   anniversary?: Date;
 
-  @ApiProperty({ example: 'https://s3.....' })
+  @ApiProperty({ type: FileEntity, example: { id: 1 } })
   @IsOptional()
-  avatar?: string | null;
+  avatar?: FileEntity | null;
 
   @ApiProperty({ example: 'Wonderful note' })
   @IsOptional()

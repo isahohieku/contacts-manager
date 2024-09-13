@@ -1,4 +1,5 @@
 export enum FilesErrorCodes {
   INVALID_FILE_TYPE = 'ERR_INVALID_FILE_TYPE',
   NO_FILE = 'ERR_NO_FILE',
+  NOT_FOUND = 'ERR_FILE_NOT_FOUND',
 }

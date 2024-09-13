@@ -3,6 +3,7 @@ import {
   Delete,
   Param,
   Post,
+  Request,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -44,13 +45,14 @@ export class FilesController {
     },
   })
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file) {
-    return this.filesService.uploadFile(file);
+  async uploadFile(@Request() request, @UploadedFile() file) {
+    return this.filesService.uploadFile(request.user, file);
   }
 
-  // TODO: Refactor service to store file path in db rather and link with uploading user
-  @Delete('remove')
-  remove(@Param('file') file: string) {
-    return this.filesService.removeFile(file);
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('remove/:id')
+  remove(@Request() request, @Param('id') file: string) {
+    return this.filesService.removeFile(request.user, file);
   }
 }

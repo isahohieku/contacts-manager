@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
-import * as AWS from 'aws-sdk';
+import AWS from 'aws-sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 import multerS3 from 'multer-s3';
@@ -43,13 +43,14 @@ export class FileStorageService {
   }
 
   private removeFromLocalStorage(filePath: string) {
-    const fullPath = path.join(__dirname, '..', '..', filePath);
+    const file = filePath.split('/').pop();
+    const fullPath = path.join(__dirname, '..', '..', '..', 'files', file);
 
     fs.unlink(fullPath, (err) => {
       if (err) {
         throw handleError(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          `Failed to delete local file: ${filePath}`,
+          `Failed to delete local file: ${fullPath}`,
           err,
         );
       }
@@ -74,7 +75,9 @@ export class FileStorageService {
         throw handleError(
           HttpStatus.INTERNAL_SERVER_ERROR,
           `Failed to delete S3 file: ${filePath}`,
-          err,
+          {
+            file: err.message,
+          },
         );
       });
   }

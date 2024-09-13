@@ -19,6 +19,7 @@ import { EmailsModule } from './emails/emails.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { TagsModule } from './tags/tags.module';
 import { FilesModule } from './files/files.module';
+import { FileStorageModule } from './file-storage/file-storage.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { FilesModule } from './files/files.module';
     ContactsModule,
     EmailsModule,
     FilesModule,
+    FileStorageModule,
     ForgotModule,
     MailModule,
     PhonesModule,

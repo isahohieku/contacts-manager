@@ -149,7 +149,7 @@ export class ContactsService {
   }
 
   async update(user: User, id: number, updateContactDto: UpdateContactDto) {
-    await this.findOne(user, id);
+    const existingContact = await this.findOne(user, id);
 
     const tags = updateContactDto.tags;
 
@@ -161,15 +161,12 @@ export class ContactsService {
       );
     }
 
-    // TODO: Remove avatar from S3 before update if avatar is part of the update object
-    if (updateContactDto.avatar) {
-      const existingContact = await this.findOne(user, id);
-      if (
-        existingContact.avatar &&
-        existingContact.avatar !== updateContactDto.avatar
-      ) {
-        await this.fileService.removeFile(existingContact.avatar);
-      }
+    if (
+      updateContactDto.avatar &&
+      existingContact.avatar &&
+      existingContact.avatar.id !== updateContactDto.avatar.id
+    ) {
+      await this.fileService.removeFile(user, existingContact.avatar.path);
     }
 
     await this.contactsRepository.save(

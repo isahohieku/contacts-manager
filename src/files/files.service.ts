@@ -4,15 +4,46 @@ import { handleError } from '../utils/handlers/error.handler';
 import { FilesErrorCodes } from '../utils/constants/files/errors';
 import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 import { FileStorageService } from '../file-storage/file-storage.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FileEntity } from './entities/file.entity';
+import { Repository } from 'typeorm';
+import { User } from '../users/entity/user.entity';
 
 @Injectable()
 export class FilesService {
   constructor(
     private readonly configService: ConfigService,
     private readonly fileStorageService: FileStorageService,
+    @InjectRepository(FileEntity)
+    private fileRepository: Repository<FileEntity>,
   ) {}
 
-  async uploadFile(file): Promise<{ path: string }> {
+  async findOne(user: User, id: string) {
+    const file = await this.fileRepository.findOne({
+      where: {
+        id,
+        owner: {
+          id: user.id,
+        },
+      },
+    });
+
+    if (file) {
+      return file;
+    }
+
+    const errors = {
+      file: FilesErrorCodes.NOT_FOUND,
+    };
+
+    throw handleError(
+      HttpStatus.NOT_FOUND,
+      ERROR_MESSAGES.NOT_FOUND('File', id),
+      errors,
+    );
+  }
+
+  async uploadFile(user: User, file): Promise<{ path: string }> {
     if (!file) {
       const errors = {
         file: FilesErrorCodes.NO_FILE,
@@ -29,12 +60,18 @@ export class FilesService {
       s3: file.location,
     };
 
-    return {
-      path: path[this.configService.get('file.driver')],
-    };
+    return this.fileRepository.save(
+      this.fileRepository.create({
+        owner: user,
+        path: path[this.configService.get('file.driver')],
+      }),
+    );
   }
 
-  async removeFile(file: string) {
-    await this.fileStorageService.removeFromStorage(file);
+  async removeFile(user: User, id: string) {
+    const file = await this.findOne(user, id);
+    await this.fileStorageService.removeFromStorage(file.path);
+    await this.fileRepository.softDelete(id);
+    return file;
   }
 }

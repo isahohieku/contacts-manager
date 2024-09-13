@@ -1,3 +1,4 @@
+import { FileEntity } from '../../files/entities/file.entity';
 import { Address } from '../../addresses/entities/address.entity';
 import { Email } from '../../emails/entities/email.entity';
 import { Phone } from '../../phones/entities/phone.entity';
@@ -13,6 +14,7 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
@@ -42,8 +44,12 @@ export class Contact extends EntityBase {
   @Column({ nullable: true, type: 'date' })
   anniversary?: Date;
 
-  @Column({ nullable: true, type: 'varchar', length: 100 })
-  avatar?: string | null;
+  @OneToOne(() => FileEntity, (file) => file.owner, {
+    nullable: true,
+    cascade: true,
+    eager: true,
+  })
+  avatar?: FileEntity | null;
 
   @Column({ nullable: true, type: 'text' })
   notes?: string | null;

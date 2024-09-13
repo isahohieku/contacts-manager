@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Allow } from 'class-validator';
-import { EntityBase } from 'src/utils/entity-helper';
+import { EntityBase } from '../../utils/entity-helper';
 import appConfig from '../../configs/app.config';
 import { User } from '../../users/entity/user.entity';
 
