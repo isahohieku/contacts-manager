@@ -15,8 +15,9 @@ import { genericFindManyWithPagination } from '../utils/infinity-pagination';
 import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 import { SearchTypes } from '../utils/types/contacts.type';
 import { FilesService } from '../files/files.service';
+import { allProperties, searchTypes } from '../utils/contact/helper';
 
-// TODO: Bulk import and export of contacts
+// TODO: Bulk import of contacts
 
 @Injectable()
 export class ContactsService {
@@ -43,39 +44,6 @@ export class ContactsService {
     type: SearchTypes,
     user: User,
   ) {
-    // TODO: Move this properties to utils
-    const contactProperties = [
-      'firstName',
-      'job_title',
-      'lastName',
-      'notes',
-      'organization',
-    ];
-
-    const addressProperties = [
-      'addresses.address_type.name',
-      'addresses.city',
-      'addresses.street',
-      'addresses.country.code',
-    ];
-
-    const emailProperties = ['emails.email_address', 'emails.email_type.name'];
-
-    const phoneProperties = [
-      'phone_numbers.phone_number',
-      'phone_numbers.phone_type.name',
-    ];
-
-    const tagProperties = ['tags.name'];
-
-    const searchTypes = {
-      [SearchTypes.CONTACT]: contactProperties,
-      [SearchTypes.ADDRESS]: addressProperties,
-      [SearchTypes.EMAIL]: emailProperties,
-      [SearchTypes.PHONE_NUMBER]: phoneProperties,
-      [SearchTypes.TAG]: tagProperties,
-    };
-
     const baseQuery: FindManyOptions<Contact> = {
       where: {
         owner: {
@@ -84,15 +52,8 @@ export class ContactsService {
       },
     };
 
+    // TODO: Improve search performance
     if (search && !type) {
-      const allProperties = [
-        ...contactProperties,
-        ...addressProperties,
-        ...emailProperties,
-        ...phoneProperties,
-        ...tagProperties,
-      ];
-
       baseQuery.where = [
         ...allProperties.map((property) => {
           const query = {

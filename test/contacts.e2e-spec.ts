@@ -164,7 +164,7 @@ describe('ContactController (e2e)', () => {
       });
   });
 
-  it(`should get a user's contact with GET /api/contacts/${contactData.id} - `, () => {
+  it(`should get a user's contact with GET /api/contacts/${contactData.id}`, () => {
     return request(app.getHttpServer())
       .get(`/api/contacts/${contactData.id}`)
       .set({
@@ -185,6 +185,78 @@ describe('ContactController (e2e)', () => {
         expect(typeof new Date(body.createdAt).getTime()).toBe('number');
         expect(typeof new Date(body.updatedAt).getTime()).toBe('number');
         contactData.id = body.id;
+      });
+  });
+
+  it(`should get user's contacts searched by name with GET /api/contacts?search=xxxx`, () => {
+    return request(app.getHttpServer())
+      .get(`/api/contacts?search=${contactData.firstName.substring(0, 3)}`)
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.OK)
+      .then(({ body }) => {
+        expect(body).toHaveProperty('data');
+        expect(body).toHaveProperty('metadata');
+        const { data, metadata } = body;
+        expect(Array.isArray(data)).toBeTruthy();
+
+        const firstItem = data[0];
+        expect(typeof firstItem).toBe('object');
+        expect(firstItem.firstName).toBe(contactData.firstName);
+        expect(firstItem.lastName).toBe(contactData.lastName);
+        expect(firstItem.organization).toBe(contactData.organization);
+        expect(firstItem.job_title).toBe(contactData.job_title);
+        expect(typeof new Date(firstItem.birthday).getTime()).toBe('number');
+        expect(typeof new Date(firstItem.anniversary).getTime()).toBe('number');
+        expect(firstItem).toHaveProperty('id');
+        expect(typeof firstItem.id).toBe('number');
+        expect(firstItem.deletedAt).toBeNull();
+        expect(typeof new Date(firstItem.createdAt).getTime()).toBe('number');
+        expect(typeof new Date(firstItem.updatedAt).getTime()).toBe('number');
+        // Test metadata
+        expect(typeof metadata.page).toBe('number');
+        expect(typeof metadata.items_per_page).toBe('number');
+        expect(typeof metadata.total_items).toBe('number');
+        expect(typeof metadata.total_pages).toBe('number');
+        expect(typeof metadata.hasNextPage).toBe('boolean');
+      });
+  });
+
+  it(`should get user's contacts searched by name with GET /api/contacts?search=xxxx&type=contact`, () => {
+    return request(app.getHttpServer())
+      .get(
+        `/api/contacts?search=${contactData.firstName.substring(0, 3)}&type=contact`,
+      )
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.OK)
+      .then(({ body }) => {
+        expect(body).toHaveProperty('data');
+        expect(body).toHaveProperty('metadata');
+        const { data, metadata } = body;
+        expect(Array.isArray(data)).toBeTruthy();
+
+        const firstItem = data[0];
+        expect(typeof firstItem).toBe('object');
+        expect(firstItem.firstName).toBe(contactData.firstName);
+        expect(firstItem.lastName).toBe(contactData.lastName);
+        expect(firstItem.organization).toBe(contactData.organization);
+        expect(firstItem.job_title).toBe(contactData.job_title);
+        expect(typeof new Date(firstItem.birthday).getTime()).toBe('number');
+        expect(typeof new Date(firstItem.anniversary).getTime()).toBe('number');
+        expect(firstItem).toHaveProperty('id');
+        expect(typeof firstItem.id).toBe('number');
+        expect(firstItem.deletedAt).toBeNull();
+        expect(typeof new Date(firstItem.createdAt).getTime()).toBe('number');
+        expect(typeof new Date(firstItem.updatedAt).getTime()).toBe('number');
+        // Test metadata
+        expect(typeof metadata.page).toBe('number');
+        expect(typeof metadata.items_per_page).toBe('number');
+        expect(typeof metadata.total_items).toBe('number');
+        expect(typeof metadata.total_pages).toBe('number');
+        expect(typeof metadata.hasNextPage).toBe('boolean');
       });
   });
 
@@ -235,6 +307,40 @@ describe('ContactController (e2e)', () => {
         const tag = body.tags[0];
         expect(tag.name).toBe(tagData.name);
         expect(tag.id).toBe(tagData.id);
+      });
+  });
+
+  it(`should export a user's contact with GET /api/contacts/export?id=${contactData.id}`, () => {
+    return request(app.getHttpServer())
+      .get(`/api/contacts/export?id=${contactData.id}`)
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.OK);
+  });
+
+  it("should export a user's contacts with GET /api/contacts/export", () => {
+    return request(app.getHttpServer())
+      .get('/api/contacts/export')
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.OK);
+  });
+
+  it("should throw error if user tries to export a non-existing user's contacts with GET /api/contacts/export?id=-1", () => {
+    return request(app.getHttpServer())
+      .get('/api/contacts/export?id=-1')
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
+      .then(({ body }) => {
+        expect(body.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+        expect(body.error).toBeTruthy();
+        expect(body.errors.contact).toBe(
+          ContactErrorCodes.CSV_GENERATION_FAILED,
+        );
       });
   });
 
