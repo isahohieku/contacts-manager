@@ -92,4 +92,13 @@ describe('FileController (e2e)', () => {
         expect(body.errors.file).toBe(FilesErrorCodes.NO_FILE);
       });
   });
+
+  it("should remove a file with DELETE /api/files/remove/${'id'}", () => {
+    return request(app.getHttpServer())
+      .delete(`/api/files/remove/${file.id}`)
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.OK);
+  });
 });

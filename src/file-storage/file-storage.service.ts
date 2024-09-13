@@ -44,7 +44,7 @@ export class FileStorageService {
 
   private removeFromLocalStorage(filePath: string) {
     const file = filePath.split('/').pop();
-    const fullPath = path.join(__dirname, '..', '..', '..', 'files', file);
+    const fullPath = path.join(__dirname, '..', '..', 'files', file);
 
     fs.unlink(fullPath, (err) => {
       if (err) {
