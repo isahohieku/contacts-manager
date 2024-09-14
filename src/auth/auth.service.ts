@@ -112,19 +112,6 @@ export class AuthService {
   }
 
   async register(dto: AuthRegisterLoginDto): Promise<User> {
-    const found = await this.usersService.findOne({ email: dto.email }, false);
-
-    if (found) {
-      const errors = {
-        email: UserErrorCodes.ALREADY_EXISTS,
-      };
-      throw handleError(
-        HttpStatus.CONFLICT,
-        ERROR_MESSAGES.ALREADY_EXIST('User', 'email'),
-        errors,
-      );
-    }
-
     const user = await this.usersService.create({
       ...dto,
       email: dto.email,
@@ -168,33 +155,22 @@ export class AuthService {
       false,
     );
 
-    if (!user) {
-      const errors = {
-        hash: UserErrorCodes.HASH_NOT_FOUND,
-      };
-      throw handleError(
-        HttpStatus.NOT_FOUND,
-        ERROR_MESSAGES.HASH_NOT_FOUND,
-        errors,
-      );
-    } else {
-      const hash = crypto
-        .createHash('sha256')
-        .update(randomStringGenerator())
-        .digest('hex');
+    const hash = crypto
+      .createHash('sha256')
+      .update(randomStringGenerator())
+      .digest('hex');
 
-      await this.forgotService.create({
+    await this.forgotService.create({
+      hash,
+      user,
+    });
+
+    await this.mailService.forgotPassword({
+      to: email,
+      data: {
         hash,
-        user,
-      });
-
-      await this.mailService.forgotPassword({
-        to: email,
-        data: {
-          hash,
-        },
-      });
-    }
+      },
+    });
   }
 
   async resetPassword(hash: string, password: string): Promise<void> {

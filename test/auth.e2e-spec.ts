@@ -172,7 +172,7 @@ describe('AuthController (e2e)', () => {
       });
   });
 
-  it('should not log user in if user entered wrond password with POST /api/auth/email/login', () => {
+  it('should not log user in if user entered wrong password with POST /api/auth/email/login', () => {
     return request(app.getHttpServer())
       .post('/api/auth/email/login')
       .send({
@@ -333,6 +333,29 @@ describe('AuthController (e2e)', () => {
         expect(body.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
         expect(typeof body.errors).toBe('object');
         expect(body.errors.oldPassword).toBe(UserErrorCodes.MISSING_PASSWORD);
+      });
+  });
+
+  it('should throw error if user user a different provider to login with POST /api/auth/email/login', async () => {
+    await User.save({
+      ...loggedInUser.user,
+      provider: 'facebook',
+    });
+    return request(app.getHttpServer())
+      .post('/api/auth/email/login')
+      .send({
+        email: userSignUpDetails.email,
+        password: userSignUpDetails.password,
+      })
+      .set({
+        Authorization: `Bearer ${loggedInUser.token}`,
+      })
+      .expect(HttpStatus.UNPROCESSABLE_ENTITY)
+      .then(({ body }) => {
+        expect(typeof body).toBe('object');
+        expect(body.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
+        expect(typeof body.errors).toBe('object');
+        expect(body.errors.provider).toBe(UserErrorCodes.INVALID_PROVIDER);
       });
   });
 
