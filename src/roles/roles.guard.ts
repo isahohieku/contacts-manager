@@ -1,5 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  HttpStatus,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { handleError } from '../utils/handlers/error.handler';
+import { UserErrorCodes } from '../utils/constants/users/errors';
+import { ERROR_MESSAGES } from '../utils/constants/generic/errors';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -10,11 +18,15 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
       context.getHandler(),
     ]);
-    if (!roles.length) {
-      return true;
-    }
+
     const request = context.switchToHttp().getRequest();
 
-    return roles.includes(request.user?.role?.id);
+    if (roles.includes(request.user?.role?.id)) {
+      return true;
+    }
+
+    throw handleError(HttpStatus.FORBIDDEN, ERROR_MESSAGES.FORBIDDEN_RESOURCE, {
+      user: UserErrorCodes.FORBIDDEN_RESOURCE,
+    });
   }
 }

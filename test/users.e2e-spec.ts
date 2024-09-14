@@ -208,6 +208,23 @@ describe('UserController (e2e)', () => {
       });
   });
 
+  it('should not allow none admin user to fetch another user with GET /api/users/0', () => {
+    const normalUserToken = jwt.sign(
+      normalUserDbData,
+      configService.get('auth.secret'),
+    );
+    return request(app.getHttpServer())
+      .get('/api/users/0')
+      .set({
+        Authorization: `Bearer ${normalUserToken}`,
+      })
+      .expect(HttpStatus.FORBIDDEN)
+      .then(({ body }) => {
+        expect(body.status).toBe(HttpStatus.FORBIDDEN);
+        expect(body.errors.user).toBe(UserErrorCodes.FORBIDDEN_RESOURCE);
+      });
+  });
+
   it(`should update a user with PATCH /api/users/${normalUserDbData?.id}`, () => {
     const user = {
       firstName: 'Jin',
