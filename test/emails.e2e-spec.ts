@@ -117,6 +117,23 @@ describe('EmailController (e2e)', () => {
       });
   });
 
+  it('should not create a new email for contact if the email already exists on the contact with POST /api/contacts/emails', () => {
+    return request(app.getHttpServer())
+      .post('/api/contacts/emails')
+      .send({ ...emailData })
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.UNPROCESSABLE_ENTITY)
+      .then(({ body }) => {
+        expect(typeof body).toBe('object');
+        expect(body.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
+        expect(body).toHaveProperty('errors');
+        expect(body.errors).toHaveProperty('email_address');
+        expect(body.errors.email_address).toBe(EmailErrorCodes.ALREADY_EXISTS);
+      });
+  });
+
   it(`should get a contact email with GET /api/contacts/emails/${emailData.id}`, () => {
     return request(app.getHttpServer())
       .get(`/api/contacts/emails/${emailData.id}`)

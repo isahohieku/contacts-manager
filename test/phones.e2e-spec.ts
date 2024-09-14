@@ -77,9 +77,9 @@ describe('PhoneController (e2e)', () => {
       });
   });
 
-  it('should create a new phone number for a contact with POST /api/contacts/phones', () => {
+  it('should create a new phone number for a contact with POST /api/contacts/phones?validatePhone=true', () => {
     return request(app.getHttpServer())
-      .post('/api/contacts/phones')
+      .post('/api/contacts/phones?validatePhone=true')
       .send({ ...phoneData, contact: { id: contactData.id } })
       .set({
         Authorization: `Bearer ${token}`,
@@ -114,6 +114,23 @@ describe('PhoneController (e2e)', () => {
         expect(body).toHaveProperty('errors');
         expect(body.errors).toHaveProperty('contact');
         expect(body.errors.contact).toBe(ContactErrorCodes.NOT_FOUND);
+      });
+  });
+
+  it('should not create a new phone number for a contact if number is invalid and validatePhone flag is true with POST /api/contacts/phones?validatePhone=true', () => {
+    return request(app.getHttpServer())
+      .post('/api/contacts/phones?validatePhone=true')
+      .send({ ...phoneData, phone_number: '661937767', contact: { id: 0 } })
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.UNPROCESSABLE_ENTITY)
+      .then(({ body }) => {
+        expect(typeof body).toBe('object');
+        expect(body.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
+        expect(body).toHaveProperty('errors');
+        expect(body.errors).toHaveProperty('phone');
+        expect(body.errors.phone).toBe(PhoneNumberErrorCodes.INVALID);
       });
   });
 

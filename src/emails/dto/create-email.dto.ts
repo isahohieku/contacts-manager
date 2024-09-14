@@ -3,14 +3,14 @@ import { IsEmail, IsNotEmpty, IsOptional, Validate } from 'class-validator';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { EmailType } from '../../email-types/entities/email-type.entity';
 import { IsUniqueToContact } from '../../utils/validators/is-unique-to-contact.validator';
-import { ERROR_MESSAGES } from '../../utils/constants/generic/errors';
 import { Email } from '../entities/email.entity';
+import { EmailErrorCodes } from '../../utils/constants/emails/errors';
 
 export class CreateEmailDto {
   @ApiProperty({ example: 'isahohieku@gmail.com' })
   @IsEmail({}, { message: 'Email address is required' })
   @Validate(IsUniqueToContact, [Email], {
-    message: ERROR_MESSAGES.ALREADY_EXISTS_MAIN('Email'),
+    message: EmailErrorCodes.ALREADY_EXISTS,
   })
   email_address: string;
 
