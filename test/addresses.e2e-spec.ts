@@ -4,15 +4,15 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/contacts/entities/contact.entity';
-import { Address } from '../src/addresses/entities/address.entity';
+import { Contact } from '../src/modules/contacts/entities/contact.entity';
+import { Address } from '../src/modules/addresses/entities/address.entity';
 import { userData } from './mock-data/user';
 import { contactData } from './mock-data/contact';
 import { addressData } from './mock-data/address';
-import { ContactErrorCodes } from '../src/utils/constants/contacts/errors';
-import { AddressErrorCodes } from '../src/utils/constants/addresses/errors';
-import { User } from '../src/users/entity/user.entity';
-import validationOptions from '../src/utils/validation-options';
+import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
+import { AddressErrorCodes } from '../src/shared/utils/constants/addresses/errors';
+import { User } from '../src/modules/users/entity/user.entity';
+import validationOptions from '../src/common/pipes/validation-options.pipe';
 
 describe('AddressController (e2e)', () => {
   let app: INestApplication;

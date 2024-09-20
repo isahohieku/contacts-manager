@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
 import { userData } from './mock-data/user';
-import { User } from '../src/users/entity/user.entity';
+import { User } from '../src/modules/users/entity/user.entity';
 
 process.env.FILE_DRIVER = 's3';
 

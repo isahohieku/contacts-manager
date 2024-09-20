@@ -4,15 +4,15 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/contacts/entities/contact.entity';
-import { Email } from '../src/emails/entities/email.entity';
+import { Contact } from '../src/modules/contacts/entities/contact.entity';
+import { Email } from '../src/modules/emails/entities/email.entity';
 import { userData } from './mock-data/user';
 import { contactData } from './mock-data/contact';
 import { emailData } from './mock-data/email';
-import { User } from '../src/users/entity/user.entity';
-import { ContactErrorCodes } from '../src/utils/constants/contacts/errors';
-import { EmailErrorCodes } from '../src/utils/constants/emails/errors';
-import validationOptions from '../src/utils/validation-options';
+import { User } from '../src/modules/users/entity/user.entity';
+import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
+import { EmailErrorCodes } from '../src/shared/utils/constants/emails/errors';
+import validationOptions from '../src/common/pipes/validation-options.pipe';
 
 describe('EmailController (e2e)', () => {
   let app: INestApplication;

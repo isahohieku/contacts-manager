@@ -4,14 +4,14 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/contacts/entities/contact.entity';
+import { Contact } from '../src/modules/contacts/entities/contact.entity';
 import { userData } from './mock-data/user';
 import { contactData } from './mock-data/contact';
-import { ContactErrorCodes } from '../src/utils/constants/contacts/errors';
-import { User } from '../src/users/entity/user.entity';
-import { Tag } from '../src/tags/entities/tag.entity';
+import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
+import { User } from '../src/modules/users/entity/user.entity';
+import { Tag } from '../src/modules/tags/entities/tag.entity';
 import { tagData } from './mock-data/tag';
-import validationOptions from '../src/utils/validation-options';
+import validationOptions from '../src/common/pipes/validation-options.pipe';
 
 describe('ContactController (e2e)', () => {
   let app: INestApplication;

@@ -1,6 +1,6 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
-import { Role } from '../../roles/entities/role.entity';
+import { Role } from '../../modules/roles/entities/role.entity';
 
 export default class CreateRole implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {

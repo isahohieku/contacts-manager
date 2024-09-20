@@ -4,15 +4,15 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/contacts/entities/contact.entity';
-import { Phone } from '../src/phones/entities/phone.entity';
+import { Contact } from '../src/modules/contacts/entities/contact.entity';
+import { Phone } from '../src/modules/phones/entities/phone.entity';
 import { userData } from './mock-data/user';
 import { contactData } from './mock-data/contact';
 import { phoneData } from './mock-data/phone';
-import { User } from '../src/users/entity/user.entity';
-import { ContactErrorCodes } from '../src/utils/constants/contacts/errors';
-import { PhoneNumberErrorCodes } from '../src/utils/constants/phone-numbers/errors';
-import validationOptions from '../src/utils/validation-options';
+import { User } from '../src/modules/users/entity/user.entity';
+import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
+import { PhoneNumberErrorCodes } from '../src/shared/utils/constants/phone-numbers/errors';
+import validationOptions from '../src/common/pipes/validation-options.pipe';
 
 describe('PhoneController (e2e)', () => {
   let app: INestApplication;

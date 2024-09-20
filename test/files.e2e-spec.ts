@@ -5,9 +5,9 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
 import { userData } from './mock-data/user';
-import { User } from '../src/users/entity/user.entity';
-import { FilesErrorCodes } from '../src/utils/constants/files/errors';
-import { FileEntity } from '../src/files/entities/file.entity';
+import { User } from '../src/modules/users/entity/user.entity';
+import { FilesErrorCodes } from '../src/shared/utils/constants/files/errors';
+import { FileEntity } from '../src/modules/files/entities/file.entity';
 
 describe('FileController (e2e)', () => {
   let app: INestApplication;

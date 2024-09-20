@@ -8,18 +8,18 @@ import appConfig from './configs/app.config';
 import fileConfig from './configs/file.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
-import { UsersModule } from './users/users.module';
-import { ContactsModule } from './contacts/contacts.module';
-import { AuthModule } from './auth/auth.module';
-import { MailConfigService } from './mail/mail-config.service';
-import { ForgotModule } from './forgot/forgot.module';
-import { MailModule } from './mail/mail.module';
-import { PhonesModule } from './phones/phones.module';
-import { EmailsModule } from './emails/emails.module';
-import { AddressesModule } from './addresses/addresses.module';
-import { TagsModule } from './tags/tags.module';
-import { FilesModule } from './files/files.module';
-import { FileStorageModule } from './file-storage/file-storage.module';
+import { UsersModule } from './modules/users/users.module';
+import { ContactsModule } from './modules/contacts/contacts.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { MailConfigService } from './modules/mail/mail-config.service';
+import { ForgotModule } from './modules/forgot/forgot.module';
+import { MailModule } from './modules/mail/mail.module';
+import { PhonesModule } from './modules/phones/phones.module';
+import { EmailsModule } from './modules/emails/emails.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
+import { TagsModule } from './modules/tags/tags.module';
+import { FilesModule } from './modules/files/files.module';
+import { FileStorageModule } from './modules/file-storage/file-storage.module';
 
 @Module({
   imports: [

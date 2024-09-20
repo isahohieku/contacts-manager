@@ -1,7 +1,7 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
-import { Status } from '../../statuses/entities/status.entity';
-import { StatusEnum } from '../../statuses/statuses.enum';
+import { Status } from '../../modules/statuses/entities/status.entity';
+import { StatusEnum } from '../../modules/statuses/statuses.enum';
 
 export default class CreateStatus implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {

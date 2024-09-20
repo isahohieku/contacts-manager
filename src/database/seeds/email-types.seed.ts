@@ -1,7 +1,7 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
-import { EmailType } from '../../email-types/entities/email-type.entity';
-import { EmailTypeEnum } from '../../email-types/email-type.enum';
+import { EmailType } from '../../modules/email-types/entities/email-type.entity';
+import { EmailTypeEnum } from '../../modules/email-types/email-type.enum';
 
 export default class CreateEmailType implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {

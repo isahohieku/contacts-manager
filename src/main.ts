@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { SerializerInterceptor } from './utils/serializer.interceptor';
-import validationOptions from './utils/validation-options';
+import { SerializerInterceptor } from './common/interceptors/serializer.interceptor';
+import validationOptions from './common/pipes/validation-options.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

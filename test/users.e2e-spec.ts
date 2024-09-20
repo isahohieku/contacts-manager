@@ -5,12 +5,12 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../src/users/entity/user.entity';
+import { User } from '../src/modules/users/entity/user.entity';
 import { userData, userSignUpDetails } from './mock-data/admin-user';
 import { userData as normalUser, password } from './mock-data/user';
-import { UserErrorCodes } from '../src/utils/constants/users/errors';
-import { SerializerInterceptor } from '../src/utils/serializer.interceptor';
-import validationOptions from '../src/utils/validation-options';
+import { UserErrorCodes } from '../src/shared/utils/constants/users/errors';
+import { SerializerInterceptor } from '../src/common/interceptors/serializer.interceptor';
+import validationOptions from '../src/common/pipes/validation-options.pipe';
 
 describe('UserController (e2e)', () => {
   let app: INestApplication;

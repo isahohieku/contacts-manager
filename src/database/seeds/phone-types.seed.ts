@@ -1,7 +1,7 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
-import { PhoneType } from '../../phone-types/entities/phone-type.entity';
-import { PhoneTypeEnum } from '../../phone-types/phone-type.enum';
+import { PhoneType } from '../../modules/phone-types/entities/phone-type.entity';
+import { PhoneTypeEnum } from '../../modules/phone-types/phone-type.enum';
 
 export default class CreatePhoneType implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {
