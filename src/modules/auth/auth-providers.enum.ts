@@ -1,3 +1,3 @@
 export enum AuthProvidersEnum {
-  email = 'email',
+  EMAIL = 'email',
 }

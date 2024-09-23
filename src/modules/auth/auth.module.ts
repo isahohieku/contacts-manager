@@ -8,6 +8,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from '../users/users.module';
 import { ForgotModule } from '../forgot/forgot.module';
 import { MailModule } from '../mail/mail.module';
+import { AuthProvider } from './entities/auth-providers.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { MailModule } from '../mail/mail.module';
         },
       }),
     }),
+    TypeOrmModule.forFeature([AuthProvider]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
