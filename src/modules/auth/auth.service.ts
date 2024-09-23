@@ -20,19 +20,29 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
 import { handleError } from '../../shared/utils/handlers/error.handler';
 import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { AuthProvider } from './entities/auth-providers.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
-// TODO: Add refresh token
 // TODO: Generate documentations
+// TODO: Refactor auth login/signup based on auth providers
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(AuthProvider)
+    private readonly authProviderssRepository: Repository<AuthProvider>,
     private jwtService: JwtService,
     private usersService: UsersService,
     private forgotService: ForgotService,
     private mailService: MailService,
   ) {}
 
+  async getProviders() {
+    return this.authProviderssRepository.find({ where: { active: true } });
+  }
+
+  // TODO: Improve login to not differentiate between admin and user
   async validateLogin(
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
@@ -62,7 +72,7 @@ export class AuthService {
       );
     }
 
-    if (user.provider !== AuthProvidersEnum.email) {
+    if (user.provider !== AuthProvidersEnum.EMAIL) {
       const errors = {
         provider: UserErrorCodes.INVALID_PROVIDER,
       };

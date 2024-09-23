@@ -28,6 +28,12 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class AuthController {
   constructor(public service: AuthService) {}
 
+  @Get('providers')
+  @HttpCode(HttpStatus.OK)
+  public async getProviders() {
+    return this.service.getProviders();
+  }
+
   @Post('email/login')
   @HttpCode(HttpStatus.OK)
   public async login(@Body() loginDto: AuthEmailLoginDto) {

@@ -1,6 +1,7 @@
-import { IsEmail, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { AuthProvider } from '../entities/auth-providers.entity';
 
 export class AuthEmailLoginDto {
   @ApiProperty({ example: 'john.doe@example.com' })
@@ -11,4 +12,8 @@ export class AuthEmailLoginDto {
   @ApiProperty()
   @MinLength(6, { message: 'A valid password is required' })
   password: string;
+
+  @ApiProperty({ type: AuthProvider, example: { id: 1 } })
+  @IsOptional()
+  provider = { id: 1 };
 }
