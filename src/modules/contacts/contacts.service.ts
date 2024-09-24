@@ -4,7 +4,9 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import set from 'lodash/set';
+import stream from 'stream';
 import { Parser } from '@json2csv/plainjs';
+import { CsvParser, ParsedData } from 'nest-csv-parser';
 import { FindManyOptions, ILike, Repository } from 'typeorm';
 import { User } from '../users/entity/user.entity';
 import { handleError } from '../../shared/utils/handlers/error.handler';
@@ -16,16 +18,19 @@ import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
 import { SearchTypes } from '../../shared/utils/types/contacts.type';
 import { FilesService } from '../files/files.service';
 import { allProperties, searchTypes } from '../../shared/utils/contact/helper';
-
-// TODO: Bulk import of contacts
+import {
+  detectSeparator,
+  processContactCleanup,
+} from '../../shared/utils/contact/contact-cleaning-helper';
 
 @Injectable()
 export class ContactsService {
   constructor(
     @InjectRepository(Contact)
-    private contactsRepository: Repository<Contact>,
-    private tagsService: TagsService,
-    private fileService: FilesService,
+    private readonly contactsRepository: Repository<Contact>,
+    private readonly tagsService: TagsService,
+    private readonly fileService: FilesService,
+    private readonly csvParser: CsvParser,
   ) {}
 
   async create(user: User, createContactDto: CreateContactDto) {
@@ -177,6 +182,54 @@ export class ContactsService {
     } catch (error) {
       const errors = {
         contact: ContactErrorCodes.CSV_GENERATION_FAILED,
+      };
+      throw handleError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        errors,
+      );
+    }
+  }
+
+  async importContacts(user: User, file) {
+    // Creates an initial buffer stream for separator detection
+    const bufferStreamForSeparator = new stream.PassThrough();
+    bufferStreamForSeparator.end(file instanceof Buffer ? file : file.buffer);
+
+    // Creates a second buffer stream for CSV parsing
+    const bufferStreamForParser = new stream.PassThrough();
+    bufferStreamForParser.end(file instanceof Buffer ? file : file.buffer);
+
+    const separator = await detectSeparator(bufferStreamForSeparator);
+
+    try {
+      const { list: contacts }: ParsedData<Contact> =
+        await this.csvParser.parse(bufferStreamForParser, Contact, null, null, {
+          separator,
+        });
+
+      const parsedContacts = processContactCleanup<Contact[]>(contacts);
+
+      const contactsWithOwner = parsedContacts.map((contact) => ({
+        ...contact,
+        owner: user,
+      }));
+
+      // TODO: Improve bulk insert performance by queueing multiple inserts and sending done feedback via SSE
+      await this.contactsRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Contact)
+        .values(contactsWithOwner[contactsWithOwner.length - 1])
+        .orIgnore()
+        .execute();
+
+      return {
+        message: 'Contacts imported successfully',
+      };
+    } catch (error) {
+      const errors = {
+        contact: ContactErrorCodes.CSV_IMPORT_FAILED,
       };
       throw handleError(
         HttpStatus.INTERNAL_SERVER_ERROR,

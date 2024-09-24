@@ -10,9 +10,13 @@ import { TagsService } from '../tags/tags.service';
 import { FileStorageService } from '../file-storage/file-storage.service';
 import { FilesService } from '../files/files.service';
 import { FileEntity } from '../files/entities/file.entity';
+import { CsvModule } from 'nest-csv-parser';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Phone, Contact, Tag, FileEntity])],
+  imports: [
+    TypeOrmModule.forFeature([Phone, Contact, Tag, FileEntity]),
+    CsvModule,
+  ],
   controllers: [PhonesController],
   providers: [
     PhonesService,

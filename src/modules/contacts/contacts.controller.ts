@@ -12,15 +12,26 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { Response as Res } from 'express';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from '../users/entity/user.entity';
 import { SearchTypes } from '../../shared/utils/types/contacts.type';
+import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { memoryStorage } from 'multer';
+import { fileFilter } from '../../shared/utils/file-filter';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -79,6 +90,32 @@ export class ContactsController {
     res.header('Content-Type', 'text/csv');
     res.attachment('contacts.csv');
     res.send(csvContacts);
+  }
+
+  @Post('import')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter,
+    }),
+  )
+  async importContacts(@Request() request, @UploadedFile() file) {
+    return await this.contactsService.importContacts(
+      request.user as User,
+      file,
+    );
   }
 
   @Get(':id')
