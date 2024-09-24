@@ -42,9 +42,9 @@ describe('FileController (e2e)', () => {
     await app.close();
   });
 
-  it('should store a valid image successfully with POST /api/files/upload', () => {
+  it('should store a valid image successfully with POST /api/files/upload?type=image', () => {
     return request(app.getHttpServer())
-      .post('/api/files/upload')
+      .post('/api/files/upload?type=image')
       .attach('file', 'test/mock-data/file.jpg')
       .set({
         Authorization: `Bearer ${token}`,
@@ -58,11 +58,11 @@ describe('FileController (e2e)', () => {
       });
   });
 
-  it('should not store if an invalid image was sent with POST /api/files/upload', () => {
+  it('should not store if an invalid image was sent with POST /api/files/upload?type=image', () => {
     const buffer = Buffer.from('invalid data');
 
     return request(app.getHttpServer())
-      .post('/api/files/upload')
+      .post('/api/files/upload?type=image')
       .attach('file', buffer, 'file.invalid')
       .set({
         Authorization: `Bearer ${token}`,
@@ -77,9 +77,9 @@ describe('FileController (e2e)', () => {
       });
   });
 
-  it('should return error if no image was sent with POST /api/files/upload', () => {
+  it('should return error if no image was sent with POST /api/files/upload?type=image', () => {
     return request(app.getHttpServer())
-      .post('/api/files/upload')
+      .post('/api/files/upload?type=image')
       .set({
         Authorization: `Bearer ${token}`,
       })
