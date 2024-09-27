@@ -12,12 +12,12 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { EntityUser } from '../../../shared/entities/entity-helper';
-import { AuthProvidersEnum } from '../../auth/auth-providers.enum';
 import { Role } from '../../roles/entities/role.entity';
 import { Status } from '../../statuses/entities/status.entity';
 import { Tag } from '../../tags/entities/tag.entity';
 import { Country } from '../../countries/entities/country.entity';
 import { FileEntity } from '../../files/entities/file.entity';
+import { AuthProvider } from '../../auth/entities/auth-providers.entity';
 
 @Entity('users')
 export class User extends EntityUser {
@@ -49,8 +49,10 @@ export class User extends EntityUser {
     }
   }
 
-  @Column({ default: AuthProvidersEnum.email })
-  provider: string;
+  @ManyToOne(() => AuthProvider, {
+    eager: true,
+  })
+  provider?: AuthProvider;
 
   @Index()
   @Column({ nullable: true })

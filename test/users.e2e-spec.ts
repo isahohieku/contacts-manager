@@ -54,9 +54,9 @@ describe('UserController (e2e)', () => {
     await app.close();
   });
 
-  it('should log admin user in with POST /api/auth/admin/email/login', () => {
+  it('should log admin user in with POST /api/auth/admin/login', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/admin/email/login')
+      .post('/api/auth/admin/login')
       .send({
         email: userSignUpDetails.email,
         password: userSignUpDetails.password,
@@ -69,7 +69,7 @@ describe('UserController (e2e)', () => {
         expect(user.email).toBe(userSignUpDetails.email);
         expect(user.firstName).toBe(userSignUpDetails.firstName);
         expect(user.lastName).toBe(userSignUpDetails.lastName);
-        const { role, status } = user;
+        const { role, status, provider } = user;
         expect(typeof role).toBe('object');
         expect(role.id).toBe(1);
         expect(typeof status).toBe('object');
@@ -78,13 +78,13 @@ describe('UserController (e2e)', () => {
         expect(typeof new Date(user.updatedAt).getTime()).toBe('number');
         expect(user.deletedAt).toBeNull();
         expect(typeof user.id).toBe('number');
-        expect(user.provider).toBe('email');
+        expect(typeof provider).toBe('object');
+        expect(provider.id).toBe(1);
       });
   });
 
   it('should create a new user with POST /api/users', () => {
     const payload = { ...normalUser, password };
-    delete payload.provider;
     return request(app.getHttpServer())
       .post('/api/users')
       .send(payload)
@@ -101,6 +101,8 @@ describe('UserController (e2e)', () => {
         expect(body.deletedAt).toBeNull();
         expect(typeof new Date(body.createdAt).getTime()).toBe('number');
         expect(typeof new Date(body.updatedAt).getTime()).toBe('number');
+        expect(typeof body.provider).toBe('object');
+        expect(body.provider.id).toBe(1);
         normalUserDbData = body;
       });
   });

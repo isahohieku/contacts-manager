@@ -34,19 +34,19 @@ export class AuthController {
     return this.service.getProviders();
   }
 
-  @Post('email/login')
+  @Post('login')
   @HttpCode(HttpStatus.OK)
   public async login(@Body() loginDto: AuthEmailLoginDto) {
     return this.service.validateLogin(loginDto, false);
   }
 
-  @Post('admin/email/login')
+  @Post('admin/login')
   @HttpCode(HttpStatus.OK)
   public async adminLogin(@Body() loginDTO: AuthEmailLoginDto) {
     return this.service.validateLogin(loginDTO, true);
   }
 
-  @Post('email/register')
+  @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() createUserDto: AuthRegisterLoginDto) {
     return this.service.register(createUserDto);

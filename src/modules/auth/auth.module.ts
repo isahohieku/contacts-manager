@@ -10,6 +10,7 @@ import { ForgotModule } from '../forgot/forgot.module';
 import { MailModule } from '../mail/mail.module';
 import { AuthProvider } from './entities/auth-providers.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthProvidersService } from './auth-providers.service';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TypeOrmModule.forFeature([AuthProvider]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy, AuthProvidersService],
+  exports: [AuthService, AuthProvidersService],
 })
 export class AuthModule {}

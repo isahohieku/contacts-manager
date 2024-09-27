@@ -16,7 +16,10 @@ export default class CreateAuthProvider implements Seeder {
         .createQueryBuilder()
         .insert()
         .into(AuthProvider)
-        .values([{ name: AuthProvidersEnum.EMAIL }])
+        .values([
+          { name: AuthProvidersEnum.EMAIL },
+          { name: AuthProvidersEnum.GOOGLE },
+        ])
         .execute();
     }
   }

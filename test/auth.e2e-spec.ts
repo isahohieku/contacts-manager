@@ -34,9 +34,19 @@ describe('AuthController (e2e)', () => {
     await app.close();
   });
 
-  it('should create a new user account with POST /api/auth/email/register', () => {
+  it('should get all active auth providers with GET /api/auth/providers', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/email/register')
+      .get('/api/auth/providers')
+      .expect(HttpStatus.OK)
+      .then(({ body }) => {
+        expect(Array.isArray(body)).toBe(true);
+        expect(body.length).toBeGreaterThan(0);
+      });
+  });
+
+  it('should create a new user account with POST /api/auth/register', () => {
+    return request(app.getHttpServer())
+      .post('/api/auth/register')
       .send(userSignUpDetails)
       .expect(HttpStatus.CREATED)
       .then(async ({ body }) => {
@@ -44,7 +54,7 @@ describe('AuthController (e2e)', () => {
         expect(body.email).toBe(userSignUpDetails.email);
         expect(body.firstName).toBe(userSignUpDetails.firstName);
         expect(body.lastName).toBe(userSignUpDetails.lastName);
-        const { role, status } = body;
+        const { role, status, provider } = body;
         expect(typeof role).toBe('object');
         expect(role.id).toBe(2);
         expect(typeof status).toBe('object');
@@ -53,14 +63,15 @@ describe('AuthController (e2e)', () => {
         expect(typeof new Date(body.updatedAt).getTime()).toBe('number');
         expect(body.deletedAt).toBeNull();
         expect(typeof body.id).toBe('number');
-        expect(body.provider).toBe('email');
+        expect(typeof provider).toBe('object');
+        expect(provider.id).toBe(1);
         userDbData = body;
       });
   });
 
-  it('should not create a new user account if email address already exist with POST /api/auth/email/register', () => {
+  it('should not create a new user account if email address already exist with POST /api/auth/register', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/email/register')
+      .post('/api/auth/register')
       .send(userSignUpDetails)
       .expect(HttpStatus.UNPROCESSABLE_ENTITY)
       .then(async ({ body }) => {
@@ -69,9 +80,9 @@ describe('AuthController (e2e)', () => {
       });
   });
 
-  it('should not log user in if user has not confirmed account with POST /api/auth/email/login', () => {
+  it('should not log user in if user has not confirmed account with POST /api/auth/login', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/email/login')
+      .post('/api/auth/login')
       .send({
         email: userSignUpDetails.email,
         password: userSignUpDetails.password,
@@ -111,9 +122,9 @@ describe('AuthController (e2e)', () => {
       });
   });
 
-  it('should log user in with POST /api/auth/email/login', () => {
+  it('should log user in with POST /api/auth/login', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/email/login')
+      .post('/api/auth/login')
       .send({
         email: userSignUpDetails.email,
         password: userSignUpDetails.password,
@@ -127,7 +138,7 @@ describe('AuthController (e2e)', () => {
         expect(user.email).toBe(userSignUpDetails.email);
         expect(user.firstName).toBe(userSignUpDetails.firstName);
         expect(user.lastName).toBe(userSignUpDetails.lastName);
-        const { role, status } = user;
+        const { role, status, provider } = user;
         expect(typeof role).toBe('object');
         expect(role.id).toBe(2);
         expect(typeof status).toBe('object');
@@ -136,13 +147,14 @@ describe('AuthController (e2e)', () => {
         expect(typeof new Date(user.updatedAt).getTime()).toBe('number');
         expect(user.deletedAt).toBeNull();
         expect(typeof user.id).toBe('number');
-        expect(user.provider).toBe('email');
+        expect(typeof provider).toBe('object');
+        expect(provider.id).toBe(1);
       });
   });
 
-  it('should not log user in if email is missing in payload with POST /api/auth/email/login', () => {
+  it('should not log user in if email is missing in payload with POST /api/auth/login', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/email/login')
+      .post('/api/auth/login')
       .send({
         password: userSignUpDetails.password,
       })
@@ -155,9 +167,9 @@ describe('AuthController (e2e)', () => {
       });
   });
 
-  it('should not log user in if user with email does not exist with POST /api/auth/email/login', () => {
+  it('should not log user in if user with email does not exist with POST /api/auth/login', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/email/login')
+      .post('/api/auth/login')
       .send({
         email: 'jake@email.com',
         password: userSignUpDetails.password,
@@ -172,9 +184,9 @@ describe('AuthController (e2e)', () => {
       });
   });
 
-  it('should not log user in if user entered wrong password with POST /api/auth/email/login', () => {
+  it('should not log user in if user entered wrong password with POST /api/auth/login', () => {
     return request(app.getHttpServer())
-      .post('/api/auth/email/login')
+      .post('/api/auth/login')
       .send({
         email: userSignUpDetails.email,
         password: 'wrong-password',
@@ -257,7 +269,7 @@ describe('AuthController (e2e)', () => {
         expect(body.email).toBe(userSignUpDetails.email);
         expect(body.firstName).toBe(userSignUpDetails.firstName);
         expect(body.lastName).toBe(userSignUpDetails.lastName);
-        const { role, status } = body;
+        const { role, status, provider } = body;
         expect(typeof role).toBe('object');
         expect(role.id).toBe(2);
         expect(typeof status).toBe('object');
@@ -266,7 +278,8 @@ describe('AuthController (e2e)', () => {
         expect(typeof new Date(body.updatedAt).getTime()).toBe('number');
         expect(body.deletedAt).toBeNull();
         expect(typeof body.id).toBe('number');
-        expect(body.provider).toBe('email');
+        expect(typeof provider).toBe('object');
+        expect(provider.id).toBe(1);
       });
   });
 
@@ -284,7 +297,7 @@ describe('AuthController (e2e)', () => {
       .then(({ body }) => {
         expect(body.firstName).toBe(firstName);
         expect(body.lastName).toBe(userSignUpDetails.lastName);
-        const { role, status } = body;
+        const { role, status, provider } = body;
         expect(typeof role).toBe('object');
         expect(role.id).toBe(2);
         expect(typeof status).toBe('object');
@@ -293,7 +306,8 @@ describe('AuthController (e2e)', () => {
         expect(typeof new Date(body.updatedAt).getTime()).toBe('number');
         expect(body.deletedAt).toBeNull();
         expect(typeof body.id).toBe('number');
-        expect(body.provider).toBe('email');
+        expect(typeof provider).toBe('object');
+        expect(provider.id).toBe(1);
         userSignUpDetails.firstName = firstName;
       });
   });
@@ -336,13 +350,13 @@ describe('AuthController (e2e)', () => {
       });
   });
 
-  it('should throw error if user user a different provider to login with POST /api/auth/email/login', async () => {
+  it('should throw error if user user a different provider to login with POST /api/auth/login', async () => {
     await User.save({
       ...loggedInUser.user,
-      provider: 'facebook',
+      provider: { id: 2 },
     });
     return request(app.getHttpServer())
-      .post('/api/auth/email/login')
+      .post('/api/auth/login')
       .send({
         email: userSignUpDetails.email,
         password: userSignUpDetails.password,

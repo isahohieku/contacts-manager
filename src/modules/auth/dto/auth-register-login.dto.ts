@@ -11,33 +11,37 @@ import { IsNotExist } from '../../../common/decorators/is-not-exists.decorator';
 import { Country } from '../../countries/entities/country.entity';
 import { StatusEnum } from '../../statuses/statuses.enum';
 import { RoleEnum } from '../../roles/roles.enum';
+import { AuthProvider } from '../entities/auth-providers.entity';
+import { ERROR_MESSAGES } from '../../../shared/utils/constants/generic/errors';
 
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'john.doe@example.com' })
-  @Transform(({ value }) => {
-    return value.toLowerCase().trim();
-  })
+  @Transform(({ value }) => value?.toLowerCase().trim())
+  @IsNotEmpty({ message: ERROR_MESSAGES.REQUIRED('Email') })
   @Validate(IsNotExist, ['User'], {
-    message:
-      'Failed to create account. Please try again later or contact support for assistance.',
+    message: ERROR_MESSAGES.ALREADY_EXIST('User', 'email'),
   })
-  @IsEmail({}, { message: 'A valid email address required' })
+  @IsEmail()
   email: string;
 
   @ApiProperty()
-  @MinLength(6, { message: 'A valid password is required' })
+  @MinLength(6, { message: ERROR_MESSAGES.REQUIRED('A valid password') })
   password: string;
 
   @ApiProperty({ example: 'John' })
-  @IsNotEmpty({ message: 'User first name required' })
+  @IsNotEmpty({ message: ERROR_MESSAGES.REQUIRED('First name') })
   firstName: string;
 
   @ApiProperty({ example: 'Doe' })
-  @IsNotEmpty({ message: 'User last name required' })
+  @IsNotEmpty({ message: ERROR_MESSAGES.REQUIRED('Last name') })
   lastName: string;
 
+  @ApiProperty({ type: AuthProvider, example: { id: 1 } })
+  @IsNotEmpty({ message: ERROR_MESSAGES.REQUIRED('AuthProvider') })
+  provider: AuthProvider;
+
   @ApiProperty({ type: Country, example: { id: 1 } })
-  @IsNotEmpty({ message: 'Country is required' })
+  @IsNotEmpty({ message: ERROR_MESSAGES.REQUIRED('Country') })
   country: Country;
 
   @IsOptional()

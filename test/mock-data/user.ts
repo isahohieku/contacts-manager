@@ -5,12 +5,12 @@ const base = {
   firstName: 'John',
   lastName: 'Doe',
   country: { id: 162 },
+  provider: { id: 1 },
 };
 
 export const userData = {
   ...base,
   id: undefined,
-  provider: 'email',
   role: { id: 2 },
   status: { id: 2 },
 };
