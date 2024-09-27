@@ -43,6 +43,7 @@ describe('ContactController (e2e)', () => {
 
   afterAll(async () => {
     await Contact.delete({ id: contactData.id });
+    await Contact.delete({ owner: { id: userData.id } }); // Remove the imported contact
     await Tag.delete({ id: tagData.id });
     await User.delete({ id: userData.id });
     contactData.id = undefined;
@@ -341,6 +342,31 @@ describe('ContactController (e2e)', () => {
         expect(body.errors.contact).toBe(
           ContactErrorCodes.CSV_GENERATION_FAILED,
         );
+      });
+  });
+
+  it('should import valid contacts with POST /api/contacts/import', () => {
+    return request(app.getHttpServer())
+      .post('/api/contacts/import')
+      .attach('file', 'test/mock-data/import.csv')
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.CREATED);
+  });
+
+  it('should throw error if user tries to import an invalid csv file with POST /api/contacts/import', () => {
+    return request(app.getHttpServer())
+      .post('/api/contacts/import')
+      .attach('file', 'test/mock-data/invalid-file.csv')
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
+      .then(({ body }) => {
+        expect(body.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+        expect(body.error).toBeTruthy();
+        expect(body.errors.contact).toBe(ContactErrorCodes.CSV_IMPORT_FAILED);
       });
   });
 

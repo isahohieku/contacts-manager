@@ -200,9 +200,9 @@ export class ContactsService {
     const bufferStreamForParser = new stream.PassThrough();
     bufferStreamForParser.end(file instanceof Buffer ? file : file.buffer);
 
-    const separator = await detectSeparator(bufferStreamForSeparator);
-
     try {
+      const separator = await detectSeparator(bufferStreamForSeparator);
+
       const { list: contacts }: ParsedData<Contact> =
         await this.csvParser.parse(bufferStreamForParser, Contact, null, null, {
           separator,
