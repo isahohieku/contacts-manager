@@ -25,6 +25,14 @@ import {
 
 @Injectable()
 export class ContactsService {
+  /**
+   * Initializes a new instance of the ContactsService class.
+   *
+   * @param {Repository<Contact>} contactsRepository - The repository for contacts.
+   * @param {TagsService} tagsService - The service for tags.
+   * @param {FilesService} fileService - The service for files.
+   * @param {CsvParser} csvParser - The parser for CSV data.
+   */
   constructor(
     @InjectRepository(Contact)
     private readonly contactsRepository: Repository<Contact>,
@@ -33,6 +41,13 @@ export class ContactsService {
     private readonly csvParser: CsvParser,
   ) {}
 
+  /**
+   * Creates a new contact in the database.
+   *
+   * @param {User} user - The user who owns the contact.
+   * @param {CreateContactDto} createContactDto - The data transfer object containing the contact's details.
+   * @return {Promise<Contact>} The newly created contact.
+   */
   async create(user: User, createContactDto: CreateContactDto) {
     const contact = await this.contactsRepository.save(
       this.contactsRepository.create({
@@ -43,6 +58,15 @@ export class ContactsService {
     return contact;
   }
 
+  /**
+   * Retrieves a list of contacts with pagination, filtered by the provided search term and type.
+   *
+   * @param {IPaginationOptions} options - The pagination options.
+   * @param {string} search - The search term to filter contacts by.
+   * @param {SearchTypes} type - The type of search to perform.
+   * @param {User} user - The user who owns the contacts.
+   * @return {Promise<Contact[]>} The list of contacts matching the search criteria.
+   */
   async findAllWithPagination(
     options: IPaginationOptions,
     search: string,
@@ -89,6 +113,14 @@ export class ContactsService {
     );
   }
 
+  /**
+   * Retrieves a single contact by its ID, belonging to the specified user.
+   *
+   * @param {User} user - The user who owns the contact.
+   * @param {number} id - The ID of the contact to retrieve.
+   * @returns {Contact | undefined} The contact if found, or undefined if not found.
+   * @throws {Error} If the contact is not found, with a NOT_FOUND status code.
+   */
   async findOne(user: User, id: number) {
     const contact = await this.contactsRepository.findOne({
       where: {
@@ -114,6 +146,14 @@ export class ContactsService {
     );
   }
 
+  /**
+   * Updates a single contact by its ID, belonging to the specified user.
+   *
+   * @param {User} user - The user who owns the contact.
+   * @param {number} id - The ID of the contact to update.
+   * @param {UpdateContactDto} updateContactDto - The updated contact data.
+   * @returns {Promise<Contact | undefined>} The updated contact if found, or undefined if not found.
+   */
   async update(user: User, id: number, updateContactDto: UpdateContactDto) {
     const existingContact = await this.findOne(user, id);
 
@@ -129,10 +169,11 @@ export class ContactsService {
 
     if (
       updateContactDto.avatar &&
-      existingContact.avatar &&
-      existingContact.avatar.id !== updateContactDto.avatar.id
+      existingContact.avatar?.id !== updateContactDto.avatar.id
     ) {
-      await this.fileService.removeFile(user, existingContact.avatar.path);
+      if (existingContact.avatar) {
+        await this.fileService.removeFile(user, existingContact.avatar.path);
+      }
     }
 
     await this.contactsRepository.save(
@@ -144,6 +185,13 @@ export class ContactsService {
     return this.findOne(user, id);
   }
 
+  /**
+   * Removes a single contact by its ID, belonging to the specified user.
+   *
+   * @param {User} user - The user who owns the contact.
+   * @param {number} id - The ID of the contact to remove.
+   * @return {Contact | undefined} The removed contact if found, or undefined if not found.
+   */
   async remove(user: User, id: number) {
     const contact = await this.findOne(user, id);
 
@@ -153,36 +201,54 @@ export class ContactsService {
     return contact;
   }
 
-  async exportContacts(user: User, id?: number) {
+  /**
+   * Export contacts as a CSV string
+   *
+   * This function takes a user (the owner of the contacts) and an optional contact ID.
+   * If the contact ID is provided, only that contact will be exported.
+   * If the contact ID is not provided, all contacts belonging to the user will be exported.
+   *
+   * @param {User} owner - The user who owns the contacts to export
+   * @param {number} [contactId] - Optional: The ID of the contact to export. If not provided,
+   *                              all contacts belonging to the user will be exported.
+   * @return {string} The CSV string containing the exported contacts
+   */
+  async exportContacts(owner: User, contactId?: number): Promise<string> {
     const query: FindManyOptions<Contact> = {
+      // This where clause is used to filter the contacts to export.
+      // It will only export contacts that belong to the specified user.
       where: {
-        owner: {
-          id: user.id,
-        },
+        // The user who owns the contact
+        owner: { id: owner.id },
       },
     };
 
-    if (id) {
+    if (contactId) {
+      // If a contact ID is provided, update the where clause to only export that contact
       query.where = {
-        id,
+        // The contact ID to export
+        id: contactId,
+        // The owner of the contact must match the original where clause
         ...query.where,
       };
     }
 
-    const contacts = await this.contactsRepository.find({
-      ...query,
-    });
+    const contacts = await this.contactsRepository.find(query);
 
     try {
-      const opts = {};
-      const parser = new Parser(opts);
+      // Create a new parser with the default options
+      const parser = new Parser({});
+
+      // Parse the contacts into a CSV string
       const csv = parser.parse(contacts);
 
+      // Return the CSV string
       return csv;
     } catch (error) {
       const errors = {
         contact: ContactErrorCodes.CSV_GENERATION_FAILED,
       };
+
       throw handleError(
         HttpStatus.INTERNAL_SERVER_ERROR,
         ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
@@ -191,6 +257,14 @@ export class ContactsService {
     }
   }
 
+  /**
+   * Asynchronously imports contacts from a CSV file and associates them with a user.
+   *
+   * @param {User} user - The user to associate the imported contacts with.
+   * @param {Buffer|File} file - The CSV file containing the contacts to import.
+   * @return {Promise<{message: string}>} A promise that resolves to an object with a success message.
+   * @throws {Error} If there is an error importing the contacts.
+   */
   async importContacts(user: User, file) {
     // Creates an initial buffer stream for separator detection
     const bufferStreamForSeparator = new stream.PassThrough();

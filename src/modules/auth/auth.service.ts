@@ -27,13 +27,22 @@ import { AuthProvidersService } from './auth-providers.service';
 
 @Injectable()
 export class AuthService {
+  /**
+   * Initializes a new instance of the AuthService class.
+   *
+   * @param {Repository<AuthProvider>} authProviderssRepository - The repository for authentication providers.
+   * @param {UsersService} usersService - The service for user operations.
+   * @param {ForgotService} forgotService - The service for forgot password operations.
+   * @param {MailService} mailService - The service for sending emails.
+   * @param {AuthProvidersService} authProvidersService - The service for authentication providers.
+   */
   constructor(
     @InjectRepository(AuthProvider)
     private readonly authProviderssRepository: Repository<AuthProvider>,
-    private usersService: UsersService,
-    private forgotService: ForgotService,
-    private mailService: MailService,
-    private authProvidersService: AuthProvidersService,
+    private readonly usersService: UsersService,
+    private readonly forgotService: ForgotService,
+    private readonly mailService: MailService,
+    private readonly authProvidersService: AuthProvidersService,
   ) {}
 
   /**
@@ -48,6 +57,8 @@ export class AuthService {
   /**
    * Validates a user's login credentials and returns a JWT token and user object if successful.
    *
+   * This method is used to validate a user's login credentials and return a JWT token and user object if the validation is successful.
+   *
    * @param {AuthEmailLoginDto} loginDto - The login credentials including email and provider.
    * @param {boolean} onlyAdmin - Whether the user must be an admin or not.
    * @return {Promise<{ token: string; user: User }>} A promise that resolves to an object containing the JWT token and user object.
@@ -57,12 +68,15 @@ export class AuthService {
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
   ): Promise<{ token: string; user: User }> {
+    // Step 1: Find the user by email
+    // We don't want to throw an error if the user doesn't exist, so we use findOne() with the second argument set to false
     const user = await this.usersService.findOne(
       { email: loginDto.email },
-      false,
+      false, // Don't throw an error if the user doesn't exist
     );
 
-    if (!user || (onlyAdmin && user.role.id !== RoleEnum.admin)) {
+    // Step 2: Check if the user exists
+    if (!user) {
       const errors = {
         user: UserErrorCodes.NOT_FOUND,
       };
@@ -74,38 +88,20 @@ export class AuthService {
       );
     }
 
-    if (user.status.id !== StatusEnum.active) {
-      const errors = {
-        provider: UserErrorCodes.UNVERIFIED_USER,
-      };
+    // Step 3: Validate the user's status and role
+    // If onlyAdmin is true, the user must be an admin
+    // Otherwise, the user can be any role
+    this.validateUserStatusAndRole(user, onlyAdmin);
 
-      throw handleError(
-        HttpStatus.UNAUTHORIZED,
-        ERROR_MESSAGES.UNVERIFIED_USER,
-        errors,
-      );
-    }
-
-    const provider = await this.authProviderssRepository.findOne({
-      where: { id: loginDto.provider.id, active: true },
-    });
-
-    if (!provider || user.provider.id !== loginDto.provider.id) {
-      const errors = {
-        provider: UserErrorCodes.INVALID_PROVIDER,
-      };
-
-      throw handleError(
-        HttpStatus.UNPROCESSABLE_ENTITY,
-        ERROR_MESSAGES.INVALID_PROVIDER,
-        errors,
-      );
-    }
-
-    const providerHandler = this.authProvidersService.handleLogin(
-      provider.name,
+    // Step 4: Validate the provider
+    // Get the provider handler for the provider
+    const providerHandler = this.validateProvider(
+      loginDto.provider.id,
+      user.provider.id,
     );
 
+    // Step 5: Call the provider handler and return the result
+    // Call the provider handler with the user and loginDto as arguments
     return (await providerHandler)(user, loginDto);
   }
 
@@ -192,32 +188,27 @@ export class AuthService {
   /**
    * Resets a user's password using a provided hash.
    *
-   * @param {string} hash - The hash used to identify the password reset request.
-   * @param {string} password - The new password for the user.
-   * @return {Promise<void>} A promise that resolves when the password reset is successful.
+   * @param hash The hash used to identify the password reset request.
+   * @param newPassword The new password for the user.
+   * @returns A promise that resolves when the password reset is successful.
    */
-  async resetPassword(hash: string, password: string): Promise<void> {
-    const forgot = await this.forgotService.findOne({
-      where: {
-        hash,
-      },
+  async resetPassword(hash: string, newPassword: string): Promise<void> {
+    const forgotPassword = await this.forgotService.findOne({
+      where: { hash },
     });
 
-    if (!forgot) {
-      const errors = {
-        hash: UserErrorCodes.HASH_NOT_FOUND,
-      };
+    if (!forgotPassword) {
       throw handleError(
         HttpStatus.UNPROCESSABLE_ENTITY,
         ERROR_MESSAGES.HASH_NOT_FOUND,
-        errors,
+        { hash: UserErrorCodes.HASH_NOT_FOUND },
       );
     }
 
-    const user = forgot.user;
-    user.password = password;
+    const user = forgotPassword.user;
+    user.password = newPassword;
     await user.save();
-    await this.forgotService.softDelete(forgot.id);
+    await this.forgotService.softDelete(forgotPassword.id);
   }
 
   /**
@@ -238,53 +229,52 @@ export class AuthService {
   /**
    * Updates a user's account information.
    *
-   * @param {User} user - The user whose account is being updated.
-   * @param {AuthUpdateDto} userDto - The updated user information.
+   * @param {User} existingUser - The user whose account is being updated.
+   * @param {AuthUpdateDto} updateDto - The updated user information.
    * @return {Promise<User>} The updated user object.
    */
-  async update(user: User, userDto: AuthUpdateDto): Promise<User> {
-    if (userDto.password) {
-      if (userDto.oldPassword) {
-        const currentUser = await this.usersService.findOne(
-          {
-            id: user.id,
-          },
-          false,
-        );
+  async update(existingUser: User, updateDto: AuthUpdateDto): Promise<User> {
+    const { password: newPassword, oldPassword } = updateDto;
 
-        const isValidOldPassword = await bcrypt.compare(
-          userDto.oldPassword,
-          currentUser.password,
-        );
-
-        if (!isValidOldPassword) {
-          const errors = {
-            oldPassword: UserErrorCodes.INCORRECT_PASSWORD,
-          };
-          throw handleError(
-            HttpStatus.UNPROCESSABLE_ENTITY,
-            ERROR_MESSAGES.INCORRECT_PASSWORD,
-            errors,
-          );
-        }
-      } else {
-        const errors = {
-          oldPassword: UserErrorCodes.MISSING_PASSWORD,
-        };
-
+    if (newPassword) {
+      if (!oldPassword) {
         throw handleError(
           HttpStatus.UNPROCESSABLE_ENTITY,
           ERROR_MESSAGES.MISSING_PASSWORD,
-          errors,
+          {
+            oldPassword: UserErrorCodes.MISSING_PASSWORD,
+          },
+        );
+      }
+
+      const currentUser = await this.usersService.findOne(
+        {
+          id: existingUser.id,
+        },
+        false,
+      );
+
+      const isValidOldPassword = await bcrypt.compare(
+        oldPassword,
+        currentUser.password,
+      );
+
+      if (!isValidOldPassword) {
+        throw handleError(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          ERROR_MESSAGES.INCORRECT_PASSWORD,
+          {
+            oldPassword: UserErrorCodes.INCORRECT_PASSWORD,
+          },
         );
       }
     }
 
-    await this.usersService.update(user.id, userDto as UpdateUserDto);
+    await this.usersService.update(existingUser.id, updateDto as UpdateUserDto);
 
     return this.usersService.findOne(
       {
-        id: user.id,
+        id: existingUser.id,
       },
       false,
     );
@@ -298,5 +288,78 @@ export class AuthService {
    */
   async softDelete(user: User): Promise<void> {
     await this.usersService.softDelete(user.id);
+  }
+
+  /**
+   * Validates the status and role of a user.
+   *
+   * @param {User} user - The user to validate.
+   * @param {boolean} onlyAdmin - Whether to only allow admin users.
+   * @return {void}
+   * @throws {HttpException} If the user is not active or not an admin (if onlyAdmin is true).
+   */
+  private validateUserStatusAndRole(user: User, onlyAdmin: boolean): void {
+    // If the user is not active, throw a 401 error
+    if (user.status.id !== StatusEnum.active) {
+      const errors = {
+        provider: UserErrorCodes.UNVERIFIED_USER,
+      };
+
+      throw handleError(
+        HttpStatus.UNAUTHORIZED,
+        ERROR_MESSAGES.UNVERIFIED_USER,
+        errors,
+      );
+    }
+
+    // If we want to only allow admins to log in, make sure the user is an admin
+    if (onlyAdmin && user.role.id !== RoleEnum.admin) {
+      const errors = {
+        user: UserErrorCodes.FORBIDDEN_RESOURCE,
+      };
+
+      throw handleError(
+        HttpStatus.FORBIDDEN,
+        ERROR_MESSAGES.FORBIDDEN_RESOURCE,
+        errors,
+      );
+    }
+  }
+
+  /**
+   * Validates a provider by checking if it exists and is active, and if its ID matches the user's provider ID.
+   *
+   * This method is used to validate a user's login credentials when they try to log in.
+   *
+   * @param {number} providerId - The ID of the provider to validate.
+   * @param {number} userProviderId - The ID of the user's provider.
+   * @return {Promise<void>} A promise that resolves when the provider is valid.
+   */
+  private async validateProvider(providerId: number, userProviderId: number) {
+    // First, let's try to find the provider by ID
+    const provider = await this.authProviderssRepository.findOne({
+      where: { id: providerId, active: true },
+    });
+
+    // If the provider exists, let's check if its ID matches the user's provider ID
+    if (userProviderId !== providerId) {
+      const errors = {
+        provider: UserErrorCodes.INVALID_PROVIDER,
+      };
+
+      throw handleError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.INVALID_PROVIDER,
+        errors,
+      );
+    }
+
+    // If we've made it this far, the provider is valid, so we call the provider's handler
+    const providerHandler = this.authProvidersService.handleLogin(
+      provider.name,
+    );
+
+    // We return the provider's handler as a promise
+    return providerHandler;
   }
 }
