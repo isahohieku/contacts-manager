@@ -1,9 +1,11 @@
 import {
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Request,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -17,8 +19,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import type { Response } from 'express';
 import { FilesService } from './files.service';
 import { FileTypes } from '../../shared/utils/types/files.type';
+import { FileStorageService } from '../file-storage/file-storage.service';
 
 @ApiTags('Files')
 @Controller({
@@ -26,7 +30,15 @@ import { FileTypes } from '../../shared/utils/types/files.type';
   version: '1',
 })
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(
+    private readonly filesService: FilesService,
+    private readonly fileStorageService: FileStorageService,
+  ) {}
+
+  @Get(':file')
+  getFile(@Param('file') filepath: string, @Res() res: Response) {
+    return this.fileStorageService.getFile(filepath, res);
+  }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
