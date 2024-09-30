@@ -77,6 +77,26 @@ describe('FileController (e2e)', () => {
       });
   });
 
+  it('should get a file with GET /api/files/filename', () => {
+    const fileUrl = `/api/files/${file.path.split('/').pop()}`;
+    return request(app.getHttpServer())
+      .get(fileUrl)
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.OK);
+  });
+
+  it('should not get a file that does not exist with GET /api/files/filename', () => {
+    const fileUrl = '/api/files/unknown.jpg';
+    return request(app.getHttpServer())
+      .get(fileUrl)
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+      .expect(HttpStatus.NOT_FOUND);
+  });
+
   it('should return error if no image was sent with POST /api/files/upload?type=image', () => {
     return request(app.getHttpServer())
       .post('/api/files/upload?type=image')

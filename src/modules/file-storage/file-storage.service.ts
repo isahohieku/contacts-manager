@@ -12,7 +12,6 @@ import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
 import { Repository } from 'typeorm';
 import { FileEntity } from '../files/entities/file.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FilesErrorCodes } from '../../shared/utils/constants/files/errors';
 
 @Injectable()
 export class FileStorageService {
@@ -145,28 +144,13 @@ export class FileStorageService {
       : this.removeFromLocalStorage(filePath);
   }
 
-  async findOne(id: string) {
-    const file = await this.fileRepository.findOne({
-      where: {
-        id,
-      },
-    });
-
-    if (file) {
-      return file;
-    }
-
-    const errors = {
-      file: FilesErrorCodes.NOT_FOUND,
-    };
-
-    throw handleError(
-      HttpStatus.NOT_FOUND,
-      ERROR_MESSAGES.NOT_FOUND('File', id),
-      errors,
-    );
-  }
-
+  /**
+   * Retrieves a file from storage and streams it to the response.
+   *
+   * @param {string} filePath - The path of the file to be retrieved.
+   * @param {Response} res - The response object to stream the file to.
+   * @return {Promise<void>} A promise that resolves when the file has been streamed.
+   */
   async getFile(filePath: string, res: Response) {
     const fullPath = path.join(__dirname, '..', '..', '..', 'files', filePath);
 
