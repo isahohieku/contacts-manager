@@ -1,17 +1,19 @@
-import jwt from 'jsonwebtoken';
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/modules/contacts/entities/contact.entity';
-import { userData } from './mock-data/user';
+import { Test, TestingModule } from '@nestjs/testing';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { contactData } from './mock-data/contact';
-import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
-import { User } from '../src/modules/users/entity/user.entity';
-import { Tag } from '../src/modules/tags/entities/tag.entity';
 import { tagData } from './mock-data/tag';
-import validationOptions from '../src/common/pipes/validation-options.pipe';
+import { userData } from './mock-data/user';
+
+import { AppModule } from '@/app.module';
+import validationOptions from '@/common/pipes/validation-options.pipe';
+import { Contact } from '@/modules/contacts/entities/contact.entity';
+import { Tag } from '@/modules/tags/entities/tag.entity';
+import { User } from '@/modules/users/entity/user.entity';
+import { ContactErrorCodes } from '@/shared/utils/constants/contacts/errors';
 
 describe('ContactController (e2e)', () => {
   let app: INestApplication;

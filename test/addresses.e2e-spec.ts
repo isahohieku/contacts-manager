@@ -1,18 +1,20 @@
-import jwt from 'jsonwebtoken';
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/modules/contacts/entities/contact.entity';
-import { Address } from '../src/modules/addresses/entities/address.entity';
-import { userData } from './mock-data/user';
-import { contactData } from './mock-data/contact';
+import { Test, TestingModule } from '@nestjs/testing';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { addressData } from './mock-data/address';
-import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
-import { AddressErrorCodes } from '../src/shared/utils/constants/addresses/errors';
-import { User } from '../src/modules/users/entity/user.entity';
-import validationOptions from '../src/common/pipes/validation-options.pipe';
+import { contactData } from './mock-data/contact';
+import { userData } from './mock-data/user';
+
+import { AppModule } from '@/app.module';
+import validationOptions from '@/common/pipes/validation-options.pipe';
+import { Address } from '@/modules/addresses/entities/address.entity';
+import { Contact } from '@/modules/contacts/entities/contact.entity';
+import { User } from '@/modules/users/entity/user.entity';
+import { AddressErrorCodes } from '@/shared/utils/constants/addresses/errors';
+import { ContactErrorCodes } from '@/shared/utils/constants/contacts/errors';
 
 describe('AddressController (e2e)', () => {
   let app: INestApplication;

@@ -1,3 +1,4 @@
+import { Allow } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -7,9 +8,9 @@ import {
   PrimaryGeneratedColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entity/user.entity';
-import { Allow } from 'class-validator';
+
 import { EntityHelper } from '../../../shared/entities/entity-helper';
+import { User } from '../../users/entity/user.entity';
 
 @Entity()
 export class Forgot extends EntityHelper {

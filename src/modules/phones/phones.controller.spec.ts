@@ -1,12 +1,14 @@
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import databaseConfig from '../../configs/database.config';
+import { TypeOrmConfigService } from '../../database/typeorm-config.service';
+import { Contact } from '../contacts/entities/contact.entity';
+
+import { Phone } from './entities/phone.entity';
 import { PhonesController } from './phones.controller';
 import { PhonesService } from './phones.service';
-import { Phone } from './entities/phone.entity';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import databaseConfig from '../../configs/database.config';
-import { Contact } from '../contacts/entities/contact.entity';
-import { TypeOrmConfigService } from '../../database/typeorm-config.service';
 
 describe('PhonesController', () => {
   let controller: PhonesController;

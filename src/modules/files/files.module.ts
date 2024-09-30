@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
-import { FilesController } from './files.controller';
-import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { FilesService } from './files.service';
-import { fileFilter } from '../../shared/utils/file-filter';
-import { FileStorageService } from '../file-storage/file-storage.service';
-import { FileStorageModule } from '../file-storage/file-storage.module';
+import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { fileFilter } from '../../shared/utils/file-filter';
+import { FileStorageModule } from '../file-storage/file-storage.module';
+import { FileStorageService } from '../file-storage/file-storage.service';
 import { User } from '../users/entity/user.entity';
+
 import { FileEntity } from './entities/file.entity';
+import { FilesController } from './files.controller';
+import { FilesService } from './files.service';
 
 @Module({
   imports: [

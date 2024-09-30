@@ -13,14 +13,16 @@ import {
   HttpCode,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { RoleEnum } from '../roles/roles.enum';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { RoleEnum } from '../roles/roles.enum';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { AuthGuard } from '@nestjs/passport';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { UsersService } from './users.service';
 
 @ApiBearerAuth()
 @Roles(RoleEnum.admin)

@@ -1,13 +1,15 @@
-import { User } from '../users/entity/user.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateTagDto } from './dto/create-tag.dto';
-import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Tag } from './entities/tag.entity';
 import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
 import { TagErrorCodes } from '../../shared/utils/constants/tags/errors';
 import { handleError } from '../../shared/utils/handlers/error.handler';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { User } from '../users/entity/user.entity';
+
+import { CreateTagDto } from './dto/create-tag.dto';
+import { UpdateTagDto } from './dto/update-tag.dto';
+import { Tag } from './entities/tag.entity';
 
 @Injectable()
 export class TagsService {

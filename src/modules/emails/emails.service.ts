@@ -1,15 +1,17 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { EmailErrorCodes } from '../../shared/utils/constants/emails/errors';
+import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { handleError } from '../../shared/utils/handlers/error.handler';
+import { ContactsService } from '../contacts/contacts.service';
+import { EmailType } from '../email-types/entities/email-type.entity';
 import { User } from '../users/entity/user.entity';
+
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { Email } from './entities/email.entity';
-import { EmailType } from '../email-types/entities/email-type.entity';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { EmailErrorCodes } from '../../shared/utils/constants/emails/errors';
-import { ContactsService } from '../contacts/contacts.service';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
 
 @Injectable()
 export class EmailsService {

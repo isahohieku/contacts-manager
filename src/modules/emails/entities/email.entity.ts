@@ -1,4 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { EntityBase } from '../../../shared/entities/entity-helper';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { EmailType } from '../../email-types/entities/email-type.entity';

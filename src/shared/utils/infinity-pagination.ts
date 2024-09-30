@@ -1,4 +1,5 @@
 import { FindManyOptions, Repository } from 'typeorm';
+
 import { IPaginationOptions } from './types/pagination-options';
 
 export const infinityPagination = <T>(

@@ -1,12 +1,13 @@
-import { ERROR_MESSAGES } from '../../../shared/utils/constants/generic/errors';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../../roles/entities/role.entity';
 import { Validate, IsOptional } from 'class-validator';
+
 import { IsExist } from '../../../common/decorators/is-exists.decorator';
-import { Status } from '../../statuses/entities/status.entity';
-import { RoleEnum } from '../../roles/roles.enum';
-import { StatusEnum } from '../../../shared/utils/types/statuses.type';
 import { AuthRegisterLoginDto } from '../../../modules/auth/dto/auth-register-login.dto';
+import { ERROR_MESSAGES } from '../../../shared/utils/constants/generic/errors';
+import { StatusEnum } from '../../../shared/utils/types/statuses.type';
+import { Role } from '../../roles/entities/role.entity';
+import { RoleEnum } from '../../roles/roles.enum';
+import { Status } from '../../statuses/entities/status.entity';
 
 export class CreateUserDto extends AuthRegisterLoginDto {
   @ApiProperty({ example: 'https://s3.....' })

@@ -1,15 +1,17 @@
-import { User } from '../users/entity/user.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { AddressErrorCodes } from '../../shared/utils/constants/addresses/errors';
+import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { handleError } from '../../shared/utils/handlers/error.handler';
+import { AddressType } from '../address-types/entities/address-type.entity';
+import { ContactsService } from '../contacts/contacts.service';
+import { User } from '../users/entity/user.entity';
+
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Address } from './entities/address.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AddressType } from '../address-types/entities/address-type.entity';
-import { AddressErrorCodes } from '../../shared/utils/constants/addresses/errors';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { ContactsService } from '../contacts/contacts.service';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
 
 @Injectable()
 export class AddressesService {

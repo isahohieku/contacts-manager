@@ -1,17 +1,19 @@
-import { User } from '../users/entity/user.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CountryCode } from 'libphonenumber-js';
+import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { PhoneNumberErrorCodes } from '../../shared/utils/constants/phone-numbers/errors';
+import { handleError } from '../../shared/utils/handlers/error.handler';
+import { validatePhoneNumber } from '../../shared/utils/validators/phone-number';
+import { ContactsService } from '../contacts/contacts.service';
+import { PhoneType } from '../phone-types/entities/phone-type.entity';
+import { User } from '../users/entity/user.entity';
+
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Phone } from './entities/phone.entity';
-import { Repository } from 'typeorm';
-import { PhoneType } from '../phone-types/entities/phone-type.entity';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { PhoneNumberErrorCodes } from '../../shared/utils/constants/phone-numbers/errors';
-import { ContactsService } from '../contacts/contacts.service';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { CountryCode } from 'libphonenumber-js';
-import { validatePhoneNumber } from '../../shared/utils/validators/phone-number';
 
 @Injectable()
 export class PhonesService {

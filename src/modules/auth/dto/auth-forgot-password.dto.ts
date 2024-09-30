@@ -1,6 +1,7 @@
-import { IsEmail, Validate } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsEmail, Validate } from 'class-validator';
+
 import { IsExist } from '../../../common/decorators/is-exists.decorator';
 
 export class AuthForgotPasswordDto {

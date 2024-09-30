@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import userResponseSerializer from '../../modules/users/user-response.serializer';
+
 import { User } from '../../modules/users/entity/user.entity';
+import userResponseSerializer from '../../modules/users/user-response.serializer';
 import deepMapObject from '../../shared/utils/deep-map-object';
 
 @Injectable()

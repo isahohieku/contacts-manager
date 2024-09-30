@@ -1,5 +1,6 @@
-import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
+import { Factory, Seeder } from 'typeorm-seeding';
+
 import { Status } from '../../modules/statuses/entities/status.entity';
 import { StatusEnum } from '../../modules/statuses/statuses.enum';
 

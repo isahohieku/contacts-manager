@@ -1,7 +1,8 @@
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { CreatePhoneDto } from '../../phones/dto/create-phone.dto';
+
 import { FileEntity } from '../../files/entities/file.entity';
+import { CreatePhoneDto } from '../../phones/dto/create-phone.dto';
 
 @ApiExtraModels(CreatePhoneDto)
 export class CreateContactDto {

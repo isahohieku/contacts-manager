@@ -9,11 +9,12 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { TagsService } from './tags.service';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
+import { TagsService } from './tags.service';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))

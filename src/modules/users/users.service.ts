@@ -1,17 +1,20 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
-import { IPaginationOptions } from '../../shared/utils/types/pagination-options';
+
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
+
+import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
+import { handleError } from '../../shared/utils/handlers/error.handler';
+import { genericFindManyWithPagination } from '../../shared/utils/infinity-pagination';
+import { IPaginationOptions } from '../../shared/utils/types/pagination-options';
+import { MailService } from '../mail/mail.service';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entity/user.entity';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { genericFindManyWithPagination } from '../../shared/utils/infinity-pagination';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
-import { MailService } from '../mail/mail.service';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 
 @Injectable()
 export class UsersService {

@@ -1,5 +1,6 @@
-import { EntityBase } from '../../../shared/entities/entity-helper';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
+import { EntityBase } from '../../../shared/entities/entity-helper';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { PhoneType } from '../../phone-types/entities/phone-type.entity';
 

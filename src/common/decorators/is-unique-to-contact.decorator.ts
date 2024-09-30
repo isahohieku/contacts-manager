@@ -4,6 +4,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import set from 'lodash/set';
+
 import { CreateEmailDto } from '../../modules/emails/dto/create-email.dto';
 
 @ValidatorConstraint({ name: 'IsUniqueToContact', async: true })

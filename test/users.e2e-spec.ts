@@ -1,16 +1,18 @@
-import jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcryptjs';
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../src/modules/users/entity/user.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import * as bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { userData, userSignUpDetails } from './mock-data/admin-user';
 import { userData as normalUser, password } from './mock-data/user';
-import { UserErrorCodes } from '../src/shared/utils/constants/users/errors';
-import { SerializerInterceptor } from '../src/common/interceptors/serializer.interceptor';
-import validationOptions from '../src/common/pipes/validation-options.pipe';
+
+import { AppModule } from '@/app.module';
+import { SerializerInterceptor } from '@/common/interceptors/serializer.interceptor';
+import validationOptions from '@/common/pipes/validation-options.pipe';
+import { User } from '@/modules/users/entity/user.entity';
+import { UserErrorCodes } from '@/shared/utils/constants/users/errors';
 
 describe('UserController (e2e)', () => {
   let app: INestApplication;
@@ -219,6 +221,24 @@ describe('UserController (e2e)', () => {
       .get('/api/users/0')
       .set({
         Authorization: `Bearer ${normalUserToken}`,
+      })
+      .expect(HttpStatus.FORBIDDEN)
+      .then(({ body }) => {
+        expect(body.status).toBe(HttpStatus.FORBIDDEN);
+        expect(body.errors.user).toBe(UserErrorCodes.FORBIDDEN_RESOURCE);
+      });
+  });
+
+  it('should not log user into admin route if user is not admin with POST /api/auth/admin/login', async () => {
+    await User.save({
+      ...normalUserDbData,
+      status: { id: 1 },
+    });
+    return request(app.getHttpServer())
+      .post('/api/auth/admin/login')
+      .send({
+        email: normalUser.email,
+        password,
       })
       .expect(HttpStatus.FORBIDDEN)
       .then(({ body }) => {

@@ -1,10 +1,11 @@
-import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MailData } from './interfaces/mail-data.interface';
+import { MailerService } from '@nestjs-modules/mailer';
 
 import confirmEmail from '../../shared/translations/confirm-email.json';
 import resetPassword from '../../shared/translations/reset-password.json';
+
+import { MailData } from './interfaces/mail-data.interface';
 
 @Injectable()
 export class MailService {

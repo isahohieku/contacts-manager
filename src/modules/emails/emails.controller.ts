@@ -9,11 +9,12 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { EmailsService } from './emails.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
+import { EmailsService } from './emails.service';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))

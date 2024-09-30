@@ -15,11 +15,8 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
-import { Response as Res } from 'express';
-import { ContactsService } from './contacts.service';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express/multer';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -27,11 +24,16 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from '../users/entity/user.entity';
-import { SearchTypes } from '../../shared/utils/types/contacts.type';
-import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { Response as Res } from 'express';
 import { memoryStorage } from 'multer';
+
 import { fileFilter } from '../../shared/utils/file-filter';
+import { SearchTypes } from '../../shared/utils/types/contacts.type';
+import { User } from '../users/entity/user.entity';
+
+import { ContactsService } from './contacts.service';
+import { CreateContactDto } from './dto/create-contact.dto';
+import { UpdateContactDto } from './dto/update-contact.dto';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))

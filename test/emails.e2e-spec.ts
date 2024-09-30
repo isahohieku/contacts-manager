@@ -1,18 +1,20 @@
-import jwt from 'jsonwebtoken';
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/modules/contacts/entities/contact.entity';
-import { Email } from '../src/modules/emails/entities/email.entity';
-import { userData } from './mock-data/user';
+import { Test, TestingModule } from '@nestjs/testing';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { contactData } from './mock-data/contact';
 import { emailData } from './mock-data/email';
-import { User } from '../src/modules/users/entity/user.entity';
-import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
-import { EmailErrorCodes } from '../src/shared/utils/constants/emails/errors';
-import validationOptions from '../src/common/pipes/validation-options.pipe';
+import { userData } from './mock-data/user';
+
+import { AppModule } from '@/app.module';
+import validationOptions from '@/common/pipes/validation-options.pipe';
+import { Contact } from '@/modules/contacts/entities/contact.entity';
+import { Email } from '@/modules/emails/entities/email.entity';
+import { User } from '@/modules/users/entity/user.entity';
+import { ContactErrorCodes } from '@/shared/utils/constants/contacts/errors';
+import { EmailErrorCodes } from '@/shared/utils/constants/emails/errors';
 
 describe('EmailController (e2e)', () => {
   let app: INestApplication;

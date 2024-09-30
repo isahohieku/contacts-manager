@@ -1,6 +1,7 @@
-import { IsEmail, IsOptional, MinLength } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsEmail, IsOptional, MinLength } from 'class-validator';
+
 import { AuthProvider } from '../entities/auth-providers.entity';
 
 export class AuthEmailLoginDto {

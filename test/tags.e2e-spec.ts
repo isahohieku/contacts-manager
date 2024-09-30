@@ -1,17 +1,19 @@
-import jwt from 'jsonwebtoken';
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Contact } from '../src/modules/contacts/entities/contact.entity';
-import { Tag } from '../src/modules/tags/entities/tag.entity';
-import { userData } from './mock-data/user';
+import { Test, TestingModule } from '@nestjs/testing';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { contactData } from './mock-data/contact';
 import { tagData } from './mock-data/tag';
-import { User } from '../src/modules/users/entity/user.entity';
-import { ContactErrorCodes } from '../src/shared/utils/constants/contacts/errors';
-import { TagErrorCodes } from '../src/shared/utils/constants/tags/errors';
+import { userData } from './mock-data/user';
+
+import { AppModule } from '@/app.module';
+import { Contact } from '@/modules/contacts/entities/contact.entity';
+import { Tag } from '@/modules/tags/entities/tag.entity';
+import { User } from '@/modules/users/entity/user.entity';
+import { ContactErrorCodes } from '@/shared/utils/constants/contacts/errors';
+import { TagErrorCodes } from '@/shared/utils/constants/tags/errors';
 
 describe('TagController (e2e)', () => {
   let app: INestApplication;

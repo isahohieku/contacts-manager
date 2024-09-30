@@ -1,10 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TagsService } from './tags.service';
 import { ConfigModule } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import databaseConfig from '../../configs/database.config';
 import { TypeOrmConfigService } from '../../database/typeorm-config.service';
+
 import { Tag } from './entities/tag.entity';
+import { TagsService } from './tags.service';
 
 describe('TagsService', () => {
   let service: TagsService;

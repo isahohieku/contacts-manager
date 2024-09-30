@@ -1,6 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
-import { handleError } from '../utils/handlers/error.handler';
+
 import { FilesErrorCodes } from '../utils/constants/files/errors';
+import { handleError } from '../utils/handlers/error.handler';
+
 import { FileTypes } from './types/files.type';
 
 const allowedImageFileTypes = /\.(jpg|jpeg|png|gif)$/i;

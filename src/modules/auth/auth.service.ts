@@ -1,27 +1,30 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { User } from '../users/entity/user.entity';
-import * as bcrypt from 'bcryptjs';
-import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthUpdateDto } from './dto/auth-update.dto';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { RoleEnum } from '../roles/roles.enum';
-import { StatusEnum } from '../../shared/utils/types/statuses.type';
 import * as crypto from 'crypto';
+
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
-import { Status } from '../statuses/entities/status.entity';
-import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
-import { UsersService } from '../users/users.service';
-import { ForgotService } from '../forgot/forgot.service';
-import { MailService } from '../mail/mail.service';
-import { UpdateUserDto } from '../users/dto/update-user.dto';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
 import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
 import { handleError } from '../../shared/utils/handlers/error.handler';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { AuthProvider } from './entities/auth-providers.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { StatusEnum } from '../../shared/utils/types/statuses.type';
+import { ForgotService } from '../forgot/forgot.service';
+import { MailService } from '../mail/mail.service';
+import { RoleEnum } from '../roles/roles.enum';
+import { Status } from '../statuses/entities/status.entity';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
+import { User } from '../users/entity/user.entity';
+import { UsersService } from '../users/users.service';
+
 import { AuthProvidersService } from './auth-providers.service';
+import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
+import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
+import { AuthUpdateDto } from './dto/auth-update.dto';
+import { AuthProvider } from './entities/auth-providers.entity';
 
 // TODO: Generate documentations
 

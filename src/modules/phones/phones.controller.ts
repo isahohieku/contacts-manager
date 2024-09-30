@@ -12,11 +12,12 @@ import {
   DefaultValuePipe,
   ParseBoolPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { PhonesService } from './phones.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
+import { PhonesService } from './phones.service';
 
 // TODO: Add nestJS devtool
 

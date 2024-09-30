@@ -1,12 +1,14 @@
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import databaseConfig from '../../configs/database.config';
+import { TypeOrmConfigService } from '../../database/typeorm-config.service';
+import { Contact } from '../contacts/entities/contact.entity';
+
 import { EmailsController } from './emails.controller';
 import { EmailsService } from './emails.service';
 import { Email } from './entities/email.entity';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import databaseConfig from '../../configs/database.config';
-import { Contact } from '../contacts/entities/contact.entity';
-import { TypeOrmConfigService } from '../../database/typeorm-config.service';
 
 describe('EmailsController', () => {
   let controller: EmailsController;

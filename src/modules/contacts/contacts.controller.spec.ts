@@ -1,10 +1,12 @@
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import databaseConfig from '../../configs/database.config';
+import { TypeOrmConfigService } from '../../database/typeorm-config.service';
+
 import { ContactsController } from './contacts.controller';
 import { ContactsService } from './contacts.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmConfigService } from '../../database/typeorm-config.service';
-import databaseConfig from '../../configs/database.config';
 import { Contact } from './entities/contact.entity';
 
 describe('ContactsController', () => {

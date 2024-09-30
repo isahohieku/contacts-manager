@@ -1,7 +1,8 @@
-import { Factory, Seeder } from 'typeorm-seeding';
 import { DataSource } from 'typeorm';
-import { AuthProvider } from '../../modules/auth/entities/auth-providers.entity';
+import { Factory, Seeder } from 'typeorm-seeding';
+
 import { AuthProvidersEnum } from '../../modules/auth/auth-providers.enum';
+import { AuthProvider } from '../../modules/auth/entities/auth-providers.entity';
 
 export default class CreateAuthProvider implements Seeder {
   public async run(factory: Factory, dataSource: DataSource): Promise<void> {

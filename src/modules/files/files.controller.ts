@@ -10,6 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
@@ -18,11 +19,13 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
-import type { Response } from 'express';
-import { FilesService } from './files.service';
+
 import { FileTypes } from '../../shared/utils/types/files.type';
 import { FileStorageService } from '../file-storage/file-storage.service';
+
+import { FilesService } from './files.service';
+
+import type { Response } from 'express';
 
 @ApiTags('Files')
 @Controller({

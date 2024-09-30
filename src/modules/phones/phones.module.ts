@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
-import { PhonesService } from './phones.service';
-import { PhonesController } from './phones.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Contact } from '../contacts/entities/contact.entity';
-import { Phone } from './entities/phone.entity';
-import { Tag } from '../tags/entities/tag.entity';
-import { ContactsService } from '../contacts/contacts.service';
-import { TagsService } from '../tags/tags.service';
-import { FileStorageService } from '../file-storage/file-storage.service';
-import { FilesService } from '../files/files.service';
-import { FileEntity } from '../files/entities/file.entity';
 import { CsvModule } from 'nest-csv-parser';
+
+import { ContactsService } from '../contacts/contacts.service';
+import { Contact } from '../contacts/entities/contact.entity';
+import { FileStorageService } from '../file-storage/file-storage.service';
+import { FileEntity } from '../files/entities/file.entity';
+import { FilesService } from '../files/files.service';
+import { Tag } from '../tags/entities/tag.entity';
+import { TagsService } from '../tags/tags.service';
+
+import { Phone } from './entities/phone.entity';
+import { PhonesController } from './phones.controller';
+import { PhonesService } from './phones.service';
 
 @Module({
   imports: [

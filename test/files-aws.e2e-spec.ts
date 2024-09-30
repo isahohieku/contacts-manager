@@ -1,11 +1,13 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import request from 'supertest';
-import jwt from 'jsonwebtoken';
-import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { userData } from './mock-data/user';
-import { User } from '../src/modules/users/entity/user.entity';
+
+import { AppModule } from '@/app.module';
+import { User } from '@/modules/users/entity/user.entity';
 
 process.env.FILE_DRIVER = 's3';
 

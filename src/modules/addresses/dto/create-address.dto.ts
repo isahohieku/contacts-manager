@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsNotEmpty } from 'class-validator';
+
 import { AddressType } from '../../address-types/entities/address-type.entity';
 import { Contact } from '../../contacts/entities/contact.entity';
 import { Country } from '../../countries/entities/country.entity';

@@ -1,9 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ContactsService } from './contacts.service';
 import { ConfigModule } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import databaseConfig from '../../configs/database.config';
 import { TypeOrmConfigService } from '../../database/typeorm-config.service';
+
+import { ContactsService } from './contacts.service';
 import { Contact } from './entities/contact.entity';
 
 describe('ContactsService', () => {

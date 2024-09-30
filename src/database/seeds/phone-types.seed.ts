@@ -1,5 +1,6 @@
-import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
+import { Factory, Seeder } from 'typeorm-seeding';
+
 import { PhoneType } from '../../modules/phone-types/entities/phone-type.entity';
 import { PhoneTypeEnum } from '../../modules/phone-types/phone-type.enum';
 

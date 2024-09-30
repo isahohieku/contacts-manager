@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Allow } from 'class-validator';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
 import { EntityHelper } from '../../../shared/entities/entity-helper';
 import { AuthProvidersEnum } from '../auth-providers.enum';
 

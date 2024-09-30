@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcryptjs';
 import {
   Column,
   AfterLoad,
@@ -9,15 +10,15 @@ import {
   OneToMany,
   ManyToOne,
 } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
-import { Contact } from '../../contacts/entities/contact.entity';
+
 import { EntityUser } from '../../../shared/entities/entity-helper';
+import { AuthProvider } from '../../auth/entities/auth-providers.entity';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { Country } from '../../countries/entities/country.entity';
+import { FileEntity } from '../../files/entities/file.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { Status } from '../../statuses/entities/status.entity';
 import { Tag } from '../../tags/entities/tag.entity';
-import { Country } from '../../countries/entities/country.entity';
-import { FileEntity } from '../../files/entities/file.entity';
-import { AuthProvider } from '../../auth/entities/auth-providers.entity';
 
 @Entity('users')
 export class User extends EntityUser {

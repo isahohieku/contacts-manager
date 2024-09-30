@@ -1,17 +1,20 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { diskStorage } from 'multer';
-import AWS from 'aws-sdk';
 import * as fs from 'fs';
 import * as path from 'path';
-import multerS3 from 'multer-s3';
-import type { Response } from 'express';
+
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { Repository } from 'typeorm';
-import { FileEntity } from '../files/entities/file.entity';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import AWS from 'aws-sdk';
+import { diskStorage } from 'multer';
+import multerS3 from 'multer-s3';
+import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { handleError } from '../../shared/utils/handlers/error.handler';
+import { FileEntity } from '../files/entities/file.entity';
+
+import type { Response } from 'express';
 
 @Injectable()
 export class FileStorageService {

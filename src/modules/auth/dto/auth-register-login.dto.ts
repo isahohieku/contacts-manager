@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -5,14 +7,13 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+
 import { IsNotExist } from '../../../common/decorators/is-not-exists.decorator';
-import { Country } from '../../countries/entities/country.entity';
-import { StatusEnum } from '../../statuses/statuses.enum';
-import { RoleEnum } from '../../roles/roles.enum';
-import { AuthProvider } from '../entities/auth-providers.entity';
 import { ERROR_MESSAGES } from '../../../shared/utils/constants/generic/errors';
+import { Country } from '../../countries/entities/country.entity';
+import { RoleEnum } from '../../roles/roles.enum';
+import { StatusEnum } from '../../statuses/statuses.enum';
+import { AuthProvider } from '../entities/auth-providers.entity';
 
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'john.doe@example.com' })

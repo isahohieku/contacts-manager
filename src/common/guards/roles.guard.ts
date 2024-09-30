@@ -5,9 +5,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
+
 import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
+import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
+import { handleError } from '../../shared/utils/handlers/error.handler';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

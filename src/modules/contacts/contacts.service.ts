@@ -1,27 +1,30 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Contact } from './entities/contact.entity';
-import set from 'lodash/set';
 import stream from 'stream';
+
 import { Parser } from '@json2csv/plainjs';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import set from 'lodash/set';
 import { CsvParser, ParsedData } from 'nest-csv-parser';
 import { FindManyOptions, ILike, Repository } from 'typeorm';
-import { User } from '../users/entity/user.entity';
-import { handleError } from '../../shared/utils/handlers/error.handler';
+
 import { ContactErrorCodes } from '../../shared/utils/constants/contacts/errors';
-import { TagsService } from '../tags/tags.service';
-import { IPaginationOptions } from '../../shared/utils/types/pagination-options';
-import { genericFindManyWithPagination } from '../../shared/utils/infinity-pagination';
 import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { SearchTypes } from '../../shared/utils/types/contacts.type';
-import { FilesService } from '../files/files.service';
-import { allProperties, searchTypes } from '../../shared/utils/contact/helper';
 import {
   detectSeparator,
   processContactCleanup,
 } from '../../shared/utils/contact/contact-cleaning-helper';
+import { allProperties, searchTypes } from '../../shared/utils/contact/helper';
+import { handleError } from '../../shared/utils/handlers/error.handler';
+import { genericFindManyWithPagination } from '../../shared/utils/infinity-pagination';
+import { SearchTypes } from '../../shared/utils/types/contacts.type';
+import { IPaginationOptions } from '../../shared/utils/types/pagination-options';
+import { FilesService } from '../files/files.service';
+import { TagsService } from '../tags/tags.service';
+import { User } from '../users/entity/user.entity';
+
+import { CreateContactDto } from './dto/create-contact.dto';
+import { UpdateContactDto } from './dto/update-contact.dto';
+import { Contact } from './entities/contact.entity';
 
 @Injectable()
 export class ContactsService {

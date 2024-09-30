@@ -1,8 +1,9 @@
-import { Country } from '../../countries/entities/country.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
+import { EntityBase } from '../../../shared/entities/entity-helper';
 import { AddressType } from '../../address-types/entities/address-type.entity';
 import { Contact } from '../../contacts/entities/contact.entity';
-import { EntityBase } from '../../../shared/entities/entity-helper';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Country } from '../../countries/entities/country.entity';
 
 @Entity()
 export class Address extends EntityBase {
