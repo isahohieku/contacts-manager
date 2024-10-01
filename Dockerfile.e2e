@@ -15,9 +15,6 @@ RUN yarn install
 
 COPY [".", "./"]
 
-# Change to not use the env-example file
-RUN rm -rf .env && cp env-example .env 
-
 # Run Migrations and Seed
 RUN yarn migration:run
 RUN yarn seed:run

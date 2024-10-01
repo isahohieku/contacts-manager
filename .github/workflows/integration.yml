@@ -54,8 +54,6 @@ jobs:
           
           echo NODE_OPTIONS=${{ secrets.NODE_OPTIONS }} >> .env
 
-          cat .env
-
       - name: Run e2e tests
         run: docker compose -f docker-compose.ci.yaml --env-file .env -p contacts-manager-ci up --build --exit-code-from api
 
