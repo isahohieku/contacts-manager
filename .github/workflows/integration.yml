@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: 'Create env file'
         run: |
           touch .env
@@ -51,11 +54,9 @@ jobs:
           
           echo NODE_OPTIONS=${{ secrets.NODE_OPTIONS }} >> .env
 
-          ls
-
-      - uses: actions/checkout@v3
       - name: Run e2e tests
-        run: docker compose -f docker-compose.ci.yaml --env-file .env -p ci up --build --exit-code-from api
+        run: docker compose -f docker-compose.ci.yaml --env-file .env -p contacts-manager-ci up --build --exit-code-from api
+
       - name: Upload test coverage
         uses: codecov/codecov-action@v4
         with:
