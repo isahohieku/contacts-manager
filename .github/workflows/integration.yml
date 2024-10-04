@@ -23,6 +23,9 @@ jobs:
           echo APP_FALLBACK_LANGUAGE=${{ secrets.APP_FALLBACK_LANGUAGE }} >> .env
           echo FRONTEND_DOMAIN=${{ secrets.FRONTEND_DOMAIN }} >> .env
           echo BACKEND_DOMAIN=${{ secrets.BACKEND_DOMAIN }} >> .env
+
+          echo AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }} >> .env
+          echo AUTH_JWT_TOKEN_EXPIRES_IN=${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN }} >> .env
           
           echo DATABASE_TYPE=${{ secrets.DATABASE_TYPE }} >> .env
           echo DATABASE_HOST=${{ secrets.DATABASE_HOST }} >> .env

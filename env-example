@@ -6,6 +6,9 @@ APP_FALLBACK_LANGUAGE=en
 FRONTEND_DOMAIN=http://localhost:3000
 BACKEND_DOMAIN=http://localhost:3000
 
+AUTH_JWT_SECRET=secret
+AUTH_JWT_TOKEN_EXPIRES_IN=1d
+
 DATABASE_TYPE=postgres
 # DATABASE_HOST=postgres
 DATABASE_HOST=host.docker.internal # Use this while running docker on mac
