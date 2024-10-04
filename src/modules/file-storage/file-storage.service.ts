@@ -1,28 +1,32 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import AWS from 'aws-sdk';
 import { diskStorage } from 'multer';
 import multerS3 from 'multer-s3';
-import { Repository } from 'typeorm';
 
 import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
 import { handleError } from '../../shared/utils/handlers/error.handler';
-import { FileEntity } from '../files/entities/file.entity';
 
 import type { Response } from 'express';
 
 @Injectable()
 export class FileStorageService {
-  constructor(
-    @InjectRepository(FileEntity)
-    private readonly fileRepository: Repository<FileEntity>,
-    private readonly configService: ConfigService,
-  ) {}
+  private readonly s3Client: S3Client;
+
+  constructor(private readonly configService: ConfigService) {
+    // Initialize the AWS S3 client
+    this.s3Client = new S3Client({
+      region: this.configService.get('file.awsS3Region'),
+      credentials: {
+        accessKeyId: this.configService.get('file.accessKeyId'),
+        secretAccessKey: this.configService.get('file.secretAccessKey'),
+      },
+    });
+  }
 
   /**
    * Checks if the file storage driver is set to S3.
@@ -54,15 +58,8 @@ export class FileStorageService {
    * @return {multerS3.StorageEngine} A multer-s3 storage engine configuration object.
    */
   private getS3Storage() {
-    const s3 = new AWS.S3();
-    AWS.config.update({
-      accessKeyId: this.configService.get('file.accessKeyId'),
-      secretAccessKey: this.configService.get('file.secretAccessKey'),
-      region: this.configService.get('file.awsS3Region'),
-    });
-
     return multerS3({
-      s3,
+      s3: this.s3Client,
       bucket: this.configService.get('file.awsDefaultS3Bucket'),
       acl: 'public-read',
       contentType: multerS3.AUTO_CONTENT_TYPE,
@@ -95,35 +92,30 @@ export class FileStorageService {
   }
 
   /**
-   * Asynchronously removes a file from S3 storage.
+   * Asynchronously removes a file from S3 storage using @aws-sdk/client-s3.
    *
    * @param {string} filePath - The path of the file to be removed.
    * @return {Promise<void>} A promise that resolves when the file is successfully removed.
    * @throws {Error} If there is an error deleting the file.
    */
   private async removeFromS3Storage(filePath: string) {
-    const s3 = new AWS.S3();
     const bucket = this.configService.get('file.awsDefaultS3Bucket');
-
     const key = filePath.replace(/^.*\/\/[^\/]+/, ''); // Remove URL part
 
-    const params = {
-      Bucket: bucket,
-      Key: key,
-    };
-
-    await s3
-      .deleteObject(params)
-      .promise()
-      .catch((err) => {
-        throw handleError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          `Failed to delete S3 file: ${filePath}`,
-          {
-            file: err.message,
-          },
-        );
-      });
+    try {
+      await this.s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        }),
+      );
+    } catch (err) {
+      throw handleError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        `Failed to delete S3 file: ${filePath}`,
+        { file: err.message },
+      );
+    }
   }
 
   /**
