@@ -18,7 +18,7 @@ export default class CreateAuthProvider implements Seeder {
         .insert()
         .into(AuthProvider)
         .values([
-          { name: AuthProvidersEnum.EMAIL },
+          { name: AuthProvidersEnum.EMAIL, active: true },
           { name: AuthProvidersEnum.GOOGLE },
         ])
         .execute();

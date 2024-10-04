@@ -53,4 +53,7 @@ export class AuthProvidersService {
       );
     }
   }
+
+  // TODO: Add Corbado provider
+  // TODO: Add Clerk provider
 }

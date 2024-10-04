@@ -15,9 +15,8 @@ RUN yarn install
 
 COPY [".", "./"]
 
-# Run Migrations and Seed
-RUN yarn migration:run
-RUN yarn seed:run
+# Faux creation of ormconfig.json
+RUN touch ormconfig.json
 
 RUN yarn build
 
@@ -28,8 +27,8 @@ WORKDIR /usr/app
 
 COPY --from=yarn-migration ["/tmp/app/jest-e2e.json", \
     "/tmp/app/package.json", \
-    "/tmp/app/ormconfig.json", \
     "/tmp/app/tsconfig.json", \
+    "/tmp/app/tsconfig.path.json", \
     "/tmp/app/nest-cli.json", \
     "/tmp/app/.env", \
     "./"]
@@ -42,5 +41,8 @@ COPY --from=yarn-migration ["/tmp/app/node_modules", "./node_modules"]
 COPY --from=yarn-migration ["/tmp/app/wait-for-it.sh", \
     "/tmp/app/startup.ci.sh", \
     "/opt/"]
+
+# Remove the faux ormconfig.json
+RUN rm -rf ormconfig.json
 
 CMD ["/bin/bash", "/opt/startup.ci.sh"]
