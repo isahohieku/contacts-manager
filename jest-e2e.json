@@ -1,5 +1,8 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleNameMapper": {
+    "^@contactApp/(.*)$": "<rootDir>/src/$1"
+  },
   "coveragePathIgnorePatterns": ["/node_modules/", "./src/database/migrations"],
   "rootDir": ".",
   "testEnvironment": "node",

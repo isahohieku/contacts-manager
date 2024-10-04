@@ -1,3 +1,10 @@
+import { AppModule } from '@contactApp/app.module';
+import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
+import { Address } from '@contactApp/modules/addresses/entities/address.entity';
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { AddressErrorCodes } from '@contactApp/shared/utils/constants/addresses/errors';
+import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -7,14 +14,6 @@ import request from 'supertest';
 import { addressData } from './mock-data/address';
 import { contactData } from './mock-data/contact';
 import { userData } from './mock-data/user';
-
-import { AppModule } from '@/app.module';
-import validationOptions from '@/common/pipes/validation-options.pipe';
-import { Address } from '@/modules/addresses/entities/address.entity';
-import { Contact } from '@/modules/contacts/entities/contact.entity';
-import { User } from '@/modules/users/entity/user.entity';
-import { AddressErrorCodes } from '@/shared/utils/constants/addresses/errors';
-import { ContactErrorCodes } from '@/shared/utils/constants/contacts/errors';
 
 describe('AddressController (e2e)', () => {
   let app: INestApplication;

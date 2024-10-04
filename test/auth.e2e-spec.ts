@@ -1,15 +1,14 @@
+import { AppModule } from '@contactApp/app.module';
+import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
+import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
+import { Forgot } from '@contactApp/modules/forgot/entities/forgot.entity';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
 import { userSignUpDetails } from './mock-data/user';
-
-import { AppModule } from '@/app.module';
-import { SerializerInterceptor } from '@/common/interceptors/serializer.interceptor';
-import validationOptions from '@/common/pipes/validation-options.pipe';
-import { Forgot } from '@/modules/forgot/entities/forgot.entity';
-import { User } from '@/modules/users/entity/user.entity';
-import { UserErrorCodes } from '@/shared/utils/constants/users/errors';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;

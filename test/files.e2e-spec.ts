@@ -1,3 +1,7 @@
+import { AppModule } from '@contactApp/app.module';
+import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { FilesErrorCodes } from '@contactApp/shared/utils/constants/files/errors';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -5,11 +9,6 @@ import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
 import { userData } from './mock-data/user';
-
-import { AppModule } from '@/app.module';
-import { FileEntity } from '@/modules/files/entities/file.entity';
-import { User } from '@/modules/users/entity/user.entity';
-import { FilesErrorCodes } from '@/shared/utils/constants/files/errors';
 
 describe('FileController (e2e)', () => {
   let app: INestApplication;
