@@ -1,10 +1,10 @@
+import { IsUniqueToContact } from '@contactApp/common/decorators/is-unique-to-contact.decorator';
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { EmailType } from '@contactApp/modules/email-types/entities/email-type.entity';
+import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsOptional, Validate } from 'class-validator';
 
-import { IsUniqueToContact } from '../../../common/decorators/is-unique-to-contact.decorator';
-import { EmailErrorCodes } from '../../../shared/utils/constants/emails/errors';
-import { Contact } from '../../contacts/entities/contact.entity';
-import { EmailType } from '../../email-types/entities/email-type.entity';
 import { Email } from '../entities/email.entity';
 
 export class CreateEmailDto {

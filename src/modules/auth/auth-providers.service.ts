@@ -1,10 +1,10 @@
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
-import { handleError } from '../../shared/utils/handlers/error.handler';
 import { User } from '../users/entity/user.entity';
 
 import { AuthProvidersEnum } from './auth-providers.enum';

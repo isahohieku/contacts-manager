@@ -1,10 +1,10 @@
+import { AddressErrorCodes } from '@contactApp/shared/utils/constants/addresses/errors';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { AddressErrorCodes } from '../../shared/utils/constants/addresses/errors';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { handleError } from '../../shared/utils/handlers/error.handler';
 import { AddressType } from '../address-types/entities/address-type.entity';
 import { ContactsService } from '../contacts/contacts.service';
 import { User } from '../users/entity/user.entity';

@@ -1,3 +1,6 @@
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import userResponseSerializer from '@contactApp/modules/users/user-response.serializer';
+import deepMapObject from '@contactApp/shared/utils/deep-map-object';
 import {
   Injectable,
   NestInterceptor,
@@ -6,10 +9,6 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { User } from '../../modules/users/entity/user.entity';
-import userResponseSerializer from '../../modules/users/user-response.serializer';
-import deepMapObject from '../../shared/utils/deep-map-object';
 
 @Injectable()
 export class SerializerInterceptor implements NestInterceptor {

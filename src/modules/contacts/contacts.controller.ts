@@ -1,3 +1,5 @@
+import { fileFilter } from '@contactApp/shared/utils/file-filter';
+import { SearchTypes } from '@contactApp/shared/utils/types/contacts.type';
 import {
   Controller,
   Get,
@@ -27,8 +29,6 @@ import {
 import { Response as Res } from 'express';
 import { memoryStorage } from 'multer';
 
-import { fileFilter } from '../../shared/utils/file-filter';
-import { SearchTypes } from '../../shared/utils/types/contacts.type';
 import { User } from '../users/entity/user.entity';
 
 import { ContactsService } from './contacts.service';

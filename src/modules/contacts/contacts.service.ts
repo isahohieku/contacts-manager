@@ -1,5 +1,19 @@
 import stream from 'stream';
 
+import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import {
+  detectSeparator,
+  processContactCleanup,
+} from '@contactApp/shared/utils/contact/contact-cleaning-helper';
+import {
+  allProperties,
+  searchTypes,
+} from '@contactApp/shared/utils/contact/helper';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
+import { genericFindManyWithPagination } from '@contactApp/shared/utils/infinity-pagination';
+import { SearchTypes } from '@contactApp/shared/utils/types/contacts.type';
+import { IPaginationOptions } from '@contactApp/shared/utils/types/pagination-options';
 import { Parser } from '@json2csv/plainjs';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,17 +21,6 @@ import set from 'lodash/set';
 import { CsvParser, ParsedData } from 'nest-csv-parser';
 import { FindManyOptions, ILike, Repository } from 'typeorm';
 
-import { ContactErrorCodes } from '../../shared/utils/constants/contacts/errors';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import {
-  detectSeparator,
-  processContactCleanup,
-} from '../../shared/utils/contact/contact-cleaning-helper';
-import { allProperties, searchTypes } from '../../shared/utils/contact/helper';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { genericFindManyWithPagination } from '../../shared/utils/infinity-pagination';
-import { SearchTypes } from '../../shared/utils/types/contacts.type';
-import { IPaginationOptions } from '../../shared/utils/types/pagination-options';
 import { FilesService } from '../files/files.service';
 import { TagsService } from '../tags/tags.service';
 import { User } from '../users/entity/user.entity';
@@ -247,7 +250,7 @@ export class ContactsService {
 
       // Return the CSV string
       return csv;
-    } catch (error) {
+    } catch {
       const errors = {
         contact: ContactErrorCodes.CSV_GENERATION_FAILED,
       };
@@ -304,7 +307,7 @@ export class ContactsService {
       return {
         message: 'Contacts imported successfully',
       };
-    } catch (error) {
+    } catch {
       const errors = {
         contact: ContactErrorCodes.CSV_IMPORT_FAILED,
       };

@@ -2,14 +2,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
 import multerS3 from 'multer-s3';
-
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { handleError } from '../../shared/utils/handlers/error.handler';
 
 import type { Response } from 'express';
 

@@ -1,3 +1,6 @@
+import appConfig from '@contactApp/configs/app.config';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { EntityBase } from '@contactApp/shared/entities/entity-helper';
 import { ApiProperty } from '@nestjs/swagger';
 import { Allow } from 'class-validator';
 import {
@@ -8,10 +11,6 @@ import {
   AfterInsert,
   ManyToOne,
 } from 'typeorm';
-
-import appConfig from '../../../configs/app.config';
-import { EntityBase } from '../../../shared/entities/entity-helper';
-import { User } from '../../users/entity/user.entity';
 
 @Entity({ name: 'file' })
 export class FileEntity extends EntityBase {

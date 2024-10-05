@@ -1,9 +1,9 @@
+import { fileFilter } from '@contactApp/shared/utils/file-filter';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { fileFilter } from '../../shared/utils/file-filter';
 import { FileStorageModule } from '../file-storage/file-storage.module';
 import { FileStorageService } from '../file-storage/file-storage.service';
 import { User } from '../users/entity/user.entity';

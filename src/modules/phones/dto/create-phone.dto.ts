@@ -1,10 +1,10 @@
+import { IsUniqueToContact } from '@contactApp/common/decorators/is-unique-to-contact.decorator';
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { PhoneType } from '@contactApp/modules/phone-types/entities/phone-type.entity';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, Validate } from 'class-validator';
 
-import { IsUniqueToContact } from '../../../common/decorators/is-unique-to-contact.decorator';
-import { ERROR_MESSAGES } from '../../../shared/utils/constants/generic/errors';
-import { Contact } from '../../contacts/entities/contact.entity';
-import { PhoneType } from '../../phone-types/entities/phone-type.entity';
 import { Phone } from '../entities/phone.entity';
 
 export class CreatePhoneDto {

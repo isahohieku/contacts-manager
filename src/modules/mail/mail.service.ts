@@ -1,9 +1,8 @@
+import confirmEmail from '@contactApp/shared/translations/confirm-email.json';
+import resetPassword from '@contactApp/shared/translations/reset-password.json';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-
-import confirmEmail from '../../shared/translations/confirm-email.json';
-import resetPassword from '../../shared/translations/reset-password.json';
 
 import { MailData } from './interfaces/mail-data.interface';
 

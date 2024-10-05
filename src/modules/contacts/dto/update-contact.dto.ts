@@ -1,8 +1,7 @@
+import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
-
-import { Tag } from '../../tags/entities/tag.entity';
 
 import { CreateContactDto } from './create-contact.dto';
 

@@ -1,11 +1,11 @@
+import { FilesErrorCodes } from '@contactApp/shared/utils/constants/files/errors';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { FilesErrorCodes } from '../../shared/utils/constants/files/errors';
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { handleError } from '../../shared/utils/handlers/error.handler';
 import { FileStorageService } from '../file-storage/file-storage.service';
 import { User } from '../users/entity/user.entity';
 

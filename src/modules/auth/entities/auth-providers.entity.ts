@@ -1,8 +1,8 @@
+import { EntityHelper } from '@contactApp/shared/entities/entity-helper';
 import { ApiProperty } from '@nestjs/swagger';
 import { Allow } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-import { EntityHelper } from '../../../shared/entities/entity-helper';
 import { AuthProvidersEnum } from '../auth-providers.enum';
 
 @Entity()

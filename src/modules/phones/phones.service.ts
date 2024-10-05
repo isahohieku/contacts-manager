@@ -1,12 +1,12 @@
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { PhoneNumberErrorCodes } from '@contactApp/shared/utils/constants/phone-numbers/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
+import { validatePhoneNumber } from '@contactApp/shared/utils/validators/phone-number';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CountryCode } from 'libphonenumber-js';
 import { Repository } from 'typeorm';
 
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { PhoneNumberErrorCodes } from '../../shared/utils/constants/phone-numbers/errors';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { validatePhoneNumber } from '../../shared/utils/validators/phone-number';
 import { ContactsService } from '../contacts/contacts.service';
 import { PhoneType } from '../phone-types/entities/phone-type.entity';
 import { User } from '../users/entity/user.entity';

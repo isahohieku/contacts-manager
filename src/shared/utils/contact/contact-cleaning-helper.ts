@@ -21,7 +21,7 @@ const parseStringArrays = (obj) => {
 
         // Recursively parse nested properties
         parseStringArrays(obj[key]);
-      } catch (e) {
+      } catch {
         // If JSON parsing fails, ignore and continue
       }
     } else if (typeof obj[key] === 'object' && obj[key] !== null) {

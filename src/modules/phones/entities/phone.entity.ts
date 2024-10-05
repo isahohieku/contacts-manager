@@ -1,8 +1,7 @@
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { PhoneType } from '@contactApp/modules/phone-types/entities/phone-type.entity';
+import { EntityBase } from '@contactApp/shared/entities/entity-helper';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-
-import { EntityBase } from '../../../shared/entities/entity-helper';
-import { Contact } from '../../contacts/entities/contact.entity';
-import { PhoneType } from '../../phone-types/entities/phone-type.entity';
 
 @Entity()
 export class Phone extends EntityBase {

@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 
+import appConfig from '@contactApp/configs/app.config';
+import databaseConfig from '@contactApp/configs/database.config';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
-import appConfig from '../../configs/app.config';
-import databaseConfig from '../../configs/database.config';
 import { TypeOrmConfigService } from '../typeorm-config.service';
 
 @Module({

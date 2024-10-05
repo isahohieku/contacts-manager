@@ -1,13 +1,12 @@
+import { IsExist } from '@contactApp/common/decorators/is-exists.decorator';
+import { AuthRegisterLoginDto } from '@contactApp/modules/auth/dto/auth-register-login.dto';
+import { Role } from '@contactApp/modules/roles/entities/role.entity';
+import { RoleEnum } from '@contactApp/modules/roles/roles.enum';
+import { Status } from '@contactApp/modules/statuses/entities/status.entity';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { StatusEnum } from '@contactApp/shared/utils/types/statuses.type';
 import { ApiProperty } from '@nestjs/swagger';
 import { Validate, IsOptional } from 'class-validator';
-
-import { IsExist } from '../../../common/decorators/is-exists.decorator';
-import { AuthRegisterLoginDto } from '../../../modules/auth/dto/auth-register-login.dto';
-import { ERROR_MESSAGES } from '../../../shared/utils/constants/generic/errors';
-import { StatusEnum } from '../../../shared/utils/types/statuses.type';
-import { Role } from '../../roles/entities/role.entity';
-import { RoleEnum } from '../../roles/roles.enum';
-import { Status } from '../../statuses/entities/status.entity';
 
 export class CreateUserDto extends AuthRegisterLoginDto {
   @ApiProperty({ example: 'https://s3.....' })

@@ -1,3 +1,4 @@
+import { FileTypes } from '@contactApp/shared/utils/types/files.type';
 import {
   Controller,
   Delete,
@@ -20,7 +21,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { FileTypes } from '../../shared/utils/types/files.type';
 import { FileStorageService } from '../file-storage/file-storage.service';
 
 import { FilesService } from './files.service';

@@ -1,15 +1,15 @@
 import * as crypto from 'crypto';
 
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
+import { genericFindManyWithPagination } from '@contactApp/shared/utils/infinity-pagination';
+import { IPaginationOptions } from '@contactApp/shared/utils/types/pagination-options';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 
-import { ERROR_MESSAGES } from '../../shared/utils/constants/generic/errors';
-import { UserErrorCodes } from '../../shared/utils/constants/users/errors';
-import { handleError } from '../../shared/utils/handlers/error.handler';
-import { genericFindManyWithPagination } from '../../shared/utils/infinity-pagination';
-import { IPaginationOptions } from '../../shared/utils/types/pagination-options';
 import { MailService } from '../mail/mail.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
