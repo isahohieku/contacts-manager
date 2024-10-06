@@ -10,8 +10,8 @@ type JwtPayload = Pick<User, 'id'> & { iat: number; exp: number };
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -19,6 +19,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  /**
+   * Validate the payload of the JWT.
+   *
+   * @param payload - The payload to validate.
+   * @returns The validated payload.
+   * @throws UnauthorizedException if the payload is invalid.
+   */
   public validate(payload: JwtPayload) {
     if (!payload.id) {
       throw new UnauthorizedException();
