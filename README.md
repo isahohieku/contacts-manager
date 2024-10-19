@@ -1,73 +1,181 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<!-- README.md -->
++ [![cov](https://isahohieku.github.io/contacts-manager/badges/coverage.svg)](https://github.com/isahohieku/contacts-manager/actions)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Contacts manager API
 
-## Description
+## Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The Contact Manager API provides developers with a robust set of endpoints to manage contacts efficiently within their applications. It allows users to create, retrieve, update, and delete contacts, as well as perform various operations such as searching, sorting, and filtering. It provides endpoints for creating, reading, updating and deleting contacts. Each contact has a first name, last name, email address, phone number, address and more. The API is built using NestJS and uses a PostgreSQL database.
 
-## Installation
+Overall, the Contact Manager API simplifies contact management for developers, offering a reliable and scalable solution for applications that require contact organization and interaction. Whether it's a mobile app, web app, or backend service, developers can leverage this API to enhance their applications with robust contact management capabilities.
 
-```bash
-$ yarn install
+## Features
+
+### Contact Management:
+
+- **Create Contact**: Create new contacts by providing details such as name, phone number, email, etc.
+- **Retrieve Contact**: Retrieve individual or multiple contacts using search criteria like name, phone number, or email.
+- **Update Contact**: Modify existing contact information such as adding new details or editing existing ones.
+- **Delete Contact**: Remove contacts from the database by specifying their contact ID or other identifiers.
+- **Search Contacts**: Quickly search for contacts by various attributes like name, phone, email, or tags.
+- **Sort Contacts**: Organize contacts based on criteria like name, creation date, or last updated date.
+- **Filter Contacts**: Apply filters to retrieve contacts that meet certain conditions (e.g., specific categories or tags).
+- **Pagination**: Handle large sets of contact data efficiently with paginated responses.
+
+### Admin and User Management:
+
+#### Admin Role:
+Admins have full control over the contact management system, including the ability to create, update, and delete users, contacts, and configurations.
+
+- Admins can manage user roles and permissions, ensuring that only authorized users have access to sensitive operations.
+- Admins can view and manage the activity of all users and contacts within the system.
+- Admins can assign specific roles (e.g., standard user, moderator, etc.) to other users.
+
+#### User Role:
+Standard users can create and manage their own contacts.
+
+- Users can access only the contacts and resources assigned to them, based on role-based access control (RBAC).
+- Users can update their own account details and preferences, but do not have access to admin-level operations.
+- Users can collaborate with others, sharing certain contacts if granted permission by an admin.
+
+#### Authentication and Authorization:
+
+- Supports secure user authentication mechanisms such as JWT (JSON Web Tokens) or OAuth for token-based access control.
+
+- **Role-Based Access Control (RBAC)**: Ensures that different levels of users (admin, standard users) have appropriate permissions to access or modify data.
+
+#### User Management:
+
+- **User Registration and Login**: Allows users to register and log in to the system, managing their own credentials.
+- **User Profiles**: Each user has a profile containing personal and account information, which they can manage.
+- **Reset Password**: Users can reset their passwords securely through email verification or other multi-factor authentication (MFA) methods.
+- **View User List (Admin)**: Admins can view a list of all registered users and manage their accounts.
+- **Deactivate/Delete User (Admin)**: Admins have the authority to deactivate or delete user accounts.
+Audit Logs (Admin):
+
+### Error Handling:
+
+- Clear, descriptive error messages and HTTP status codes are provided for easier debugging and handling of issues.
+
+### Search and Filters:
+
+- Perform advanced searches based on multiple parameters such as contact names, phone numbers, or email addresses.
+
+- Filters and sorting options help users quickly navigate through large lists of contacts.
+
+### Data Security and Privacy:
+
+- Data is encrypted to ensure the privacy and security of contacts and user information.
+
+- Access to sensitive data is restricted based on the user’s role (admin or standard user).
+
+### Versioning:
+
+API versioning is supported to ensure backward compatibility and smooth transitions when new features are introduced.
+
+### Comprehensive Documentation:
+
+Detailed API documentation, including usage instructions, example requests, and responses, is provided to assist developers in integration.
+
+
+## Technologies Used
+- **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications.
+- **TypeScript**: Typed superset of JavaScript for better code quality and maintainability.
+- **PostgreSQL**: Relational database management system.
+- **TypeORM**: ORM for TypeScript and JavaScript.
+- **Swagger**: API documentation.
+- **Docker**: Containerization for development and deployment.
+- **Jest**: Testing framework for JavaScript.
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (version 14.x or later)
+- [PostgreSQL](https://www.postgresql.org/) (version 12 or later)
+- [Docker](https://www.docker.com/) (optional, for containerized development)
+- [Git](https://git-scm.com/)
+
+### Installation
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/isahohieku/contacts-manager.git
+   cd contacts-manager
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   yarn install
+   ```
+
+3. **Set Up Environment Variables**
+
+   Rename `env-example` file to `.env` in the root directory and modify environment variables where necessary
+
+
+4. **Run the Database Migrations**
+
+   Run migrations to set up the database schema:
+
+   ```bash
+   yarn run migration:run
+   ```
+
+5. **Seed Database**
+
+   Seed databse with necessary data:
+
+   ```bash
+   yarn run seed:run
+   ```
+
+6. **Start mail server**
+
+   To run the local mail server:
+
+   ```bash
+   docker compose up maildev
+   ```
+
+7. **Start Application**
+
+   ```bash
+   yarn run start:dev
+   ```
+
+   The API should now be running at `http://localhost:3000`.
+
+### API Documentation
+
+The API is documented using Swagger. Once the server is running, you can access the API documentation at:
+
+```
+http://localhost:3000/docs
 ```
 
-## Running the app
+### Testing
 
-```bash
-# development
-$ yarn run start
+To test the app with jest, run
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+```
+yarn run test:e2e
 ```
 
-## Test
+For test coverage, run
 
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+```
+yarn run test:e2e:cov
 ```
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Contributing
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Contributions are welcome! Please fork the repository, make your changes, and submit a pull request.
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
