@@ -1,6 +1,6 @@
 
 <!-- README.md -->
-+ [![cov](https://isahohieku.github.io/contacts-manager/badges/coverage.svg)](https://github.com/isahohieku/contacts-manager/actions)
+[![Coverage](https://codecov.io/gh/isahohieku/contacts-manager/graph/badge.svg?token=1RHWQZT1DJ)](https://codecov.io/gh/isahohieku/contacts-manager)
 
 # Contacts manager API
 
