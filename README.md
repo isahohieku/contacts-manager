@@ -1,6 +1,6 @@
 
 <!-- README.md -->
-![Build](https://github.com/isahohieku/contacts-manager/actions/workflows/integration.yml/badge.svg?branch=dev)
+![Build](https://github.com/isahohieku/contacts-manager/actions/workflows/integration.yml/badge.svg?branch=main)
 [![Coverage](https://codecov.io/gh/isahohieku/contacts-manager/graph/badge.svg?token=1RHWQZT1DJ)](https://codecov.io/gh/isahohieku/contacts-manager)
 
 # Contacts manager API
