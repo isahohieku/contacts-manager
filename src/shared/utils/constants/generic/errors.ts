@@ -18,4 +18,5 @@ export const ERROR_MESSAGES = {
     "We're sorry, but something went wrong on our end. Please try again later. If the problem persists, contact our support team for assistance.",
   NO_FILE: 'File is required',
   FORBIDDEN_RESOURCE: 'You do not have permission to access this resource',
+  UNAUTHORIZED: 'Unauthorized user',
 };

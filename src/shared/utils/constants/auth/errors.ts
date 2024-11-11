@@ -1,0 +1,4 @@
+export enum AuthErrorCodes {
+  SESSION_EXPIRED = 'ERR_SESSION_EXPIRED',
+  UNAUTHORIZED = 'ERR_UNAUTHORIZED',
+}

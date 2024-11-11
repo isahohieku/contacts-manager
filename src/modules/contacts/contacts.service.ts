@@ -88,6 +88,7 @@ export class ContactsService {
     };
 
     // TODO: Improve search performance
+    // TODO: Add sorting feature
     if (search && !type) {
       baseQuery.where = [
         ...allProperties.map((property) => {
