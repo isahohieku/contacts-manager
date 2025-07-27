@@ -1,13 +1,16 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ThrottlerModule } from '@nestjs/throttler';
+
 
 import appConfig from './configs/app.config';
 import authConfig from './configs/auth.config';
 import databaseConfig from './configs/database.config';
 import fileConfig from './configs/file.config';
 import mailConfig from './configs/mail.config';
+import cacheConfig from './configs/cache.config';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -21,20 +24,34 @@ import { MailModule } from './modules/mail/mail.module';
 import { PhonesModule } from './modules/phones/phones.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { UsersModule } from './modules/users/users.module';
+import { HealthModule } from './modules/health/health.module';
+import { MonitoringModule } from './modules/monitoring/monitoring.module';
+import { SecurityMiddleware } from './common/middleware/security.middleware';
+import { RequestLoggingMiddleware } from './common/middleware/request-logging.middleware';
+import { CommonModule } from './common/common.module';
+import { CacheModule } from './common/cache/cache.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig],
+      load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig, cacheConfig],
       envFilePath: ['.env'],
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 100, // 100 requests per minute
+      },
+    ]),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
     }),
     MailerModule.forRootAsync({
       useClass: MailConfigService,
     }),
+    CommonModule,
+    CacheModule,
     AddressesModule,
     AuthModule,
     ContactsModule,
@@ -46,6 +63,16 @@ import { UsersModule } from './modules/users/users.module';
     PhonesModule,
     TagsModule,
     UsersModule,
+    HealthModule,
+    MonitoringModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(RequestLoggingMiddleware)
+      .forRoutes('*')
+      .apply(SecurityMiddleware)
+      .forRoutes('*');
+  }
+}

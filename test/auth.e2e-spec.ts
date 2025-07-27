@@ -8,12 +8,11 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
-import { userSignUpDetails } from './mock-data/user';
-
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
-  let userDbData = null;
-  let loggedInUser = null;
+  let userDbData: any = null;
+  let loggedInUser: any = null;
+  let userSignUpDetails: any;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -101,6 +100,9 @@ describe('AuthController (e2e)', () => {
         id: userDbData.id,
       },
     });
+    if (!user) {
+      throw new Error('User not found');
+    }
     return request(app.getHttpServer())
       .post('/api/auth/email/confirm')
       .send({
@@ -233,6 +235,10 @@ describe('AuthController (e2e)', () => {
         },
       },
     });
+
+    if (!userForgotPassword) {
+      throw new Error('Forgot password record not found');
+    }
 
     return request(app.getHttpServer())
       .post('/api/auth/reset/password')

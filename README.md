@@ -1,19 +1,85 @@
 
-<!-- README.md -->
+# Contact Management API
+
 ![Build](https://github.com/isahohieku/contacts-manager/actions/workflows/integration.yml/badge.svg?branch=main)
 [![Coverage](https://codecov.io/gh/isahohieku/contacts-manager/graph/badge.svg?token=1RHWQZT1DJ)](https://codecov.io/gh/isahohieku/contacts-manager)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
 
-# Contacts manager API
+A comprehensive, production-ready Contact Management API built with NestJS, TypeScript, and PostgreSQL. This API provides robust contact management capabilities with advanced features like caching, security, file management, and real-time search.
 
-## Overview
+## 🚀 Quick Start
 
-The Contact Manager API provides developers with a robust set of endpoints to manage contacts efficiently within their applications. It allows users to create, retrieve, update, and delete contacts, as well as perform various operations such as searching, sorting, and filtering. It provides endpoints for creating, reading, updating and deleting contacts. Each contact has a first name, last name, email address, phone number, address and more. The API is built using NestJS and uses a PostgreSQL database.
+```bash
+# Clone the repository
+git clone https://github.com/isahohieku/contacts-manager.git
+cd contacts-manager
 
-Overall, the Contact Manager API simplifies contact management for developers, offering a reliable and scalable solution for applications that require contact organization and interaction. Whether it's a mobile app, web app, or backend service, developers can leverage this API to enhance their applications with robust contact management capabilities.
+# Install dependencies
+yarn install
 
-## Features
+# Set up environment
+cp env-example .env
 
-### Contact Management:
+# Start with Docker (recommended)
+docker-compose up -d
+
+# Run migrations and seed data
+yarn run migration:run
+yarn run seed:run
+
+# Start the application
+yarn run start:dev
+```
+
+**API Documentation**: [http://localhost:3000/docs](http://localhost:3000/docs)
+
+## 📋 Overview
+
+The Contact Manager API is a enterprise-grade solution that provides developers with a comprehensive set of endpoints to manage contacts efficiently. Built with modern technologies and best practices, it offers:
+
+- **Complete Contact Management**: Full CRUD operations with advanced search and filtering
+- **User Authentication**: JWT-based auth with role-based access control
+- **File Management**: Avatar uploads with AWS S3 and local storage support
+- **Performance Optimization**: Redis caching and database query optimization
+- **Security**: Comprehensive security measures including rate limiting and input validation
+- **Scalability**: Designed for high-performance production environments
+
+## ✨ Key Features
+
+### 📱 Contact Management
+- **Complete CRUD Operations**: Create, read, update, and delete contacts
+- **Rich Contact Details**: Names, organizations, job titles, birthdays, anniversaries
+- **Multiple Contact Methods**: Emails, phone numbers, and addresses per contact
+- **File Attachments**: Avatar uploads and file management
+- **Advanced Search**: Full-text search across all contact fields
+- **Tagging System**: Organize contacts with custom tags
+- **Data Export**: CSV export functionality
+
+### 🔐 Authentication & Security
+- **JWT Authentication**: Secure token-based authentication
+- **Role-Based Access Control**: Admin and user roles with different permissions
+- **Email Verification**: Account confirmation via email
+- **Password Reset**: Secure password reset flow
+- **Rate Limiting**: Protection against abuse (100 requests/minute)
+- **Input Validation**: Comprehensive data validation and sanitization
+- **Security Headers**: Helmet.js for security best practices
+
+### 🚀 Performance & Scalability
+- **Redis Caching**: Intelligent caching for improved response times
+- **Database Optimization**: Query optimization and connection pooling
+- **Response Compression**: Gzip compression for reduced bandwidth
+- **Pagination**: Efficient data pagination for large datasets
+- **Connection Pooling**: Optimized database connections
+
+### 📁 File Management
+- **Multiple Storage Options**: AWS S3 and local file storage
+- **Image Processing**: Avatar upload and processing
+- **File Validation**: Type and size validation
+- **Secure Access**: Protected file access with authentication
+
+### 🔍 Advanced Features
 
 - **Create Contact**: Create new contacts by providing details such as name, phone number, email, etc.
 - **Retrieve Contact**: Retrieve individual or multiple contacts using search criteria like name, phone number, or email.
@@ -139,7 +205,7 @@ Detailed API documentation, including usage instructions, example requests, and 
    To run the local mail server:
 
    ```bash
-   docker compose up maildev
+   docker-compose up maildev
    ```
 
 7. **Start Application**

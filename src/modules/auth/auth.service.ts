@@ -98,6 +98,14 @@ export class AuthService {
 
     // Step 4: Validate the provider
     // Get the provider handler for the provider
+    if (!user.provider?.id) {
+      throw handleError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.INVALID_PROVIDER,
+        { provider: UserErrorCodes.INVALID_PROVIDER },
+      );
+    }
+
     const providerHandler = this.validateProvider(
       loginDto.provider.id,
       user.provider.id,
@@ -177,7 +185,7 @@ export class AuthService {
 
     await this.forgotService.create({
       hash,
-      user,
+      user: user || undefined,
     });
 
     await this.mailService.forgotPassword({
@@ -221,12 +229,22 @@ export class AuthService {
    * @return {Promise<User>} The user's data.
    */
   async me(user: User): Promise<User> {
-    return this.usersService.findOne(
+    const foundUser = await this.usersService.findOne(
       {
         id: user.id,
       },
       false,
     );
+
+    if (!foundUser) {
+      throw handleError(
+        HttpStatus.NOT_FOUND,
+        ERROR_MESSAGES.NOT_FOUND('User', user.id),
+        { user: UserErrorCodes.NOT_FOUND },
+      );
+    }
+
+    return foundUser;
   }
 
   /**
@@ -257,6 +275,14 @@ export class AuthService {
         false,
       );
 
+      if (!currentUser) {
+        throw handleError(
+          HttpStatus.NOT_FOUND,
+          ERROR_MESSAGES.NOT_FOUND('User', existingUser.id),
+          { user: UserErrorCodes.NOT_FOUND },
+        );
+      }
+
       const isValidOldPassword = await bcrypt.compare(
         oldPassword,
         currentUser.password,
@@ -275,12 +301,22 @@ export class AuthService {
 
     await this.usersService.update(existingUser.id, updateDto as UpdateUserDto);
 
-    return this.usersService.findOne(
+    const updatedUser = await this.usersService.findOne(
       {
         id: existingUser.id,
       },
       false,
     );
+
+    if (!updatedUser) {
+      throw handleError(
+        HttpStatus.NOT_FOUND,
+        ERROR_MESSAGES.NOT_FOUND('User', existingUser.id),
+        { user: UserErrorCodes.NOT_FOUND },
+      );
+    }
+
+    return updatedUser;
   }
 
   /**
@@ -303,7 +339,7 @@ export class AuthService {
    */
   private validateUserStatusAndRole(user: User, onlyAdmin: boolean): void {
     // If the user is not active, throw a 401 error
-    if (user.status.id !== StatusEnum.active) {
+    if (user.status?.id !== StatusEnum.active) {
       const errors = {
         provider: UserErrorCodes.UNVERIFIED_USER,
       };
@@ -316,7 +352,7 @@ export class AuthService {
     }
 
     // If we want to only allow admins to log in, make sure the user is an admin
-    if (onlyAdmin && user.role.id !== RoleEnum.admin) {
+    if (onlyAdmin && user.role?.id !== RoleEnum.admin) {
       const errors = {
         user: UserErrorCodes.FORBIDDEN_RESOURCE,
       };
@@ -358,6 +394,14 @@ export class AuthService {
     }
 
     // If we've made it this far, the provider is valid, so we call the provider's handler
+    if (!provider?.name) {
+      throw handleError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.INVALID_PROVIDER,
+        { provider: UserErrorCodes.INVALID_PROVIDER },
+      );
+    }
+
     const providerHandler = this.authProvidersService.handleLogin(
       provider.name,
     );

@@ -7,5 +7,5 @@ export const contactData = {
   anniversary: '2006-01-01',
   avatar: null,
   notes: 'Wonderful note',
-  id: undefined,
+  id: undefined as number | undefined,
 };

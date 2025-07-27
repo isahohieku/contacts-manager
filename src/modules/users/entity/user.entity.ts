@@ -24,13 +24,13 @@ export class User extends EntityUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ type: 'varchar', unique: true, nullable: true })
   email: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   avatar: string | null;
 
   public previousPassword: string;
@@ -55,11 +55,11 @@ export class User extends EntityUser {
   provider?: AuthProvider;
 
   @Index()
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   firstName: string | null;
 
   @Index()
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   lastName: string | null;
 
   @ManyToOne(() => Role, {
@@ -77,7 +77,7 @@ export class User extends EntityUser {
   })
   country: Country;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   @Index()
   hash: string | null;
 

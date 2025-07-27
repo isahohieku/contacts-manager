@@ -5,6 +5,6 @@ export const addressData = {
   postal_code: '810103',
   country: { id: 162 },
   address_type: { id: 1 },
-  contact: undefined,
-  id: undefined,
+  contact: undefined as any,
+  id: undefined as number | undefined,
 };

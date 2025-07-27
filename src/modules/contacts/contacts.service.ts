@@ -24,6 +24,7 @@ import { FindManyOptions, ILike, Repository } from 'typeorm';
 import { FilesService } from '../files/files.service';
 import { TagsService } from '../tags/tags.service';
 import { User } from '../users/entity/user.entity';
+import { CacheService } from '../../common/services/cache.service';
 
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -45,6 +46,7 @@ export class ContactsService {
     private readonly tagsService: TagsService,
     private readonly fileService: FilesService,
     private readonly csvParser: CsvParser,
+    private readonly cacheService: CacheService,
   ) {}
 
   /**
@@ -61,6 +63,10 @@ export class ContactsService {
         owner: user,
       }),
     );
+
+    // Invalidate contacts cache for this user
+    await this.cacheService.invalidateContactsCache(user.id);
+
     return contact;
   }
 
@@ -79,15 +85,31 @@ export class ContactsService {
     type: SearchTypes,
     user: User,
   ) {
+    // Generate cache key
+    const cacheKey = this.cacheService.generateContactsCacheKey(
+      user.id,
+      options.page,
+      options.limit,
+      search,
+      type,
+    );
+
+    // Try to get from cache first
+    const cachedResult = await this.cacheService.get(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
     const baseQuery: FindManyOptions<Contact> = {
       where: {
         owner: {
           id: user.id,
         },
       },
+      relations: ['phone_numbers', 'emails', 'addresses', 'tags', 'avatar'], // Optimize relations loading
     };
 
-    // TODO: Improve search performance
+    // TODO: Improve search performance with database indexes
     // TODO: Add sorting feature
     if (search && !type) {
       baseQuery.where = [
@@ -113,11 +135,16 @@ export class ContactsService {
       ];
     }
 
-    return genericFindManyWithPagination(
+    const result = await genericFindManyWithPagination(
       this.contactsRepository,
       baseQuery,
       options,
     );
+
+    // Cache the result for 5 minutes
+    await this.cacheService.set(cacheKey, result, 300);
+
+    return result;
   }
 
   /**
@@ -129,6 +156,15 @@ export class ContactsService {
    * @throws {Error} If the contact is not found, with a NOT_FOUND status code.
    */
   async findOne(user: User, id: number) {
+    // Generate cache key
+    const cacheKey = this.cacheService.generateContactCacheKey(id);
+
+    // Try to get from cache first
+    const cachedContact = await this.cacheService.get(cacheKey);
+    if (cachedContact) {
+      return cachedContact;
+    }
+
     const contact = await this.contactsRepository.findOne({
       where: {
         id,
@@ -136,9 +172,12 @@ export class ContactsService {
           id: user.id,
         },
       },
+      relations: ['phone_numbers', 'emails', 'addresses', 'tags', 'avatar'],
     });
 
     if (contact) {
+      // Cache the contact for 10 minutes
+      await this.cacheService.set(cacheKey, contact, 600);
       return contact;
     }
 
@@ -168,18 +207,18 @@ export class ContactsService {
 
     if (tags?.length) {
       await Promise.all(
-        updateContactDto.tags.map((tag) =>
+        updateContactDto.tags?.map((tag) =>
           this.tagsService.findOne(user, tag.id),
-        ),
+        ) || [],
       );
     }
 
     if (
       updateContactDto.avatar &&
-      existingContact.avatar?.id !== updateContactDto.avatar.id
+      (existingContact as any).avatar?.id !== updateContactDto.avatar.id
     ) {
-      if (existingContact.avatar) {
-        await this.fileService.removeFile(user, existingContact.avatar.path);
+      if ((existingContact as any).avatar) {
+        await this.fileService.removeFile(user, (existingContact as any).avatar.path);
       }
     }
 
@@ -285,7 +324,7 @@ export class ContactsService {
       const separator = await detectSeparator(bufferStreamForSeparator);
 
       const { list: contacts }: ParsedData<Contact> =
-        await this.csvParser.parse(bufferStreamForParser, Contact, null, null, {
+        await this.csvParser.parse(bufferStreamForParser, Contact, undefined, undefined, {
           separator,
         });
 

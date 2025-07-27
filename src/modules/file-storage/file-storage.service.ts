@@ -19,10 +19,10 @@ export class FileStorageService {
   constructor(private readonly configService: ConfigService) {
     // Initialize the AWS S3 client
     this.s3Client = new S3Client({
-      region: this.configService.get('file.awsS3Region'),
+      region: this.configService.get('file.awsS3Region') || 'us-east-1',
       credentials: {
-        accessKeyId: this.configService.get('file.accessKeyId'),
-        secretAccessKey: this.configService.get('file.secretAccessKey'),
+        accessKeyId: this.configService.get('file.accessKeyId') || '',
+        secretAccessKey: this.configService.get('file.secretAccessKey') || '',
       },
     });
   }
@@ -45,7 +45,7 @@ export class FileStorageService {
     return diskStorage({
       destination: './files',
       filename: (_, file, callback) => {
-        const fileExt = file.originalname.split('.').pop().toLowerCase();
+        const fileExt = file.originalname.split('.').pop()?.toLowerCase() || 'txt';
         callback(null, `${randomStringGenerator()}.${fileExt}`);
       },
     });
@@ -58,12 +58,12 @@ export class FileStorageService {
    */
   private getS3Storage() {
     return multerS3({
-      s3: this.s3Client,
-      bucket: this.configService.get('file.awsDefaultS3Bucket'),
+      s3: this.s3Client as any,
+      bucket: this.configService.get('file.awsDefaultS3Bucket') || 'default-bucket',
       acl: 'public-read',
       contentType: multerS3.AUTO_CONTENT_TYPE,
       key: (_, file, callback) => {
-        const fileExt = file.originalname.split('.').pop().toLowerCase();
+        const fileExt = file.originalname.split('.').pop()?.toLowerCase() || 'txt';
         callback(null, `${randomStringGenerator()}.${fileExt}`);
       },
     });
@@ -77,7 +77,7 @@ export class FileStorageService {
    */
   private removeFromLocalStorage(filePath: string) {
     const file = filePath.split('/').pop();
-    const fullPath = path.join(__dirname, '..', '..', '..', 'files', file);
+    const fullPath = path.join(__dirname, '..', '..', '..', 'files', file || '');
 
     fs.unlink(fullPath, (err) => {
       if (err) {

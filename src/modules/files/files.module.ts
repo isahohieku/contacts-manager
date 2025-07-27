@@ -26,7 +26,7 @@ import { FilesService } from './files.service';
         fileFilter,
         storage: await fileStorageService.getStorage(),
         limits: {
-          fileSize: parseInt(configService.get<string>('file.maxFileSize'), 10),
+          fileSize: parseInt(configService.get<string>('file.maxFileSize') || '10485760', 10),
         },
       }),
     }),

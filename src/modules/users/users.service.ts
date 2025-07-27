@@ -35,7 +35,7 @@ export class UsersService {
     );
 
     await this.mailService.userSignUp({
-      to: user.email,
+      to: user.email || '',
       data: {
         hash,
       },

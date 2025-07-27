@@ -19,9 +19,17 @@ module.exports = {
   ignorePatterns: ['.eslintrc.js'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'warn',
+    '@typescript-eslint/explicit-module-boundary-types': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-inferrable-types': 'error',
+    '@typescript-eslint/prefer-optional-chain': 'error',
+    '@typescript-eslint/prefer-nullish-coalescing': 'off',
+    'no-console': 'warn',
+    'no-debugger': 'error',
+    'prefer-const': 'error',
+    'no-var': 'error',
     "import/order": [
       "error",
       {
