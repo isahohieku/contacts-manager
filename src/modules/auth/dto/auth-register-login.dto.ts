@@ -1,8 +1,3 @@
-import { IsNotExist } from '@contactApp/common/decorators/is-not-exists.decorator';
-import { Country } from '@contactApp/modules/countries/entities/country.entity';
-import { RoleEnum } from '@contactApp/modules/roles/roles.enum';
-import { StatusEnum } from '@contactApp/modules/statuses/statuses.enum';
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
@@ -12,6 +7,12 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
+
+import { IsNotExist } from '@contactApp/common/decorators/is-not-exists.decorator';
+import { Country } from '@contactApp/modules/countries/entities/country.entity';
+import { RoleEnum } from '@contactApp/modules/roles/roles.enum';
+import { StatusEnum } from '@contactApp/modules/statuses/statuses.enum';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 
 import { AuthProvider } from '../entities/auth-providers.entity';
 

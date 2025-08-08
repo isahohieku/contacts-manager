@@ -1,10 +1,3 @@
-import { Address } from '@contactApp/modules/addresses/entities/address.entity';
-import { Email } from '@contactApp/modules/emails/entities/email.entity';
-import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
-import { Phone } from '@contactApp/modules/phones/entities/phone.entity';
-import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { EntityBase } from '@contactApp/shared/entities/entity-helper';
 import {
   Column,
   Entity,
@@ -16,6 +9,14 @@ import {
   JoinTable,
   OneToOne,
 } from 'typeorm';
+
+import { Address } from '@contactApp/modules/addresses/entities/address.entity';
+import { Email } from '@contactApp/modules/emails/entities/email.entity';
+import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
+import { Phone } from '@contactApp/modules/phones/entities/phone.entity';
+import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { EntityBase } from '@contactApp/shared/entities/entity-helper';
 
 @Entity()
 export class Contact extends EntityBase {

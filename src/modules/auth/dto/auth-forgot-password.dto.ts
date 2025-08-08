@@ -1,7 +1,8 @@
-import { IsExist } from '@contactApp/common/decorators/is-exists.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, Validate } from 'class-validator';
+
+import { IsExist } from '@contactApp/common/decorators/is-exists.decorator';
 
 export class AuthForgotPasswordDto {
   @ApiProperty({ example: 'john.doe@example.com' })

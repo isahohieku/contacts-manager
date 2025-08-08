@@ -1,7 +1,8 @@
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
 import { EmailType } from '@contactApp/modules/email-types/entities/email-type.entity';
 import { EntityBase } from '@contactApp/shared/entities/entity-helper';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Email extends EntityBase {

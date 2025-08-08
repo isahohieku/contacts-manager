@@ -1,8 +1,9 @@
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { AddressType } from '@contactApp/modules/address-types/entities/address-type.entity';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
 import { Country } from '@contactApp/modules/countries/entities/country.entity';
 import { EntityBase } from '@contactApp/shared/entities/entity-helper';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Address extends EntityBase {
