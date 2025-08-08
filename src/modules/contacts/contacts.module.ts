@@ -10,7 +10,6 @@ import { Phone } from '../phones/entities/phone.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { TagsService } from '../tags/tags.service';
 
-
 import { ContactsController } from './contacts.controller';
 import { ContactsService } from './contacts.service';
 import { Contact } from './entities/contact.entity';

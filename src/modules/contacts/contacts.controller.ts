@@ -1,5 +1,3 @@
-import { fileFilter } from '@contactApp/shared/utils/file-filter';
-import { SearchTypes } from '@contactApp/shared/utils/types/contacts.type';
 import {
   Controller,
   Get,
@@ -31,6 +29,9 @@ import {
 } from '@nestjs/swagger';
 import { Response as Res } from 'express';
 import { memoryStorage } from 'multer';
+
+import { fileFilter } from '@contactApp/shared/utils/file-filter';
+import { SearchTypes } from '@contactApp/shared/utils/types/contacts.type';
 
 import { User } from '../users/entity/user.entity';
 
