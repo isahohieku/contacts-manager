@@ -1,9 +1,10 @@
-import { repositories } from '@contactApp/shared/entities/all-entities';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
+
+import { repositories } from '@contactApp/shared/entities/all-entities';
 
 type ValidationEntity =
   | {

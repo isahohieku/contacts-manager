@@ -1,9 +1,10 @@
-import { repositories } from '@contactApp/shared/entities/all-entities';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
+
+import { repositories } from '@contactApp/shared/entities/all-entities';
 
 @ValidatorConstraint({ name: 'IsExist', async: true })
 export class IsExist implements ValidatorConstraintInterface {

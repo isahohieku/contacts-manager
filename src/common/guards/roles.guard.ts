@@ -1,6 +1,3 @@
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import {
   Injectable,
   CanActivate,
@@ -8,6 +5,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

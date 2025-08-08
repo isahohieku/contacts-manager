@@ -1,10 +1,11 @@
-import { CreateEmailDto } from '@contactApp/modules/emails/dto/create-email.dto';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
 import set from 'lodash/set';
+
+import { CreateEmailDto } from '@contactApp/modules/emails/dto/create-email.dto';
 
 @ValidatorConstraint({ name: 'IsUniqueToContact', async: true })
 export class IsUniqueToContact implements ValidatorConstraintInterface {
