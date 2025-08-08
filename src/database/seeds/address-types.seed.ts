@@ -1,19 +1,18 @@
-import { Connection } from 'typeorm';
-import { Factory, Seeder } from 'typeorm-seeding';
+import { DataSource } from 'typeorm';
 
 import { AddressTypeEnum } from '../../modules/address-types/address-type.enum';
 import { AddressType } from '../../modules/address-types/entities/address-type.entity';
 
-export default class CreateAddressType implements Seeder {
-  public async run(factory: Factory, connection: Connection): Promise<void> {
-    const count = await connection
+export default class CreateAddressType {
+  public async run(factory: any, dataSource: DataSource): Promise<void> {
+    const count = await dataSource
       .createQueryBuilder()
       .select()
       .from(AddressType, 'AddressType')
       .getCount();
 
     if (count === 0) {
-      await connection
+      await dataSource
         .createQueryBuilder()
         .insert()
         .into(AddressType)

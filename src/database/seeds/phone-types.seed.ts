@@ -1,19 +1,18 @@
-import { Connection } from 'typeorm';
-import { Factory, Seeder } from 'typeorm-seeding';
+import { DataSource } from 'typeorm';
 
 import { PhoneType } from '../../modules/phone-types/entities/phone-type.entity';
 import { PhoneTypeEnum } from '../../modules/phone-types/phone-type.enum';
 
-export default class CreatePhoneType implements Seeder {
-  public async run(factory: Factory, connection: Connection): Promise<void> {
-    const count = await connection
+export default class CreatePhoneType {
+  public async run(factory: any, dataSource: DataSource): Promise<void> {
+    const count = await dataSource
       .createQueryBuilder()
       .select()
       .from(PhoneType, 'PhoneType')
       .getCount();
 
     if (count === 0) {
-      await connection
+      await dataSource
         .createQueryBuilder()
         .insert()
         .into(PhoneType)
