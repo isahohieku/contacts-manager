@@ -9,7 +9,7 @@ module.exports = {
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
-    "plugin:import/typescript"
+    'plugin:import/typescript',
   ],
   settings: {
     'import/resolver': {
@@ -38,25 +38,25 @@ module.exports = {
     'no-debugger': 'error',
     'prefer-const': 'error',
     'no-var': 'error',
-    "import/order": [
-      "error",
+    'import/order': [
+      'error',
       {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index",
-          "object",
-          "type"
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+          'object',
+          'type',
         ],
-        "newlines-between": "always",
-        "alphabetize": {
-          "order": "asc",
-          "caseInsensitive": true
-        }
-      }
-    ]
+        'newlines-between': 'always',
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+      },
+    ],
   },
 };

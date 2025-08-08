@@ -1,8 +1,8 @@
 {
-    "compilerOptions": {
-      "baseUrl": "./",
-      "paths": {
-        "@contactApp/*": ["src/*"]
-      }
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@contactApp/*": ["src/*"]
     }
   }
+}

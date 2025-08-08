@@ -9,7 +9,7 @@
     "^@contactApp/(.*)$": "<rootDir>/src/$1"
   },
   "coveragePathIgnorePatterns": [
-    "/node_modules/", 
+    "/node_modules/",
     "./src/database/migrations",
     "./src/database/seeds",
     "./src/**/*.spec.ts",
@@ -20,9 +20,7 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "setupFilesAfterEnv": [
-    "<rootDir>/test/setup.ts"
-  ],
+  "setupFilesAfterEnv": ["<rootDir>/test/setup.ts"],
   "collectCoverageFrom": [
     "src/**/*.ts",
     "!src/**/*.spec.ts",

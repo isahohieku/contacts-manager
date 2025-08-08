@@ -1,17 +1,13 @@
 {
   "displayName": "unit",
-  "testMatch": [
-    "<rootDir>/src/**/*.spec.ts"
-  ],
-  "testPathIgnorePatterns": [
-    ".*\\.integration\\.spec\\.ts$"
-  ],
+  "testMatch": ["<rootDir>/src/**/*.spec.ts"],
+  "testPathIgnorePatterns": [".*\\.integration\\.spec\\.ts$"],
   "moduleFileExtensions": ["js", "json", "ts"],
   "moduleNameMapper": {
     "^@contactApp/(.*)$": "<rootDir>/src/$1"
   },
   "coveragePathIgnorePatterns": [
-    "/node_modules/", 
+    "/node_modules/",
     "./src/database/migrations",
     "./src/database/seeds",
     "./src/**/*.integration.spec.ts",
@@ -22,9 +18,7 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "setupFilesAfterEnv": [
-    "<rootDir>/test/setup.ts"
-  ],
+  "setupFilesAfterEnv": ["<rootDir>/test/setup.ts"],
   "collectCoverageFrom": [
     "src/**/*.ts",
     "!src/**/*.integration.spec.ts",
