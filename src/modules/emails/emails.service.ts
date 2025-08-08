@@ -1,9 +1,10 @@
-import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 
 import { ContactsService } from '../contacts/contacts.service';
 import { EmailType } from '../email-types/entities/email-type.entity';

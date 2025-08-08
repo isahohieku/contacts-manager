@@ -1,9 +1,10 @@
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 
 import { User } from '../users/entity/user.entity';
 

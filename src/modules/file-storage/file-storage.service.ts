@@ -2,13 +2,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
 import { diskStorage } from 'multer';
 import multerS3 from 'multer-s3';
+
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 
 import type { Response } from 'express';
 
@@ -45,7 +46,8 @@ export class FileStorageService {
     return diskStorage({
       destination: './files',
       filename: (_, file, callback) => {
-        const fileExt = file.originalname.split('.').pop()?.toLowerCase() || 'txt';
+        const fileExt =
+          file.originalname.split('.').pop()?.toLowerCase() || 'txt';
         callback(null, `${randomStringGenerator()}.${fileExt}`);
       },
     });
@@ -59,11 +61,13 @@ export class FileStorageService {
   private getS3Storage() {
     return multerS3({
       s3: this.s3Client as any,
-      bucket: this.configService.get('file.awsDefaultS3Bucket') || 'default-bucket',
+      bucket:
+        this.configService.get('file.awsDefaultS3Bucket') || 'default-bucket',
       acl: 'public-read',
       contentType: multerS3.AUTO_CONTENT_TYPE,
       key: (_, file, callback) => {
-        const fileExt = file.originalname.split('.').pop()?.toLowerCase() || 'txt';
+        const fileExt =
+          file.originalname.split('.').pop()?.toLowerCase() || 'txt';
         callback(null, `${randomStringGenerator()}.${fileExt}`);
       },
     });
@@ -77,7 +81,14 @@ export class FileStorageService {
    */
   private removeFromLocalStorage(filePath: string) {
     const file = filePath.split('/').pop();
-    const fullPath = path.join(__dirname, '..', '..', '..', 'files', file || '');
+    const fullPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'files',
+      file || '',
+    );
 
     fs.unlink(fullPath, (err) => {
       if (err) {

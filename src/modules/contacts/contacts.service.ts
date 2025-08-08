@@ -1,5 +1,12 @@
 import stream from 'stream';
 
+import { Parser } from '@json2csv/plainjs';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import set from 'lodash/set';
+import { CsvParser, ParsedData } from 'nest-csv-parser';
+import { FindManyOptions, ILike, Repository } from 'typeorm';
+
 import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 import {
@@ -14,17 +21,11 @@ import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { genericFindManyWithPagination } from '@contactApp/shared/utils/infinity-pagination';
 import { SearchTypes } from '@contactApp/shared/utils/types/contacts.type';
 import { IPaginationOptions } from '@contactApp/shared/utils/types/pagination-options';
-import { Parser } from '@json2csv/plainjs';
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import set from 'lodash/set';
-import { CsvParser, ParsedData } from 'nest-csv-parser';
-import { FindManyOptions, ILike, Repository } from 'typeorm';
 
+import { CacheService } from '../../common/services/cache.service';
 import { FilesService } from '../files/files.service';
 import { TagsService } from '../tags/tags.service';
 import { User } from '../users/entity/user.entity';
-import { CacheService } from '../../common/services/cache.service';
 
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -218,7 +219,10 @@ export class ContactsService {
       (existingContact as any).avatar?.id !== updateContactDto.avatar.id
     ) {
       if ((existingContact as any).avatar) {
-        await this.fileService.removeFile(user, (existingContact as any).avatar.path);
+        await this.fileService.removeFile(
+          user,
+          (existingContact as any).avatar.path,
+        );
       }
     }
 
@@ -324,9 +328,15 @@ export class ContactsService {
       const separator = await detectSeparator(bufferStreamForSeparator);
 
       const { list: contacts }: ParsedData<Contact> =
-        await this.csvParser.parse(bufferStreamForParser, Contact, undefined, undefined, {
-          separator,
-        });
+        await this.csvParser.parse(
+          bufferStreamForParser,
+          Contact,
+          undefined,
+          undefined,
+          {
+            separator,
+          },
+        );
 
       const parsedContacts = processContactCleanup<Contact[]>(contacts);
 
