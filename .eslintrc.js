@@ -11,6 +11,14 @@ module.exports = {
     'plugin:prettier/recommended',
     "plugin:import/typescript"
   ],
+  settings: {
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
+    },
+  },
   root: true,
   env: {
     node: true,
