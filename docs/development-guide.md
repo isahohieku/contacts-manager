@@ -38,7 +38,7 @@ src/
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL 12+
 - Redis 6+
 - Docker (optional but recommended)
@@ -46,6 +46,7 @@ src/
 ### Environment Setup
 
 1. **Clone and install dependencies**:
+
    ```bash
    git clone https://github.com/isahohieku/contacts-manager.git
    cd contacts-manager
@@ -53,21 +54,24 @@ src/
    ```
 
 2. **Set up environment variables**:
+
    ```bash
    cp env-example .env
    # Edit .env with your configuration
    ```
 
 3. **Start development services**:
+
    ```bash
    # Using Docker (recommended)
    docker-compose up postgres redis maildev -d
-   
+
    # Or start services manually
    # PostgreSQL, Redis, and MailDev
    ```
 
 4. **Initialize database**:
+
    ```bash
    yarn run migration:run
    yarn run seed:run
@@ -226,10 +230,10 @@ describe('ContactsService', () => {
     // Arrange
     const user = mockUser();
     const dto = mockCreateContactDto();
-    
+
     // Act
     const result = await service.create(user, dto);
-    
+
     // Assert
     expect(result).toBeDefined();
     expect(repository.save).toHaveBeenCalledWith(expect.objectContaining(dto));
@@ -251,7 +255,7 @@ describe('Contacts (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-    
+
     // Get authentication token
     token = await getAuthToken(app);
   });
@@ -361,19 +365,19 @@ for (const contact of contacts) {
 export class ContactsService {
   async findOne(id: number): Promise<Contact> {
     const cacheKey = `contact:${id}`;
-    
+
     // Try cache first
     const cached = await this.cacheService.get(cacheKey);
     if (cached) {
       return cached;
     }
-    
+
     // Fetch from database
     const contact = await this.contactRepository.findOne({ where: { id } });
-    
+
     // Cache result
     await this.cacheService.set(cacheKey, contact, 300); // 5 minutes
-    
+
     return contact;
   }
 }

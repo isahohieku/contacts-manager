@@ -16,29 +16,34 @@ The application includes enterprise-grade monitoring capabilities:
 ## 📈 Metrics Collection
 
 ### Request Metrics
+
 - **Total Requests**: Count of HTTP requests
 - **Response Times**: Average and percentile response times
 - **Error Rates**: Percentage of failed requests
 - **Status Code Distribution**: Breakdown by HTTP status codes
 
 ### Error Metrics
+
 - **Error Count**: Total application errors
 - **Error Types**: Categorized by error type
 - **Error Paths**: Errors grouped by endpoint
 - **Error Context**: User ID, correlation ID, stack traces
 
 ### Cache Metrics
+
 - **Hit Rate**: Cache hit percentage
 - **Operation Counts**: Hits, misses, sets, deletes
 - **Response Times**: Cache operation performance
 
 ### Database Metrics
+
 - **Query Count**: Total database queries
 - **Query Performance**: Average query execution time
 - **Slow Queries**: Queries exceeding 1000ms threshold
 - **Query Errors**: Failed database operations
 
 ### System Metrics
+
 - **CPU Usage**: Process CPU utilization
 - **Memory Usage**: Heap and RSS memory consumption
 - **Uptime**: Application uptime
@@ -49,6 +54,7 @@ The application includes enterprise-grade monitoring capabilities:
 ### Health Checks
 
 #### General Health Check
+
 ```http
 GET /health
 ```
@@ -56,6 +62,7 @@ GET /health
 Returns comprehensive health status including database, Redis, memory, and disk checks.
 
 **Response Example:**
+
 ```json
 {
   "status": "healthy",
@@ -87,6 +94,7 @@ Returns comprehensive health status including database, Redis, memory, and disk 
 ```
 
 #### Readiness Check
+
 ```http
 GET /health/ready
 ```
@@ -94,6 +102,7 @@ GET /health/ready
 Kubernetes-style readiness probe checking critical dependencies.
 
 #### Liveness Check
+
 ```http
 GET /health/live
 ```
@@ -105,6 +114,7 @@ Kubernetes-style liveness probe with system information.
 All metrics endpoints require authentication with Bearer token.
 
 #### Comprehensive Metrics Dashboard
+
 ```http
 GET /monitoring/metrics
 Authorization: Bearer <token>
@@ -113,15 +123,18 @@ Authorization: Bearer <token>
 Returns all metrics in a single response for dashboard display.
 
 #### Request Metrics
+
 ```http
 GET /monitoring/metrics/requests?timeRange=300000
 Authorization: Bearer <token>
 ```
 
 **Query Parameters:**
+
 - `timeRange` (optional): Time range in milliseconds (default: 60000)
 
 **Response Example:**
+
 ```json
 {
   "totalRequests": 150,
@@ -137,24 +150,28 @@ Authorization: Bearer <token>
 ```
 
 #### Error Metrics
+
 ```http
 GET /monitoring/metrics/errors?timeRange=300000
 Authorization: Bearer <token>
 ```
 
 #### Cache Metrics
+
 ```http
 GET /monitoring/metrics/cache?timeRange=300000
 Authorization: Bearer <token>
 ```
 
 #### Database Metrics
+
 ```http
 GET /monitoring/metrics/database?timeRange=300000
 Authorization: Bearer <token>
 ```
 
 #### System Metrics
+
 ```http
 GET /monitoring/metrics/system
 Authorization: Bearer <token>
@@ -165,6 +182,7 @@ Authorization: Bearer <token>
 ### Structured Logging Format
 
 All logs include:
+
 - **Timestamp**: ISO 8601 format with milliseconds
 - **Level**: error, warn, info, debug, verbose
 - **Message**: Human-readable log message
@@ -188,6 +206,7 @@ All logs include:
 ### Correlation IDs
 
 Every HTTP request receives a unique correlation ID:
+
 - **Header**: `X-Correlation-ID` in response
 - **Logging**: Included in all related log entries
 - **Tracing**: Links all operations for a single request
@@ -199,16 +218,19 @@ Every HTTP request receives a unique correlation ID:
 The system automatically logs warnings for:
 
 #### Performance Alerts
+
 - **Slow Requests**: > 1000ms response time
 - **Slow Database Queries**: > 1000ms execution time
 - **High Memory Usage**: > 80% heap utilization
 
 #### Error Alerts
+
 - **Application Errors**: All unhandled exceptions
 - **Database Errors**: Connection failures and query errors
 - **Cache Errors**: Redis connection issues
 
 #### Security Alerts
+
 - **Authentication Failures**: Failed login attempts
 - **Authorization Violations**: Access denied events
 - **Rate Limiting**: Threshold exceeded events
@@ -271,6 +293,7 @@ scrape_configs:
 ### Grafana Dashboard
 
 Create dashboards using the metrics endpoints:
+
 - Request rate and response times
 - Error rates and types
 - Cache hit rates
@@ -284,11 +307,11 @@ Configure log shipping to Elasticsearch:
 ```yaml
 # filebeat.yml
 filebeat.inputs:
-- type: log
-  paths:
-    - /app/logs/*.log
-  json.keys_under_root: true
-  json.add_error_key: true
+  - type: log
+    paths:
+      - /app/logs/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
 ```
 
 ## 🛠️ Troubleshooting

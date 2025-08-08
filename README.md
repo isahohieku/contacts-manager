@@ -1,4 +1,3 @@
-
 # Contact Management API
 
 ![Build](https://github.com/isahohieku/contacts-manager/actions/workflows/integration.yml/badge.svg?branch=main)
@@ -49,6 +48,7 @@ The Contact Manager API is a enterprise-grade solution that provides developers 
 ## ✨ Key Features
 
 ### 📱 Contact Management
+
 - **Complete CRUD Operations**: Create, read, update, and delete contacts
 - **Rich Contact Details**: Names, organizations, job titles, birthdays, anniversaries
 - **Multiple Contact Methods**: Emails, phone numbers, and addresses per contact
@@ -58,6 +58,7 @@ The Contact Manager API is a enterprise-grade solution that provides developers 
 - **Data Export**: CSV export functionality
 
 ### 🔐 Authentication & Security
+
 - **JWT Authentication**: Secure token-based authentication
 - **Role-Based Access Control**: Admin and user roles with different permissions
 - **Email Verification**: Account confirmation via email
@@ -67,6 +68,7 @@ The Contact Manager API is a enterprise-grade solution that provides developers 
 - **Security Headers**: Helmet.js for security best practices
 
 ### 🚀 Performance & Scalability
+
 - **Redis Caching**: Intelligent caching for improved response times
 - **Database Optimization**: Query optimization and connection pooling
 - **Response Compression**: Gzip compression for reduced bandwidth
@@ -74,6 +76,7 @@ The Contact Manager API is a enterprise-grade solution that provides developers 
 - **Connection Pooling**: Optimized database connections
 
 ### 📁 File Management
+
 - **Multiple Storage Options**: AWS S3 and local file storage
 - **Image Processing**: Avatar upload and processing
 - **File Validation**: Type and size validation
@@ -93,6 +96,7 @@ The Contact Manager API is a enterprise-grade solution that provides developers 
 ### Admin and User Management:
 
 #### Admin Role:
+
 Admins have full control over the contact management system, including the ability to create, update, and delete users, contacts, and configurations.
 
 - Admins can manage user roles and permissions, ensuring that only authorized users have access to sensitive operations.
@@ -100,6 +104,7 @@ Admins have full control over the contact management system, including the abili
 - Admins can assign specific roles (e.g., standard user, moderator, etc.) to other users.
 
 #### User Role:
+
 Standard users can create and manage their own contacts.
 
 - Users can access only the contacts and resources assigned to them, based on role-based access control (RBAC).
@@ -119,7 +124,7 @@ Standard users can create and manage their own contacts.
 - **Reset Password**: Users can reset their passwords securely through email verification or other multi-factor authentication (MFA) methods.
 - **View User List (Admin)**: Admins can view a list of all registered users and manage their accounts.
 - **Deactivate/Delete User (Admin)**: Admins have the authority to deactivate or delete user accounts.
-Audit Logs (Admin):
+  Audit Logs (Admin):
 
 ### Error Handling:
 
@@ -145,8 +150,8 @@ API versioning is supported to ensure backward compatibility and smooth transiti
 
 Detailed API documentation, including usage instructions, example requests, and responses, is provided to assist developers in integration.
 
-
 ## Technologies Used
+
 - **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications.
 - **TypeScript**: Typed superset of JavaScript for better code quality and maintainability.
 - **PostgreSQL**: Relational database management system.
@@ -182,7 +187,6 @@ Detailed API documentation, including usage instructions, example requests, and 
 3. **Set Up Environment Variables**
 
    Rename `env-example` file to `.env` in the root directory and modify environment variables where necessary
-
 
 4. **Run the Database Migrations**
 
@@ -237,7 +241,6 @@ For test coverage, run
 ```
 yarn run test:e2e:cov
 ```
-
 
 ## Contributing
 

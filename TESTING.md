@@ -5,6 +5,7 @@ This project uses a comprehensive testing strategy with three distinct types of 
 ## Test Types
 
 ### 1. Unit Tests (`*.spec.ts`)
+
 - **Purpose**: Test individual components/services in isolation
 - **Location**: `src/**/*.spec.ts`
 - **Characteristics**:
@@ -14,6 +15,7 @@ This project uses a comprehensive testing strategy with three distinct types of 
   - No database or external service connections
 
 ### 2. Integration Tests (`*.integration.spec.ts`)
+
 - **Purpose**: Test multiple components working together
 - **Location**: `src/**/*.integration.spec.ts` or `test/**/*.integration.spec.ts`
 - **Characteristics**:
@@ -23,6 +25,7 @@ This project uses a comprehensive testing strategy with three distinct types of 
   - Mock only external services (email, file storage, etc.)
 
 ### 3. End-to-End Tests (`*.e2e-spec.ts`)
+
 - **Purpose**: Test complete user workflows through HTTP API
 - **Location**: `test/**/*.e2e-spec.ts`
 - **Characteristics**:
@@ -34,11 +37,13 @@ This project uses a comprehensive testing strategy with three distinct types of 
 ## Running Tests
 
 ### All Tests
+
 ```bash
 npm run test
 ```
 
 ### Unit Tests Only
+
 ```bash
 npm run test:unit
 npm run test:unit:watch    # Watch mode
@@ -47,6 +52,7 @@ npm run test:unit:debug    # Debug mode
 ```
 
 ### Integration Tests Only
+
 ```bash
 npm run test:integration
 npm run test:integration:watch    # Watch mode
@@ -55,6 +61,7 @@ npm run test:integration:debug    # Debug mode
 ```
 
 ### E2E Tests Only
+
 ```bash
 npm run test:e2e
 npm run test:e2e:watch    # Watch mode
@@ -78,18 +85,21 @@ npm run test:e2e:debug    # Debug mode
 ## Best Practices
 
 ### Unit Tests
+
 - Mock all external dependencies
 - Test edge cases and error conditions
 - Keep tests fast and isolated
 - Focus on single responsibility
 
 ### Integration Tests
+
 - Use in-memory database when possible
 - Test real service interactions
 - Verify data persistence and retrieval
 - Mock only truly external services
 
 ### E2E Tests
+
 - Test complete user workflows
 - Use realistic test data
 - Test authentication and authorization
@@ -98,6 +108,7 @@ npm run test:e2e:debug    # Debug mode
 ## Coverage
 
 Each test type has separate coverage reporting:
+
 - Unit tests focus on business logic coverage
 - Integration tests focus on service interaction coverage
 - E2E tests focus on API endpoint coverage

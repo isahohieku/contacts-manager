@@ -13,6 +13,7 @@ Before you begin, ensure you have the following installed on your system:
 - **Yarn** (recommended) or npm - [Install Yarn](https://yarnpkg.com/)
 
 ### Optional
+
 - **Docker** and **Docker Compose** - [Download Docker](https://www.docker.com/)
 
 ## Installation
@@ -121,6 +122,7 @@ docker-compose up maildev -d
 #### Option B: Manual Setup
 
 1. **Create PostgreSQL Database**:
+
    ```sql
    CREATE DATABASE contact_manager;
    ```
@@ -166,6 +168,7 @@ curl http://localhost:3000/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "ok",
@@ -179,11 +182,13 @@ Expected response:
 ### 2. API Documentation
 
 Access the Swagger documentation:
+
 - **URL**: [http://localhost:3000/docs](http://localhost:3000/docs)
 
 ### 3. Mail Server (Development)
 
 If using Docker for mail:
+
 - **MailDev UI**: [http://localhost:1080](http://localhost:1080)
 
 ## Testing
@@ -206,6 +211,7 @@ yarn run test:cov
 ### Database Connection Issues
 
 1. **Check PostgreSQL is running**:
+
    ```bash
    pg_isready -h localhost -p 5432
    ```
@@ -220,6 +226,7 @@ yarn run test:cov
 ### Redis Connection Issues
 
 1. **Check Redis is running**:
+
    ```bash
    redis-cli ping
    ```
@@ -231,15 +238,17 @@ yarn run test:cov
 If port 3000 is already in use:
 
 1. **Change the port** in `.env`:
+
    ```env
    APP_PORT=3001
    ```
 
 2. **Or kill the process using the port**:
+
    ```bash
    # Find process using port 3000
    lsof -ti:3000
-   
+
    # Kill the process
    kill -9 <PID>
    ```

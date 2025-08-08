@@ -21,6 +21,7 @@ Authorization: Bearer <your_jwt_token>
 All API responses follow a consistent format:
 
 ### Success Response
+
 ```json
 {
   "data": {
@@ -32,6 +33,7 @@ All API responses follow a consistent format:
 ```
 
 ### Error Response
+
 ```json
 {
   "error": {
@@ -43,6 +45,7 @@ All API responses follow a consistent format:
 ```
 
 ### Paginated Response
+
 ```json
 {
   "data": [
@@ -62,11 +65,13 @@ All API responses follow a consistent format:
 ## Authentication Endpoints
 
 ### Register User
+
 ```http
 POST /auth/register
 ```
 
 **Request Body:**
+
 ```json
 {
   "email": "john.doe@example.com",
@@ -79,6 +84,7 @@ POST /auth/register
 ```
 
 **Response:**
+
 ```json
 {
   "data": {
@@ -96,11 +102,13 @@ POST /auth/register
 ```
 
 ### Login
+
 ```http
 POST /auth/login
 ```
 
 **Request Body:**
+
 ```json
 {
   "email": "john.doe@example.com",
@@ -110,6 +118,7 @@ POST /auth/login
 ```
 
 **Response:**
+
 ```json
 {
   "data": {
@@ -128,11 +137,13 @@ POST /auth/login
 ```
 
 ### Confirm Email
+
 ```http
 POST /auth/confirm-email
 ```
 
 **Request Body:**
+
 ```json
 {
   "hash": "confirmation_hash_from_email"
@@ -140,11 +151,13 @@ POST /auth/confirm-email
 ```
 
 ### Forgot Password
+
 ```http
 POST /auth/forgot-password
 ```
 
 **Request Body:**
+
 ```json
 {
   "email": "john.doe@example.com"
@@ -152,11 +165,13 @@ POST /auth/forgot-password
 ```
 
 ### Reset Password
+
 ```http
 POST /auth/reset-password
 ```
 
 **Request Body:**
+
 ```json
 {
   "password": "newSecurePassword123",
@@ -165,18 +180,23 @@ POST /auth/reset-password
 ```
 
 ### Get Profile
+
 ```http
 GET /auth/me
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Update Profile
+
 ```http
 PATCH /auth/me
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request Body:**
+
 ```json
 {
   "firstName": "John",
@@ -186,20 +206,25 @@ PATCH /auth/me
 ```
 
 ### Delete Account
+
 ```http
 DELETE /auth/me
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ## Contact Endpoints
 
 ### Create Contact
+
 ```http
 POST /contacts
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request Body:**
+
 ```json
 {
   "firstName": "Jane",
@@ -214,6 +239,7 @@ POST /contacts
 ```
 
 **Response:**
+
 ```json
 {
   "data": {
@@ -236,12 +262,15 @@ POST /contacts
 ```
 
 ### Get All Contacts
+
 ```http
 GET /contacts?page=1&limit=10&search=jane&sortBy=firstName&sortOrder=ASC
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Query Parameters:**
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 10, max: 50)
 - `search` (optional): Search term for name, email, or phone
@@ -249,18 +278,23 @@ GET /contacts?page=1&limit=10&search=jane&sortBy=firstName&sortOrder=ASC
 - `sortOrder` (optional): Sort order (ASC, DESC)
 
 ### Get Contact by ID
+
 ```http
 GET /contacts/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Update Contact
+
 ```http
 PATCH /contacts/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request Body:**
+
 ```json
 {
   "firstName": "Jane",
@@ -270,29 +304,37 @@ PATCH /contacts/{id}
 ```
 
 ### Delete Contact
+
 ```http
 DELETE /contacts/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Export Contacts
+
 ```http
 GET /contacts/export?format=csv
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Query Parameters:**
+
 - `format`: Export format (csv)
 
 ## Email Endpoints
 
 ### Add Email to Contact
+
 ```http
 POST /contacts/emails
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request Body:**
+
 ```json
 {
   "email": "jane.smith@example.com",
@@ -302,32 +344,41 @@ POST /contacts/emails
 ```
 
 ### Get Contact Emails
+
 ```http
 GET /contacts/emails?contactId=1
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Update Email
+
 ```http
 PATCH /contacts/emails/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Delete Email
+
 ```http
 DELETE /contacts/emails/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ## Phone Endpoints
 
 ### Add Phone to Contact
+
 ```http
 POST /contacts/phones
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request Body:**
+
 ```json
 {
   "phone": "+1234567890",
@@ -337,32 +388,41 @@ POST /contacts/phones
 ```
 
 ### Get Contact Phones
+
 ```http
 GET /contacts/phones?contactId=1
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Update Phone
+
 ```http
 PATCH /contacts/phones/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Delete Phone
+
 ```http
 DELETE /contacts/phones/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ## Address Endpoints
 
 ### Add Address to Contact
+
 ```http
 POST /contacts/addresses
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request Body:**
+
 ```json
 {
   "street": "123 Main St",
@@ -376,32 +436,41 @@ POST /contacts/addresses
 ```
 
 ### Get Contact Addresses
+
 ```http
 GET /contacts/addresses?contactId=1
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Update Address
+
 ```http
 PATCH /contacts/addresses/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Delete Address
+
 ```http
 DELETE /contacts/addresses/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ## Tag Endpoints
 
 ### Create Tag
+
 ```http
 POST /tags
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request Body:**
+
 ```json
 {
   "name": "Work",
@@ -410,36 +479,46 @@ POST /tags
 ```
 
 ### Get All Tags
+
 ```http
 GET /tags
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Update Tag
+
 ```http
 PATCH /tags/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ### Delete Tag
+
 ```http
 DELETE /tags/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ## File Endpoints
 
 ### Upload File
+
 ```http
 POST /files/upload
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 **Request:**
+
 - Content-Type: `multipart/form-data`
 - Body: Form data with `file` field
 
 **Response:**
+
 ```json
 {
   "data": {
@@ -453,56 +532,71 @@ POST /files/upload
 ```
 
 ### Get File
+
 ```http
 GET /files/{filename}
 ```
 
 ### Delete File
+
 ```http
 DELETE /files/{id}
 ```
-*Requires authentication*
+
+_Requires authentication_
 
 ## User Management (Admin Only)
 
 ### Get All Users
+
 ```http
 GET /users?page=1&limit=10
 ```
-*Requires admin authentication*
+
+_Requires admin authentication_
 
 ### Create User
+
 ```http
 POST /users
 ```
-*Requires admin authentication*
+
+_Requires admin authentication_
 
 ### Get User by ID
+
 ```http
 GET /users/{id}
 ```
-*Requires admin authentication*
+
+_Requires admin authentication_
 
 ### Update User
+
 ```http
 PATCH /users/{id}
 ```
-*Requires admin authentication*
+
+_Requires admin authentication_
 
 ### Delete User
+
 ```http
 DELETE /users/{id}
 ```
-*Requires admin authentication*
+
+_Requires admin authentication_
 
 ## Health Check Endpoints
 
 ### Health Check
+
 ```http
 GET /health
 ```
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -514,33 +608,36 @@ GET /health
 ```
 
 ### Readiness Check
+
 ```http
 GET /health/ready
 ```
 
 ### Liveness Check
+
 ```http
 GET /health/live
 ```
 
 ## Error Codes
 
-| Status Code | Description |
-|-------------|-------------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad Request |
-| 401 | Unauthorized |
-| 403 | Forbidden |
-| 404 | Not Found |
-| 409 | Conflict |
-| 422 | Unprocessable Entity |
-| 429 | Too Many Requests |
-| 500 | Internal Server Error |
+| Status Code | Description           |
+| ----------- | --------------------- |
+| 200         | Success               |
+| 201         | Created               |
+| 400         | Bad Request           |
+| 401         | Unauthorized          |
+| 403         | Forbidden             |
+| 404         | Not Found             |
+| 409         | Conflict              |
+| 422         | Unprocessable Entity  |
+| 429         | Too Many Requests     |
+| 500         | Internal Server Error |
 
 ## Rate Limiting
 
 The API implements rate limiting:
+
 - **Limit**: 100 requests per minute per IP
 - **Headers**: Rate limit information is included in response headers
   - `X-RateLimit-Limit`: Request limit
@@ -550,6 +647,7 @@ The API implements rate limiting:
 ## Pagination
 
 All list endpoints support pagination:
+
 - **Default page size**: 10
 - **Maximum page size**: 50
 - **Page numbering**: Starts from 1
@@ -557,6 +655,7 @@ All list endpoints support pagination:
 ## Search and Filtering
 
 Contact search supports:
+
 - **Full-text search**: Searches across firstName, lastName, organization
 - **Email search**: Searches contact emails
 - **Phone search**: Searches contact phone numbers

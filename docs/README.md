@@ -5,21 +5,25 @@ Welcome to the comprehensive documentation for the Contact Management API. This 
 ## 📚 Documentation Structure
 
 ### Quick Start
+
 - [Getting Started](./getting-started.md) - Setup and installation guide
 - [Authentication](./authentication.md) - Authentication and authorization
 - [API Reference](./api-reference.md) - Complete API endpoint documentation
 
 ### Development
+
 - [Development Guide](./development-guide.md) - Development setup and best practices
 - [Testing Guide](./testing-guide.md) - Testing strategies and examples
 - [Deployment Guide](./deployment-guide.md) - Production deployment instructions
 
 ### Architecture
+
 - [Architecture Overview](./architecture.md) - System architecture and design patterns
 - [Database Schema](./database-schema.md) - Database structure and relationships
 - [Security](./security.md) - Security features and best practices
 
 ### Examples
+
 - [Code Examples](./examples/) - Practical usage examples
 - [Postman Collection](./postman/) - API testing collection
 
@@ -45,12 +49,14 @@ The Contact Management API is a RESTful service built with NestJS that provides 
 ## 🔧 Key Features
 
 ### Authentication & Authorization
+
 - JWT-based authentication
 - Role-based access control (Admin/User)
 - Email verification
 - Password reset functionality
 
 ### Contact Management
+
 - Full CRUD operations for contacts
 - Multiple contact details (emails, phones, addresses)
 - Contact categorization with tags
@@ -58,6 +64,7 @@ The Contact Management API is a RESTful service built with NestJS that provides 
 - Advanced search and filtering
 
 ### Performance & Scalability
+
 - Redis caching for improved performance
 - Database query optimization
 - Response compression
@@ -65,6 +72,7 @@ The Contact Management API is a RESTful service built with NestJS that provides 
 - Pagination support
 
 ### Security
+
 - Helmet.js security headers
 - Input validation and sanitization
 - SQL injection prevention

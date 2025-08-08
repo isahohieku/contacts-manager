@@ -43,6 +43,7 @@ The Contact Management API follows a **layered architecture** pattern with clear
 ## 🎯 Design Patterns
 
 ### 1. Module Pattern (NestJS)
+
 Each feature is organized into self-contained modules:
 
 ```typescript
@@ -56,12 +57,14 @@ export class ContactsModule {}
 ```
 
 **Benefits:**
+
 - Clear separation of concerns
 - Reusable components
 - Easy testing and maintenance
 - Dependency injection
 
 ### 2. Repository Pattern
+
 Data access is abstracted through TypeORM repositories:
 
 ```typescript
@@ -79,12 +82,14 @@ export class ContactsService {
 ```
 
 **Benefits:**
+
 - Database abstraction
 - Testable data layer
 - Query optimization
 - Transaction management
 
 ### 3. Data Transfer Object (DTO) Pattern
+
 Input/output data is validated and transformed using DTOs:
 
 ```typescript
@@ -102,12 +107,14 @@ export class CreateContactDto {
 ```
 
 **Benefits:**
+
 - Input validation
 - API documentation
 - Type safety
 - Data transformation
 
 ### 4. Decorator Pattern
+
 Cross-cutting concerns are handled through decorators:
 
 ```typescript
@@ -120,6 +127,7 @@ export class ContactsController {
 ```
 
 **Benefits:**
+
 - Separation of concerns
 - Reusable functionality
 - Clean code
@@ -147,6 +155,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 ```
 
 **Features:**
+
 - JWT-based authentication
 - Role-based access control
 - Token refresh mechanism
@@ -170,6 +179,7 @@ export class CacheService {
 ```
 
 **Implementation:**
+
 - Redis for distributed caching
 - TTL-based expiration
 - Cache invalidation strategies
@@ -199,6 +209,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 ```
 
 **Features:**
+
 - Global exception handling
 - Structured error responses
 - Logging integration
@@ -212,7 +223,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 User (1) ──────────── (N) Contact
                            │
                            ├── (N) Email
-                           ├── (N) Phone  
+                           ├── (N) Phone
                            ├── (N) Address
                            ├── (N) ContactTag ── (1) Tag
                            └── (1) File (avatar)
@@ -232,16 +243,16 @@ export class Contact {
   @Column()
   lastName: string;
 
-  @ManyToOne(() => User, user => user.contacts)
+  @ManyToOne(() => User, (user) => user.contacts)
   user: User;
 
-  @OneToMany(() => Email, email => email.contact)
+  @OneToMany(() => Email, (email) => email.contact)
   emails: Email[];
 
-  @OneToMany(() => Phone, phone => phone.contact)
+  @OneToMany(() => Phone, (phone) => phone.contact)
   phones: Phone[];
 
-  @OneToMany(() => Address, address => address.contact)
+  @OneToMany(() => Address, (address) => address.contact)
   addresses: Address[];
 }
 ```
@@ -263,17 +274,17 @@ export class Contact {
 export class ContactsService {
   async findOne(id: number): Promise<Contact> {
     const cacheKey = `contact:${id}`;
-    
+
     // Check cache first
     const cached = await this.cacheService.get(cacheKey);
     if (cached) return cached;
-    
+
     // Fetch from database
     const contact = await this.contactRepository.findOne({ where: { id } });
-    
+
     // Cache result
     await this.cacheService.set(cacheKey, contact, 300);
-    
+
     return contact;
   }
 }
@@ -298,16 +309,18 @@ async findAllWithRelations(userId: number): Promise<Contact[]> {
 
 ```typescript
 // Compression middleware
-app.use(compression({
-  filter: (req, res) => {
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    return compression.filter(req, res);
-  },
-  level: 6,
-  threshold: 1024,
-}));
+app.use(
+  compression({
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+    level: 6,
+    threshold: 1024,
+  }),
+);
 ```
 
 ## 🔒 Security Architecture
@@ -322,22 +335,26 @@ Client Request → JWT Guard → JWT Strategy → User Validation → Route Hand
 
 ```typescript
 // Security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-}));
+  }),
+);
 
 // Rate limiting
-app.use(rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100, // 100 requests per minute
-}));
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100, // 100 requests per minute
+  }),
+);
 ```
 
 ### 3. Input Validation
@@ -359,21 +376,25 @@ export class CreateContactDto {
 ## 📈 Scalability Considerations
 
 ### 1. Horizontal Scaling
+
 - Stateless application design
 - Redis for shared session storage
 - Load balancer compatibility
 
 ### 2. Database Scaling
+
 - Read replicas for query distribution
 - Connection pooling
 - Query optimization
 
 ### 3. Caching Strategy
+
 - Multi-level caching (application + database)
 - Cache invalidation patterns
 - Distributed caching with Redis
 
 ### 4. File Storage
+
 - AWS S3 for scalable file storage
 - CDN integration for global distribution
 - Optimized file upload/download
@@ -475,7 +496,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
@@ -488,21 +509,25 @@ services:
 ## 🔮 Future Considerations
 
 ### 1. Microservices Migration
+
 - Service decomposition strategy
 - API gateway implementation
 - Inter-service communication
 
 ### 2. Event-Driven Architecture
+
 - Event sourcing patterns
 - Message queues (RabbitMQ/Kafka)
 - Asynchronous processing
 
 ### 3. Advanced Caching
+
 - Cache warming strategies
 - Distributed cache invalidation
 - Cache analytics and monitoring
 
 ### 4. Real-time Features
+
 - WebSocket integration
 - Real-time notifications
 - Live data synchronization
