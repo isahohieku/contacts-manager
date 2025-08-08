@@ -1,11 +1,12 @@
-import { AppModule } from '@contactApp/app.module';
-import { MailService } from '@contactApp/modules/mail/mail.service';
-import { User } from '@contactApp/modules/users/entity/user.entity';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
+
+import { AppModule } from '@contactApp/app.module';
+import { MailService } from '@contactApp/modules/mail/mail.service';
+import { User } from '@contactApp/modules/users/entity/user.entity';
 
 import {
   createTestUserData,

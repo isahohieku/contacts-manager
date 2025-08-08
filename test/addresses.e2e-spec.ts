@@ -1,3 +1,9 @@
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { AppModule } from '@contactApp/app.module';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
 import { Address } from '@contactApp/modules/addresses/entities/address.entity';
@@ -5,11 +11,6 @@ import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { AddressErrorCodes } from '@contactApp/shared/utils/constants/addresses/errors';
 import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
-import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import jwt from 'jsonwebtoken';
-import request from 'supertest';
 
 import { addressData } from './mock-data/address';
 import { contactData } from './mock-data/contact';

@@ -1,5 +1,3 @@
-import { Roles } from '@contactApp/common/decorators/roles.decorator';
-import { RolesGuard } from '@contactApp/common/guards/roles.guard';
 import {
   Controller,
   Get,
@@ -17,6 +15,9 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+
+import { Roles } from '@contactApp/common/decorators/roles.decorator';
+import { RolesGuard } from '@contactApp/common/guards/roles.guard';
 
 import { RoleEnum } from '../roles/roles.enum';
 

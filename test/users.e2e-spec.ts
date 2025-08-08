@@ -1,14 +1,15 @@
-import { AppModule } from '@contactApp/app.module';
-import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
-import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
+
+import { AppModule } from '@contactApp/app.module';
+import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
+import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
 
 import { userData, userSignUpDetails } from './mock-data/admin-user';
 import { userData as normalUser, password } from './mock-data/user';

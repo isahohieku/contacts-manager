@@ -1,3 +1,9 @@
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+
 import { AppModule } from '@contactApp/app.module';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
@@ -6,11 +12,6 @@ import { MailService } from '@contactApp/modules/mail/mail.service';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
 import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
-import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import jwt from 'jsonwebtoken';
-import request from 'supertest';
 
 import {
   createTestUserData,
