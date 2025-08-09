@@ -11,5 +11,8 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "transformIgnorePatterns": ["/node_modules/"],
-  "maxWorkers": 1
+  "setupFilesAfterEnv": ["<rootDir>/test/setup-e2e.ts"],
+  "maxWorkers": 1,
+  "forceExit": true,
+  "detectOpenHandles": true
 }

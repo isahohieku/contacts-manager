@@ -8,10 +8,10 @@
   },
   "coveragePathIgnorePatterns": [
     "/node_modules/",
-    "./src/database/migrations",
-    "./src/database/seeds",
-    "./src/**/*.integration.spec.ts",
-    "./src/**/*.e2e-spec.ts"
+    "src/database/migrations",
+    "src/database/seeds",
+    "\\.integration\\.spec\\.ts$",
+    "\\.e2e-spec\\.ts$"
   ],
   "rootDir": ".",
   "testEnvironment": "node",

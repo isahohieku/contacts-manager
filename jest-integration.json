@@ -10,10 +10,11 @@
   },
   "coveragePathIgnorePatterns": [
     "/node_modules/",
-    "./src/database/migrations",
-    "./src/database/seeds",
-    "./src/**/*.spec.ts",
-    "./src/**/*.e2e-spec.ts"
+    "src/database/migrations",
+    "src/database/seeds",
+    "\\.spec\\.ts$",
+    "\\.integration\\.spec\\.ts$",
+    "\\.e2e-spec\\.ts$"
   ],
   "rootDir": ".",
   "testEnvironment": "node",
@@ -24,6 +25,7 @@
   "collectCoverageFrom": [
     "src/**/*.ts",
     "!src/**/*.spec.ts",
+    "!src/**/*.integration.spec.ts",
     "!src/**/*.e2e-spec.ts",
     "!src/main.ts",
     "!src/**/*.module.ts",
