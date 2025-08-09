@@ -54,7 +54,7 @@ export class AuthService {
    *
    * @return {AuthProvider[]} A list of active authentication providers.
    */
-  async getProviders() {
+  async getProviders(): Promise<AuthProvider[]> {
     return this.authProviderssRepository.find({ where: { active: true } });
   }
 
@@ -375,7 +375,15 @@ export class AuthService {
    * @param {number} userProviderId - The ID of the user's provider.
    * @return {Promise<void>} A promise that resolves when the provider is valid.
    */
-  private async validateProvider(providerId: number, userProviderId: number) {
+  private async validateProvider(
+    providerId: number,
+    userProviderId: number,
+  ): Promise<
+    (
+      user: User,
+      loginDto: AuthEmailLoginDto,
+    ) => Promise<{ token: string; user: User }>
+  > {
     // First, let's try to find the provider by ID
     const provider = await this.authProviderssRepository.findOne({
       where: { id: providerId, active: true },

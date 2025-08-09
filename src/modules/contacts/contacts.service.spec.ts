@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CsvParser } from 'nest-csv-parser';
-import { Repository } from 'typeorm';
 
 import {
   createMockRepository,
@@ -10,6 +9,7 @@ import {
   mockContact,
 } from '../../../test/utils/test-helpers';
 import { CacheService } from '../../common/services/cache.service';
+import { SearchTypes } from '../../shared/utils/types/contacts.type';
 import { FilesService } from '../files/files.service';
 import { TagsService } from '../tags/tags.service';
 
@@ -20,11 +20,6 @@ import { Contact } from './entities/contact.entity';
 
 describe('ContactsService', () => {
   let service: ContactsService;
-  let contactRepository: Repository<Contact>;
-  let tagsService: TagsService;
-  let filesService: FilesService;
-  let csvParser: CsvParser;
-  let cacheService: CacheService;
 
   const mockContactRepository = createMockRepository<Contact>();
   const mockCacheService = createMockCacheService();
@@ -67,13 +62,6 @@ describe('ContactsService', () => {
     }).compile();
 
     service = module.get<ContactsService>(ContactsService);
-    contactRepository = module.get<Repository<Contact>>(
-      getRepositoryToken(Contact),
-    );
-    tagsService = module.get<TagsService>(TagsService);
-    filesService = module.get<FilesService>(FilesService);
-    csvParser = module.get<CsvParser>(CsvParser);
-    cacheService = module.get<CacheService>(CacheService);
   });
 
   afterEach(() => {
@@ -116,7 +104,7 @@ describe('ContactsService', () => {
       const page = 1;
       const limit = 10;
       const search = '';
-      const type = 'name' as any;
+      const type = SearchTypes.CONTACT;
       const cachedResult = {
         data: [mockContact],
         metadata: {
@@ -145,7 +133,7 @@ describe('ContactsService', () => {
       const page = 1;
       const limit = 10;
       const search = '';
-      const type = 'name' as any;
+      const type = SearchTypes.CONTACT;
       const contacts = [mockContact];
       const total = 1;
       const mockResult = {
@@ -208,7 +196,7 @@ describe('ContactsService', () => {
       expect(result).toEqual(mockContact);
     });
 
-    it('should throw HttpException when contact not found', async () => {
+    it('should throw error when contact not found', async () => {
       const contactId = 999;
       (mockCacheService.get as jest.Mock).mockResolvedValue(null);
       (mockContactRepository.findOne as jest.Mock).mockResolvedValue(null);
@@ -225,8 +213,15 @@ describe('ContactsService', () => {
         lastName: 'Smith',
       };
 
-      const existingContact = { ...mockContact };
-      const updatedContact = { ...existingContact, ...updateContactDto };
+      const existingContact = {
+        ...mockContact,
+      } as unknown as Contact;
+
+      const updatedContact = {
+        ...existingContact,
+        ...updateContactDto,
+        tags: updateContactDto.tags || [],
+      } as unknown as Contact;
 
       // Mock findOne to return the existing contact (called twice - once in update, once at the end)
       jest
@@ -234,7 +229,7 @@ describe('ContactsService', () => {
         .mockResolvedValueOnce(existingContact) // First call in update method
         .mockResolvedValueOnce(updatedContact); // Second call at the end of update method
 
-      (mockContactRepository.create as jest.Mock).mockReturnValue(
+      (mockContactRepository.merge as jest.Mock).mockReturnValue(
         updatedContact,
       );
       (mockContactRepository.save as jest.Mock).mockResolvedValue(
@@ -268,7 +263,9 @@ describe('ContactsService', () => {
   describe('remove', () => {
     it('should remove a contact successfully', async () => {
       const contactId = 1;
-      const existingContact = { ...mockContact };
+      const existingContact = {
+        ...mockContact,
+      } as unknown as Contact;
 
       jest.spyOn(service, 'findOne').mockResolvedValue(existingContact);
       (mockContactRepository.softDelete as jest.Mock).mockResolvedValue({
