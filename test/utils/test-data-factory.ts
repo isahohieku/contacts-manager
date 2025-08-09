@@ -90,11 +90,20 @@ export function createTestEmailData(testSuiteName: string) {
 }
 
 /**
- * Creates a mock email service for testing
+ * Creates a mock mailer service for testing
  * This can be used to mock the MailerService in tests
  */
 export const createMockMailerService = () => ({
   sendMail: jest.fn().mockResolvedValue(true),
+});
+
+/**
+ * Creates a mock mail service for testing
+ * This can be used to mock the MailService in tests
+ */
+export const createMockMailService = () => ({
+  userSignUp: jest.fn().mockResolvedValue(true),
+  forgotPassword: jest.fn().mockResolvedValue(true),
 });
 
 /**

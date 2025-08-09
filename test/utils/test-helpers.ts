@@ -23,6 +23,7 @@ export const createMockRepository = <T extends ObjectLiteral = any>(): Partial<
   remove: jest.fn(),
   softDelete: jest.fn(),
   count: jest.fn(),
+  merge: jest.fn(),
   createQueryBuilder: jest.fn(() => ({
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
@@ -213,9 +214,21 @@ export const mockContact = {
   anniversary: new Date('2020-01-01'),
   notes: 'Test notes',
   owner: mockUser,
+  phone_numbers: [],
+  emails: [],
+  addresses: [],
+  tags: [],
+  avatar: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-  deletedAt: null,
+  deletedAt: new Date(),
+  // Mock methods from BaseEntity
+  hasId: jest.fn().mockReturnValue(true),
+  save: jest.fn(),
+  remove: jest.fn(),
+  softRemove: jest.fn(),
+  recover: jest.fn(),
+  reload: jest.fn(),
 };
 
 /**

@@ -4,9 +4,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { AppModule } from '@contactApp/app.module';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { MailService } from '@contactApp/modules/mail/mail.service';
 import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
@@ -14,17 +14,22 @@ import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/e
 import { contactData } from './mock-data/contact';
 import { tagData } from './mock-data/tag';
 import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
-describe.skip('ContactController (e2e)', () => {
+describe('ContactController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     configService = moduleFixture.get<ConfigService>(ConfigService);
@@ -293,7 +298,6 @@ describe.skip('ContactController (e2e)', () => {
         expect(body.deletedAt).toBeNull();
         expect(typeof new Date(body.createdAt).getTime()).toBe('number');
         expect(typeof new Date(body.updatedAt).getTime()).toBe('number');
-        contactData.id = body.id;
       });
   });
 

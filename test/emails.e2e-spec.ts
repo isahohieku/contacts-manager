@@ -4,43 +4,34 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { AppModule } from '@contactApp/app.module';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
-import { Email } from '@contactApp/modules/emails/entities/email.entity';
 import { MailService } from '@contactApp/modules/mail/mail.service';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
 import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
 
+import { contactData } from './mock-data/contact';
+import { emailData } from './mock-data/email';
+import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
 import {
-  createTestUserData,
-  createTestContactData,
-  createTestEmailData,
-  createMockMailerService,
+  createMockMailService,
   TestDatabaseCleaner,
 } from './utils/test-data-factory';
 
-describe.skip('EmailController (e2e)', () => {
+describe('EmailController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
-  let userData: any;
-  let contactData: any;
-  let emailData: any;
 
   beforeEach(async () => {
-    // Generate unique test data for this test suite
-    userData = createTestUserData('EmailController');
-    contactData = createTestContactData('EmailController');
-    emailData = createTestEmailData('EmailController');
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
     })
       .overrideProvider(MailService)
-      .useValue(createMockMailerService())
+      .useValue(createMockMailService())
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -52,8 +43,15 @@ describe.skip('EmailController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe(validationOptions));
     await app.init();
     if (!token) {
-      const user = await User.save(userData);
+      // Create unique test data for each test run
+      const uniqueUserData = {
+        ...userData,
+        email: `test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}@example.com`,
+      };
+      const user = await User.save(uniqueUserData);
       userData.id = user.id;
+      // Update userData with unique email for token generation
+      userData.email = uniqueUserData.email;
       TestDatabaseCleaner.addUser(user.id);
     }
     const authSecret = configService.get<string>('auth.secret');
@@ -65,7 +63,7 @@ describe.skip('EmailController (e2e)', () => {
     if (!contactData.id) {
       const contact = await Contact.save({
         ...contactData,
-        user: {
+        owner: {
           id: userData.id,
         },
       });

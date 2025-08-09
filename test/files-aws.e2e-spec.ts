@@ -4,19 +4,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { AppModule } from '@contactApp/app.module';
+import { TestAppModule } from './utils/test-app.module';
 import { MailService } from '@contactApp/modules/mail/mail.service';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 
 import {
   createTestUserData,
-  createMockMailerService,
+  createMockMailService,
   TestDatabaseCleaner,
 } from './utils/test-data-factory';
 
 process.env.FILE_DRIVER = 's3';
 
-describe.skip('FileStorageService (e2e)', () => {
+describe('FileStorageService (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
@@ -27,11 +27,11 @@ describe.skip('FileStorageService (e2e)', () => {
     userData = createTestUserData('FileStorageService');
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
     })
       .overrideProvider(MailService)
-      .useValue(createMockMailerService())
+      .useValue(createMockMailService())
       .compile();
 
     app = moduleFixture.createNestApplication();

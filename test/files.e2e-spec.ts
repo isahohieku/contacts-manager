@@ -4,35 +4,28 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { AppModule } from '@contactApp/app.module';
 import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
 import { MailService } from '@contactApp/modules/mail/mail.service';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { FilesErrorCodes } from '@contactApp/shared/utils/constants/files/errors';
 
-import {
-  createTestUserData,
-  createMockMailerService,
-  TestDatabaseCleaner,
-} from './utils/test-data-factory';
+import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
-describe.skip('FileController (e2e)', () => {
+describe('FileController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
   let file;
-  let userData: any;
 
   beforeEach(async () => {
-    // Generate unique test data for this test suite
-    userData = createTestUserData('FileController');
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
     })
       .overrideProvider(MailService)
-      .useValue(createMockMailerService())
+      .useValue(createMockMailService())
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -43,9 +36,13 @@ describe.skip('FileController (e2e)', () => {
     });
     await app.init();
     if (!token) {
-      const user = await User.save(userData);
+      // Create unique test data for each test run
+      const uniqueUserData = {
+        ...userData,
+        email: `test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}@example.com`,
+      };
+      const user = await User.save(uniqueUserData);
       userData.id = user.id;
-      TestDatabaseCleaner.addUser(user.id);
     }
     const authSecret = configService.get<string>('auth.secret');
     if (!authSecret) {
@@ -56,9 +53,11 @@ describe.skip('FileController (e2e)', () => {
 
   afterAll(async () => {
     if (file?.id) {
-      TestDatabaseCleaner.addFile(file.id);
+      await FileEntity.delete({ id: file.id });
     }
-    await TestDatabaseCleaner.cleanupAll();
+    if (userData?.id) {
+      await User.delete({ id: userData.id });
+    }
     await app.close();
   });
 

@@ -2,23 +2,29 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
-import { AppModule } from '@contactApp/app.module';
 import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
 import { Forgot } from '@contactApp/modules/forgot/entities/forgot.entity';
+import { MailService } from '@contactApp/modules/mail/mail.service';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+
+import { userSignUpDetails } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let userDbData: any = null;
   let loggedInUser: any = null;
-  let userSignUpDetails: any;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+      imports: [TestAppModule],
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api', {
@@ -30,9 +36,11 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await Forgot.delete({ user: { id: userDbData.id } });
-    await User.delete({ id: userDbData.id });
-    await app.close();
+    if (userDbData?.id) {
+      await Forgot.delete({ user: { id: userDbData.id } });
+      await User.delete({ id: userDbData.id });
+      await app.close();
+    }
   });
 
   it('should get all active auth providers with GET /api/auth/providers', () => {

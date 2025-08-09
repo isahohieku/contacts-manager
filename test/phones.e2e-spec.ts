@@ -4,9 +4,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { AppModule } from '@contactApp/app.module';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { MailService } from '@contactApp/modules/mail/mail.service';
 import { Phone } from '@contactApp/modules/phones/entities/phone.entity';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
@@ -15,17 +15,22 @@ import { PhoneNumberErrorCodes } from '@contactApp/shared/utils/constants/phone-
 import { contactData } from './mock-data/contact';
 import { phoneData } from './mock-data/phone';
 import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
-describe.skip('PhoneController (e2e)', () => {
+describe('PhoneController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     configService = moduleFixture.get<ConfigService>(ConfigService);
@@ -36,8 +41,15 @@ describe.skip('PhoneController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe(validationOptions));
     await app.init();
     if (!token) {
-      const user = await User.save(userData);
+      // Create unique test data for each test run
+      const uniqueUserData = {
+        ...userData,
+        email: `test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}@example.com`,
+      };
+      const user = await User.save(uniqueUserData);
       userData.id = user.id;
+      // Update userData with unique email for token generation
+      userData.email = uniqueUserData.email;
     }
     const authSecret = configService.get<string>('auth.secret');
     if (!authSecret) {

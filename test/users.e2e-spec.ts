@@ -5,16 +5,18 @@ import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { AppModule } from '@contactApp/app.module';
 import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
+import { MailService } from '@contactApp/modules/mail/mail.service';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
 
 import { userData, userSignUpDetails } from './mock-data/admin-user';
 import { userData as normalUser, password } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
-describe.skip('UserController (e2e)', () => {
+describe('UserController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
@@ -22,9 +24,12 @@ describe.skip('UserController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     configService = moduleFixture.get<ConfigService>(ConfigService);
@@ -44,6 +49,8 @@ describe.skip('UserController (e2e)', () => {
         password,
       });
       (userData as any).id = user.id;
+      // Update userData with unique email for token generation
+      (userData as any).email = userData.email;
     }
     const authSecret = configService.get<string>('auth.secret');
     if (!authSecret) {
