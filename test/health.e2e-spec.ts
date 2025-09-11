@@ -9,9 +9,10 @@ import { createMockMailService } from './utils/test-data-factory';
 
 describe('Health Controller (e2e)', () => {
   let app: INestApplication;
+  let moduleFixture: TestingModule;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+  beforeAll(async () => {
+    moduleFixture = await Test.createTestingModule({
       imports: [TestAppModule],
     })
       .overrideProvider(MailService)
@@ -23,7 +24,12 @@ describe('Health Controller (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
+    if (moduleFixture) {
+      await moduleFixture.close();
+    }
   });
 
   describe('/health (GET)', () => {

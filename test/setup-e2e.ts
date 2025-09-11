@@ -21,5 +21,9 @@ afterAll(async () => {
   }
 
   // Small delay to allow cleanup
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  // Additional cleanup for any remaining timers
+  jest.clearAllTimers();
+  jest.useRealTimers();
 });
