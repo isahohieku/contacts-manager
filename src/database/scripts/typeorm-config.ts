@@ -14,7 +14,10 @@ import { TypeOrmConfigService } from '../typeorm-config.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, appConfig],
-      envFilePath: ['.env'],
+      envFilePath: [
+        process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+        '.env',
+      ],
     }),
   ],
   providers: [TypeOrmConfigService],
