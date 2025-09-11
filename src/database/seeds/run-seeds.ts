@@ -1,5 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 
+// @ts-expect-error We want to use the ormconfig.json file
 import config from '../../../ormconfig.json';
 
 // Import all seed classes
