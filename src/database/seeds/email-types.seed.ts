@@ -4,7 +4,7 @@ import { EmailTypeEnum } from '../../modules/email-types/email-type.enum';
 import { EmailType } from '../../modules/email-types/entities/email-type.entity';
 
 export default class CreateEmailType {
-  public async run(factory: any, dataSource: DataSource): Promise<void> {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
     const count = await dataSource
       .createQueryBuilder()
       .select()

@@ -15,14 +15,22 @@ export const CACHE_TTL_METADATA = 'cache_ttl';
 
 export const CacheKey =
   (key: string) =>
-  (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  (
+    target: object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ): void => {
     Reflector.createDecorator<string>()(key)(target, propertyKey, descriptor);
     Reflect.defineMetadata(CACHE_KEY_METADATA, key, descriptor.value);
   };
 
 export const CacheTTL =
   (ttl: number) =>
-  (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  (
+    target: object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ): void => {
     Reflect.defineMetadata(CACHE_TTL_METADATA, ttl, descriptor.value);
   };
 
@@ -36,7 +44,7 @@ export class CacheInterceptor implements NestInterceptor {
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Promise<Observable<any>> {
+  ): Promise<Observable<object>> {
     const cacheKey = this.reflector.get<string>(
       CACHE_KEY_METADATA,
       context.getHandler(),
@@ -70,7 +78,10 @@ export class CacheInterceptor implements NestInterceptor {
     );
   }
 
-  private generateDynamicKey(baseKey: string, request: any): string {
+  private generateDynamicKey(
+    baseKey: string,
+    request: { user?: { id: number }; query?: object; params?: object },
+  ): string {
     const userId = request.user?.id;
     const query = request.query;
     const params = request.params;

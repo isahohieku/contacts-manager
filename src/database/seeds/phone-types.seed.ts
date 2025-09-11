@@ -4,7 +4,7 @@ import { PhoneType } from '../../modules/phone-types/entities/phone-type.entity'
 import { PhoneTypeEnum } from '../../modules/phone-types/phone-type.enum';
 
 export default class CreatePhoneType {
-  public async run(factory: any, dataSource: DataSource): Promise<void> {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
     const count = await dataSource
       .createQueryBuilder()
       .select()

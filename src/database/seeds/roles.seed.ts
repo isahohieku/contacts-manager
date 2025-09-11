@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import { Role } from '../../modules/roles/entities/role.entity';
 
 export default class CreateRole {
-  public async run(factory: any, dataSource: DataSource): Promise<void> {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
     const countUser = await dataSource
       .createQueryBuilder()
       .select()

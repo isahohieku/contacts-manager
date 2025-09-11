@@ -104,7 +104,7 @@ export class QueryOptimizationService {
    */
   async bulkInsert<T extends ObjectLiteral>(
     repository: Repository<T>,
-    entities: any[],
+    entities: T[],
     chunkSize = 1000,
   ): Promise<void> {
     // Process in chunks to avoid memory issues
@@ -113,7 +113,7 @@ export class QueryOptimizationService {
       await repository
         .createQueryBuilder()
         .insert()
-        .values(chunk as any)
+        .values(chunk)
         .orIgnore() // Handle conflicts gracefully
         .execute();
     }

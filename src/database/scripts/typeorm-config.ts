@@ -21,7 +21,7 @@ import { TypeOrmConfigService } from '../typeorm-config.service';
 })
 class AppModule {}
 
-const setConfig = async () => {
+const setConfig = async (): Promise<void> => {
   const app = await NestFactory.create(AppModule);
   const typeOrmServiceConfig = app.get(TypeOrmConfigService);
   fs.writeFileSync(

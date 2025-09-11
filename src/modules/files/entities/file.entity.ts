@@ -29,7 +29,7 @@ export class FileEntity extends EntityBase {
 
   @AfterLoad()
   @AfterInsert()
-  updatePath() {
+  updatePath(): void {
     if (this.path.indexOf('/') === 0) {
       this.path = appConfig().backendDomain + this.path;
     }

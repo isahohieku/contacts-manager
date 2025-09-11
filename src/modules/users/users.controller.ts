@@ -23,6 +23,7 @@ import { RoleEnum } from '../roles/roles.enum';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entity/user.entity';
 import { UsersService } from './users.service';
 
 @ApiBearerAuth()
@@ -38,7 +39,7 @@ export class UsersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: CreateUserDto): Promise<User> {
     // TODO: Add flag to user created by admin to as to redirect them to setup password
     return this.usersService.create(createUserDto);
   }
@@ -50,7 +51,16 @@ export class UsersController {
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-  ) {
+  ): Promise<{
+    data: User[];
+    metadata: {
+      page?: number;
+      items_per_page?: number;
+      total_items?: number;
+      total_pages?: number;
+      hasNextPage?: boolean;
+    };
+  }> {
     if (limit > 50) {
       limit = 50;
     }
@@ -63,18 +73,21 @@ export class UsersController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<User | null> {
     return this.usersService.findOne({ id: +id });
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: number, @Body() updateProfileDto: UpdateUserDto) {
+  update(
+    @Param('id') id: number,
+    @Body() updateProfileDto: UpdateUserDto,
+  ): Promise<User> {
     return this.usersService.update(+id, updateProfileDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id') id: number): Promise<void> {
     return this.usersService.softDelete(+id);
   }
 }

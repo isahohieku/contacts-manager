@@ -13,8 +13,6 @@ import {
 
 describe('CacheInterceptor', () => {
   let interceptor: CacheInterceptor;
-  let cacheService: CacheService;
-  let reflector: Reflector;
 
   const mockCacheService = {
     get: jest.fn(),
@@ -41,8 +39,6 @@ describe('CacheInterceptor', () => {
     }).compile();
 
     interceptor = module.get<CacheInterceptor>(CacheInterceptor);
-    cacheService = module.get<CacheService>(CacheService);
-    reflector = module.get<Reflector>(Reflector);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -55,7 +51,11 @@ describe('CacheInterceptor', () => {
   describe('intercept', () => {
     let mockExecutionContext: ExecutionContext;
     let mockCallHandler: CallHandler;
-    let mockRequest: any;
+    let mockRequest: {
+      user?: { id: number } | null;
+      query?: object;
+      params?: object;
+    };
 
     beforeEach(() => {
       mockRequest = {

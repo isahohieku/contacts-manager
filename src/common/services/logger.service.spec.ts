@@ -1,6 +1,11 @@
+import * as fs from 'fs';
+
 import { Test, TestingModule } from '@nestjs/testing';
+import * as winston from 'winston';
 
 import { LoggerService } from './logger.service';
+
+// Import modules for mocking
 
 // Mock the entire winston module
 jest.mock('winston', () => ({
@@ -32,16 +37,19 @@ jest.mock('fs', () => ({
   mkdirSync: jest.fn(),
 }));
 
+// Create typed mocks
+const mockWinston = winston as jest.Mocked<typeof winston>;
+const mockFs = fs as jest.Mocked<typeof fs>;
+
 describe('LoggerService', () => {
   let service: LoggerService;
-  let mockWinstonLogger: any;
+  let mockWinstonLogger;
 
   beforeEach(async () => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Get the mocked winston module
-    const winston = require('winston');
+    // Create mock logger instance
     mockWinstonLogger = {
       info: jest.fn(),
       error: jest.fn(),
@@ -52,7 +60,7 @@ describe('LoggerService', () => {
     };
 
     // Make createLogger return our mock logger
-    winston.createLogger.mockReturnValue(mockWinstonLogger);
+    mockWinston.createLogger.mockReturnValue(mockWinstonLogger);
 
     // Mock process.env
     process.env.LOG_LEVEL = 'info';
@@ -79,39 +87,36 @@ describe('LoggerService', () => {
 
   describe('constructor', () => {
     it('should create logs directory if it does not exist', () => {
-      const fs = require('fs');
-      fs.existsSync.mockReturnValue(false);
+      mockFs.existsSync.mockReturnValue(false);
 
       // Create a new instance to test directory creation
       new LoggerService();
 
-      expect(fs.existsSync).toHaveBeenCalledWith(
+      expect(mockFs.existsSync).toHaveBeenCalledWith(
         expect.stringContaining('logs'),
       );
-      expect(fs.mkdirSync).toHaveBeenCalledWith(
+      expect(mockFs.mkdirSync).toHaveBeenCalledWith(
         expect.stringContaining('logs'),
         { recursive: true },
       );
     });
 
     it('should not create logs directory if it already exists', () => {
-      const fs = require('fs');
       // Clear previous calls and set return value
-      fs.mkdirSync.mockClear();
-      fs.existsSync.mockReturnValue(true);
+      mockFs.mkdirSync.mockClear();
+      mockFs.existsSync.mockReturnValue(true);
 
       // Create a new instance
       new LoggerService();
 
-      expect(fs.existsSync).toHaveBeenCalledWith(
+      expect(mockFs.existsSync).toHaveBeenCalledWith(
         expect.stringContaining('logs'),
       );
-      expect(fs.mkdirSync).not.toHaveBeenCalled();
+      expect(mockFs.mkdirSync).not.toHaveBeenCalled();
     });
 
     it('should create winston logger with correct configuration', () => {
-      const winston = require('winston');
-      expect(winston.createLogger).toHaveBeenCalledWith(
+      expect(mockWinston.createLogger).toHaveBeenCalledWith(
         expect.objectContaining({
           level: 'info',
           defaultMeta: {
@@ -125,11 +130,10 @@ describe('LoggerService', () => {
 
     it('should use default log level when LOG_LEVEL is not set', () => {
       delete process.env.LOG_LEVEL;
-      const winston = require('winston');
 
       new LoggerService();
 
-      expect(winston.createLogger).toHaveBeenCalledWith(
+      expect(mockWinston.createLogger).toHaveBeenCalledWith(
         expect.objectContaining({
           level: 'info',
         }),
@@ -138,11 +142,10 @@ describe('LoggerService', () => {
 
     it('should use custom log level when LOG_LEVEL is set', () => {
       process.env.LOG_LEVEL = 'debug';
-      const winston = require('winston');
 
       new LoggerService();
 
-      expect(winston.createLogger).toHaveBeenCalledWith(
+      expect(mockWinston.createLogger).toHaveBeenCalledWith(
         expect.objectContaining({
           level: 'debug',
         }),

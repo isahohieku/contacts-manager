@@ -21,7 +21,7 @@ export class FilesService {
     private fileRepository: Repository<FileEntity>,
   ) {}
 
-  async findOne(user: User, id: string) {
+  async findOne(user: User, id: string): Promise<FileEntity> {
     const file = await this.fileRepository.findOne({
       where: {
         id,
@@ -46,7 +46,10 @@ export class FilesService {
     );
   }
 
-  async uploadFile(user: User, file): Promise<{ path: string }> {
+  async uploadFile(
+    user: User,
+    file: Express.Multer.File | { path: string; location: string },
+  ): Promise<{ path: string }> {
     if (!file) {
       const errors = {
         file: FilesErrorCodes.NO_FILE,
@@ -60,7 +63,7 @@ export class FilesService {
     }
     const path = {
       local: `/${this.configService.get('app.apiPrefix')}/v1/${file.path}`,
-      s3: file.location,
+      s3: (file as { path: string; location: string }).location,
     };
 
     return this.fileRepository.save(
@@ -71,7 +74,7 @@ export class FilesService {
     );
   }
 
-  async removeFile(user: User, id: string) {
+  async removeFile(user: User, id: string): Promise<FileEntity> {
     const file = await this.findOne(user, id);
     await this.fileStorageService.removeFromStorage(file.path);
     await this.fileRepository.softDelete(id);

@@ -5,7 +5,7 @@ import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
-import { diskStorage } from 'multer';
+import { diskStorage, StorageEngine } from 'multer';
 import multerS3 from 'multer-s3';
 
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
@@ -42,7 +42,7 @@ export class FileStorageService {
    *
    * @return {DiskStorageOptions} A disk storage engine configuration object.
    */
-  private getLocalStorage() {
+  private getLocalStorage(): StorageEngine {
     return diskStorage({
       destination: './files',
       filename: (_, file, callback) => {
@@ -58,9 +58,9 @@ export class FileStorageService {
    *
    * @return {multerS3.StorageEngine} A multer-s3 storage engine configuration object.
    */
-  private getS3Storage() {
+  private getS3Storage(): StorageEngine {
     return multerS3({
-      s3: this.s3Client as any,
+      s3: this.s3Client,
       bucket:
         this.configService.get('file.awsDefaultS3Bucket') || 'default-bucket',
       acl: 'public-read',
@@ -79,7 +79,7 @@ export class FileStorageService {
    * @param {string} filePath - The path of the file to be removed.
    * @return {void}
    */
-  private removeFromLocalStorage(filePath: string) {
+  private removeFromLocalStorage(filePath: string): void {
     const file = filePath.split('/').pop();
     const fullPath = path.join(
       __dirname,
@@ -95,7 +95,7 @@ export class FileStorageService {
         throw handleError(
           HttpStatus.INTERNAL_SERVER_ERROR,
           `Failed to delete local file: ${fullPath}`,
-          err,
+          { file: 'Failed to delete local file' },
         );
       }
     });
@@ -108,7 +108,7 @@ export class FileStorageService {
    * @return {Promise<void>} A promise that resolves when the file is successfully removed.
    * @throws {Error} If there is an error deleting the file.
    */
-  private async removeFromS3Storage(filePath: string) {
+  private async removeFromS3Storage(filePath: string): Promise<void> {
     const bucket = this.configService.get('file.awsDefaultS3Bucket');
     const key = filePath.replace(/^.*\/\/[^\/]+/, ''); // Remove URL part
 
@@ -133,7 +133,7 @@ export class FileStorageService {
    *
    * @return {object} The storage object, either S3 or local storage.
    */
-  getStorage() {
+  getStorage(): StorageEngine {
     return this.getIsS3Driver() ? this.getS3Storage() : this.getLocalStorage();
   }
 
@@ -143,7 +143,7 @@ export class FileStorageService {
    * @param {string} filePath - The path of the file to be removed.
    * @return {Promise<void>} A promise that resolves when the file has been removed.
    */
-  removeFromStorage(filePath: string) {
+  removeFromStorage(filePath: string): Promise<void> | void {
     return this.getIsS3Driver()
       ? this.removeFromS3Storage(filePath)
       : this.removeFromLocalStorage(filePath);
@@ -156,7 +156,7 @@ export class FileStorageService {
    * @param {Response} res - The response object to stream the file to.
    * @return {Promise<void>} A promise that resolves when the file has been streamed.
    */
-  async getFile(filePath: string, res: Response) {
+  async getFile(filePath: string, res: Response): Promise<Response> {
     const fullPath = path.join(__dirname, '..', '..', '..', 'files', filePath);
 
     // Check if the file exists

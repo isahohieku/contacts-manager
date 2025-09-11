@@ -7,12 +7,14 @@ This directory contains the CI/CD workflows for the Contact List API project. Th
 ### 1. Quality Check (`quality-check.yml`)
 
 **Triggers:**
+
 - Push to any branch (except main/develop)
 - Pull request opened/updated
 
 **Purpose:** Fast feedback for development branches
 
 **Jobs:**
+
 - **quality-check**: ESLint, Prettier, TypeScript compilation, unit tests, security audit
 - **security-analysis**: Security vulnerabilities, dependency analysis (PR only)
 - **code-quality**: Unit test coverage, complexity analysis (PR only)
@@ -22,13 +24,15 @@ This directory contains the CI/CD workflows for the Contact List API project. Th
 ### 2. Continuous Integration (`integration.yml`)
 
 **Triggers:**
-- Push to main, develop, release/*, hotfix/* branches
+
+- Push to main, develop, release/_, hotfix/_ branches
 - Pull requests to main/develop
 - Manual workflow dispatch
 
 **Purpose:** Comprehensive testing and validation
 
 **Jobs:**
+
 1. **lint-and-typecheck**: Code quality and type safety
 2. **unit-tests**: Fast unit tests with coverage
 3. **integration-tests**: Database integration tests
@@ -40,6 +44,7 @@ This directory contains the CI/CD workflows for the Contact List API project. Th
 ### 3. Deploy (`deploy.yml`)
 
 **Triggers:**
+
 - Push to main branch (staging)
 - Git tags (production)
 - Manual workflow dispatch
@@ -47,6 +52,7 @@ This directory contains the CI/CD workflows for the Contact List API project. Th
 **Purpose:** Automated deployment pipeline
 
 **Jobs:**
+
 1. **pre-deployment-tests**: Critical tests before deployment
 2. **build-and-push**: Docker image build and registry push
 3. **deploy-staging**: Staging environment deployment
@@ -60,29 +66,34 @@ This directory contains the CI/CD workflows for the Contact List API project. Th
 The workflows use the following npm scripts:
 
 ### Unit Tests
+
 ```bash
 yarn test:unit          # Run unit tests
 yarn test:unit:cov      # Run unit tests with coverage
 ```
 
 ### Integration Tests
+
 ```bash
 yarn test:integration       # Run integration tests
 yarn test:integration:cov   # Run integration tests with coverage
 ```
 
 ### E2E Tests
+
 ```bash
 yarn test:e2e          # Run e2e tests
 yarn test:e2e:cov      # Run e2e tests with coverage
 ```
 
 ### Coverage Merging
+
 ```bash
 yarn test:cov:merge    # Merge all coverage reports
 ```
 
 ### Quality Checks
+
 ```bash
 yarn lint              # ESLint
 yarn prettier:check    # Prettier formatting check
@@ -99,6 +110,7 @@ The workflows generate and merge coverage from three sources:
 3. **E2E Tests**: Full application workflow testing
 
 Coverage reports are:
+
 - Uploaded to Codecov with separate flags
 - Merged into a comprehensive report
 - Commented on pull requests
@@ -109,6 +121,7 @@ Coverage reports are:
 ### Required Secrets
 
 #### Database
+
 - `DATABASE_TYPE`
 - `DATABASE_HOST`
 - `DATABASE_PORT`
@@ -117,10 +130,12 @@ Coverage reports are:
 - `DATABASE_NAME`
 
 #### Authentication
+
 - `AUTH_JWT_SECRET`
 - `AUTH_JWT_TOKEN_EXPIRES_IN`
 
 #### Mail Service
+
 - `MAIL_HOST`
 - `MAIL_PORT`
 - `MAIL_USER`
@@ -128,6 +143,7 @@ Coverage reports are:
 - `MAIL_DEFAULT_EMAIL`
 
 #### File Storage
+
 - `FILE_DRIVER`
 - `ACCESS_KEY_ID`
 - `SECRET_ACCESS_KEY`
@@ -135,11 +151,13 @@ Coverage reports are:
 - `AWS_DEFAULT_S3_BUCKET`
 
 #### Coverage
+
 - `CODECOV_TOKEN`
 
 ### Environment Files
 
 The workflows create appropriate `.env` files for different contexts:
+
 - CI environments use test databases
 - E2E tests use Docker Compose services
 - Integration tests use GitHub Actions services
@@ -147,18 +165,21 @@ The workflows create appropriate `.env` files for different contexts:
 ## Workflow Strategy
 
 ### Branch Strategy
+
 - **Feature branches**: Quality check only (fast feedback)
 - **Main/Develop**: Full CI pipeline
 - **Release branches**: Full CI + deployment preparation
 - **Tags**: Full CI + production deployment
 
 ### Test Strategy
+
 - **Unit tests**: Always run (fast feedback)
 - **Integration tests**: Run on important branches
 - **E2E tests**: Run on main branches and PRs
 - **Coverage**: Comprehensive reporting and tracking
 
 ### Deployment Strategy
+
 - **Staging**: Automatic on main branch
 - **Production**: Manual or tag-triggered
 - **Rollback**: Automatic on deployment failure
@@ -181,6 +202,7 @@ The workflows create appropriate `.env` files for different contexts:
 ## Usage Examples
 
 ### Running Full Test Suite Manually
+
 ```bash
 # Trigger comprehensive CI
 gh workflow run integration.yml
@@ -190,12 +212,14 @@ gh workflow run integration.yml -f run_full_suite=true
 ```
 
 ### Deploying to Staging
+
 ```bash
 # Deploy current main to staging
 gh workflow run deploy.yml -f environment=staging
 ```
 
 ### Emergency Production Deployment
+
 ```bash
 # Skip tests and deploy directly
 gh workflow run deploy.yml -f environment=production -f skip_tests=true
@@ -226,6 +250,7 @@ docker-compose -f docker-compose.ci.yaml up --build
 ## Maintenance
 
 ### Regular Tasks
+
 - Update Node.js version in workflows
 - Review and update dependencies
 - Monitor workflow execution times
@@ -233,7 +258,9 @@ docker-compose -f docker-compose.ci.yaml up --build
 - Review security audit results
 
 ### Workflow Updates
+
 When modifying workflows:
+
 1. Test changes on feature branches
 2. Validate with workflow dispatch
 3. Monitor first production run

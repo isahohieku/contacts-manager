@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailerService } from '@nestjs-modules/mailer';
 
-import { MailService } from './mail.service';
 import { MailData } from './interfaces/mail-data.interface';
+import { MailService } from './mail.service';
 
 // Mock the translation files
 jest.mock('@contactApp/shared/translations/confirm-email.json', () => ({
@@ -22,8 +22,6 @@ jest.mock('@contactApp/shared/translations/reset-password.json', () => ({
 
 describe('MailService', () => {
   let service: MailService;
-  let mailerService: MailerService;
-  let configService: ConfigService;
 
   const mockMailerService = {
     sendMail: jest.fn(),
@@ -49,8 +47,6 @@ describe('MailService', () => {
     }).compile();
 
     service = module.get<MailService>(MailService);
-    mailerService = module.get<MailerService>(MailerService);
-    configService = module.get<ConfigService>(ConfigService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -175,9 +171,13 @@ describe('MailService', () => {
     it('should log error and rethrow when mailer service fails', async () => {
       const error = new Error('SMTP connection failed');
       mockMailerService.sendMail.mockRejectedValue(error);
-      const errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const errorSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
 
-      await expect(service.userSignUp(mailData)).rejects.toThrow('SMTP connection failed');
+      await expect(service.userSignUp(mailData)).rejects.toThrow(
+        'SMTP connection failed',
+      );
 
       expect(errorSpy).toHaveBeenCalledWith(
         'Failed to send confirmation email to test@example.com',
@@ -190,9 +190,13 @@ describe('MailService', () => {
     it('should handle mailer service errors with different error types', async () => {
       const error = new Error('Invalid email address');
       mockMailerService.sendMail.mockRejectedValue(error);
-      const errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const errorSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
 
-      await expect(service.userSignUp(mailData)).rejects.toThrow('Invalid email address');
+      await expect(service.userSignUp(mailData)).rejects.toThrow(
+        'Invalid email address',
+      );
 
       expect(errorSpy).toHaveBeenCalledWith(
         'Failed to send confirmation email to test@example.com',
@@ -310,9 +314,13 @@ describe('MailService', () => {
     it('should log error and rethrow when password reset email fails', async () => {
       const error = new Error('Template not found');
       mockMailerService.sendMail.mockRejectedValue(error);
-      const errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const errorSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
 
-      await expect(service.forgotPassword(mailData)).rejects.toThrow('Template not found');
+      await expect(service.forgotPassword(mailData)).rejects.toThrow(
+        'Template not found',
+      );
 
       expect(errorSpy).toHaveBeenCalledWith(
         'Failed to send password reset email to user@example.com',
@@ -325,9 +333,13 @@ describe('MailService', () => {
     it('should handle network errors during password reset', async () => {
       const error = new Error('Network timeout');
       mockMailerService.sendMail.mockRejectedValue(error);
-      const errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const errorSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
 
-      await expect(service.forgotPassword(mailData)).rejects.toThrow('Network timeout');
+      await expect(service.forgotPassword(mailData)).rejects.toThrow(
+        'Network timeout',
+      );
 
       expect(errorSpy).toHaveBeenCalledWith(
         'Failed to send password reset email to user@example.com',

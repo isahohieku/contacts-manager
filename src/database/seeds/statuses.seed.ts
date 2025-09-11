@@ -4,7 +4,7 @@ import { Status } from '../../modules/statuses/entities/status.entity';
 import { StatusEnum } from '../../modules/statuses/statuses.enum';
 
 export default class CreateStatus {
-  public async run(factory: any, dataSource: DataSource): Promise<void> {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
     const count = await dataSource
       .createQueryBuilder()
       .select()

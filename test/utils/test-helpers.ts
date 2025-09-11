@@ -1,30 +1,144 @@
+import {
+  DynamicModule,
+  ForwardReference,
+  Provider,
+  Type,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, ObjectLiteral } from 'typeorm';
+import { Request } from 'express';
+import { ParsedQs } from 'qs';
+import { Repository, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
 import { CacheService } from '../../src/common/services/cache.service';
 import { LoggerService } from '../../src/common/services/logger.service';
 
+// Define interfaces for better type safety
+interface MockQueryBuilder<T = unknown> {
+  where: jest.MockedFunction<
+    (condition: string | object) => MockQueryBuilder<T>
+  >;
+  andWhere: jest.MockedFunction<
+    (condition: string | object) => MockQueryBuilder<T>
+  >;
+  orWhere: jest.MockedFunction<
+    (condition: string | object) => MockQueryBuilder<T>
+  >;
+  orderBy: jest.MockedFunction<
+    (sort: string, order?: 'ASC' | 'DESC') => MockQueryBuilder<T>
+  >;
+  skip: jest.MockedFunction<(offset: number) => MockQueryBuilder<T>>;
+  take: jest.MockedFunction<(limit: number) => MockQueryBuilder<T>>;
+  leftJoinAndSelect: jest.MockedFunction<
+    (relation: string, alias: string) => MockQueryBuilder<T>
+  >;
+  innerJoinAndSelect: jest.MockedFunction<
+    (relation: string, alias: string) => MockQueryBuilder<T>
+  >;
+  getOne: jest.MockedFunction<() => Promise<T | null>>;
+  getMany: jest.MockedFunction<() => Promise<T[]>>;
+  getManyAndCount: jest.MockedFunction<() => Promise<[T[], number]>>;
+  execute: jest.MockedFunction<() => Promise<unknown>>;
+}
+interface ConfigMap {
+  [key: string]: string | number | boolean;
+}
+
+interface MockUser {
+  id: number;
+  email: string;
+  password: string;
+  avatar: string | null;
+  previousPassword: string;
+  firstName: string;
+  lastName: string;
+  role: { id: number; name: string };
+  status: { id: number; name: string };
+  provider: { id: number; name: string };
+  country: { id: number; code: string };
+  hash: string | null;
+  contacts: unknown[];
+  tags: unknown[];
+  files: unknown[];
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  __entity: string;
+  loadPreviousPassword: jest.MockedFunction<() => void>;
+  setPassword: jest.MockedFunction<(password: string) => void>;
+  setEntityName: jest.MockedFunction<() => void>;
+  hasId: jest.MockedFunction<() => boolean>;
+  save: jest.MockedFunction<() => Promise<MockUser>>;
+  remove: jest.MockedFunction<() => Promise<MockUser>>;
+  softRemove: jest.MockedFunction<() => Promise<MockUser>>;
+  recover: jest.MockedFunction<() => Promise<MockUser>>;
+  reload: jest.MockedFunction<() => Promise<void>>;
+}
+
+interface MockAuthProvider {
+  id: number;
+  name: string;
+  active: boolean;
+  __entity: string;
+  setEntityName: jest.MockedFunction<() => void>;
+  hasId: jest.MockedFunction<() => boolean>;
+  save: jest.MockedFunction<() => Promise<MockAuthProvider>>;
+  remove: jest.MockedFunction<() => Promise<MockAuthProvider>>;
+  softRemove: jest.MockedFunction<() => Promise<MockAuthProvider>>;
+  recover: jest.MockedFunction<() => Promise<MockAuthProvider>>;
+  reload: jest.MockedFunction<() => Promise<void>>;
+}
+
+interface MockContact {
+  id: number;
+  firstName: string;
+  lastName: string;
+  organization: string;
+  job_title: string;
+  birthday: Date;
+  anniversary: Date;
+  notes: string;
+  owner: MockUser;
+  phone_numbers: unknown[];
+  emails: unknown[];
+  addresses: unknown[];
+  tags: unknown[];
+  avatar: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  hasId: jest.MockedFunction<() => boolean>;
+  save: jest.MockedFunction<() => Promise<MockContact>>;
+  remove: jest.MockedFunction<() => Promise<MockContact>>;
+  softRemove: jest.MockedFunction<() => Promise<MockContact>>;
+  recover: jest.MockedFunction<() => Promise<MockContact>>;
+  reload: jest.MockedFunction<() => Promise<void>>;
+}
+
+interface MockRequest extends Partial<Request> {
+  user?: MockUser;
+  headers: Record<string, string>;
+  query: ParsedQs;
+  params: Record<string, string>;
+  body: Record<string, unknown>;
+}
+
+interface MockResponse {
+  status: jest.MockedFunction<(code: number) => MockResponse>;
+  json: jest.MockedFunction<(body: unknown) => MockResponse>;
+  send: jest.MockedFunction<(body: unknown) => MockResponse>;
+  end: jest.MockedFunction<() => MockResponse>;
+}
+
 /**
  * Creates a mock repository for testing
  */
-export const createMockRepository = <T extends ObjectLiteral = any>(): Partial<
-  Repository<T>
-> => ({
-  find: jest.fn(),
-  findOne: jest.fn(),
-  findOneBy: jest.fn(),
-  save: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  remove: jest.fn(),
-  softDelete: jest.fn(),
-  count: jest.fn(),
-  merge: jest.fn(),
-  createQueryBuilder: jest.fn(() => ({
+export const createMockRepository = <
+  T extends ObjectLiteral = ObjectLiteral,
+>(): Partial<Repository<T>> => {
+  const mockQueryBuilder: MockQueryBuilder<T> = {
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orWhere: jest.fn().mockReturnThis(),
@@ -37,15 +151,32 @@ export const createMockRepository = <T extends ObjectLiteral = any>(): Partial<
     getMany: jest.fn(),
     getManyAndCount: jest.fn(),
     execute: jest.fn(),
-  })) as any,
-});
+  };
+
+  return {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    findOneBy: jest.fn(),
+    save: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    remove: jest.fn(),
+    softDelete: jest.fn(),
+    count: jest.fn(),
+    merge: jest.fn(),
+    createQueryBuilder: jest.fn(
+      () => mockQueryBuilder,
+    ) as unknown as jest.MockedFunction<() => SelectQueryBuilder<T>>,
+  };
+};
 
 /**
  * Creates a mock ConfigService for testing
  */
 export const createMockConfigService = (): Partial<ConfigService> => ({
   get: jest.fn((key: string) => {
-    const config = {
+    const config: ConfigMap = {
       'auth.secret': 'test-secret',
       'auth.expires': '1d',
       'database.type': 'postgres',
@@ -63,10 +194,16 @@ export const createMockConfigService = (): Partial<ConfigService> => ({
 /**
  * Creates a mock JwtService for testing
  */
-export const createMockJwtService = (): Partial<JwtService> => ({
+export interface MockJwtService {
+  sign: jest.Mock;
+  verify: jest.Mock;
+  decode: jest.Mock;
+}
+
+export const createMockJwtService = (): MockJwtService => ({
   sign: jest.fn(() => 'mock-jwt-token'),
-  verify: jest.fn(() => ({ id: 1, email: 'test@example.com' }) as any),
-  decode: jest.fn(() => ({ id: 1, email: 'test@example.com' }) as any),
+  verify: jest.fn(() => ({ id: 1, email: 'test@example.com' })),
+  decode: jest.fn(() => ({ id: 1, email: 'test@example.com' })),
 });
 
 /**
@@ -114,9 +251,14 @@ export const createMockLoggerService = (): Partial<LoggerService> => ({
  * Helper to create a testing module with common mocks
  */
 export const createTestingModule = async (
-  providers: any[] = [],
-  imports: any[] = [],
-  entities: any[] = [],
+  providers: Provider[] = [],
+  imports: (
+    | Type<unknown>
+    | DynamicModule
+    | Promise<DynamicModule>
+    | ForwardReference<unknown>
+  )[] = [],
+  entities: (new () => ObjectLiteral)[] = [],
 ): Promise<TestingModule> => {
   const moduleBuilder = Test.createTestingModule({
     imports,
@@ -148,11 +290,10 @@ export const createTestingModule = async (
 
   return moduleBuilder.compile();
 };
-
 /**
  * Mock user data for testing
  */
-export const mockUser = {
+export const mockUser: MockUser = {
   id: 1,
   email: 'test@example.com',
   password: 'hashedPassword',
@@ -182,12 +323,12 @@ export const mockUser = {
   softRemove: jest.fn(),
   recover: jest.fn(),
   reload: jest.fn(),
-} as any;
+};
 
 /**
  * Mock auth provider data for testing
  */
-export const mockAuthProvider = {
+export const mockAuthProvider: MockAuthProvider = {
   id: 1,
   name: 'email',
   active: true,
@@ -199,12 +340,12 @@ export const mockAuthProvider = {
   softRemove: jest.fn(),
   recover: jest.fn(),
   reload: jest.fn(),
-} as any;
+};
 
 /**
  * Mock contact data for testing
  */
-export const mockContact = {
+export const mockContact: MockContact = {
   id: 1,
   firstName: 'John',
   lastName: 'Doe',
@@ -234,7 +375,7 @@ export const mockContact = {
 /**
  * Helper to create mock request object
  */
-export const createMockRequest = (user = mockUser) => ({
+export const createMockRequest = (user: MockUser = mockUser): MockRequest => ({
   user,
   headers: {},
   query: {},
@@ -245,8 +386,8 @@ export const createMockRequest = (user = mockUser) => ({
 /**
  * Helper to create mock response object
  */
-export const createMockResponse = () => {
-  const res: any = {};
+export const createMockResponse = (): MockResponse => {
+  const res = {} as MockResponse;
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
   res.send = jest.fn().mockReturnValue(res);

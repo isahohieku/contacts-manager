@@ -12,6 +12,7 @@ import { CacheService } from '../../common/services/cache.service';
 import { SearchTypes } from '../../shared/utils/types/contacts.type';
 import { FilesService } from '../files/files.service';
 import { TagsService } from '../tags/tags.service';
+import { User } from '../users/entity/user.entity';
 
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -85,7 +86,10 @@ describe('ContactsService', () => {
       (mockContactRepository.create as jest.Mock).mockReturnValue(savedContact);
       (mockContactRepository.save as jest.Mock).mockResolvedValue(savedContact);
 
-      const result = await service.create(mockUser, createContactDto);
+      const result = await service.create(
+        mockUser as unknown as User,
+        createContactDto,
+      );
 
       expect(mockContactRepository.create).toHaveBeenCalledWith({
         ...createContactDto,
@@ -122,7 +126,7 @@ describe('ContactsService', () => {
         { page, limit },
         search,
         type,
-        mockUser,
+        mockUser as unknown as User,
       );
 
       expect(mockCacheService.get).toHaveBeenCalled();
@@ -155,7 +159,7 @@ describe('ContactsService', () => {
         { page, limit },
         search,
         type,
-        mockUser,
+        mockUser as unknown as User,
       );
 
       expect(mockCacheService.set).toHaveBeenCalled();
@@ -168,7 +172,10 @@ describe('ContactsService', () => {
       const contactId = 1;
       (mockCacheService.get as jest.Mock).mockResolvedValue(mockContact);
 
-      const result = await service.findOne(mockUser, contactId);
+      const result = await service.findOne(
+        mockUser as unknown as User,
+        contactId,
+      );
 
       expect(mockCacheService.get).toHaveBeenCalled();
       expect(result).toEqual(mockContact);
@@ -181,7 +188,10 @@ describe('ContactsService', () => {
         mockContact,
       );
 
-      const result = await service.findOne(mockUser, contactId);
+      const result = await service.findOne(
+        mockUser as unknown as User,
+        contactId,
+      );
 
       expect(mockContactRepository.findOne).toHaveBeenCalledWith({
         where: {
@@ -201,7 +211,9 @@ describe('ContactsService', () => {
       (mockCacheService.get as jest.Mock).mockResolvedValue(null);
       (mockContactRepository.findOne as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.findOne(mockUser, contactId)).rejects.toThrow();
+      await expect(
+        service.findOne(mockUser as unknown as User, contactId),
+      ).rejects.toThrow();
     });
   });
 
@@ -237,7 +249,7 @@ describe('ContactsService', () => {
       );
 
       const result = await service.update(
-        mockUser,
+        mockUser as unknown as User,
         contactId,
         updateContactDto,
       );
@@ -255,7 +267,11 @@ describe('ContactsService', () => {
         .mockRejectedValue(new Error('Contact not found'));
 
       await expect(
-        service.update(mockUser, contactId, updateContactDto),
+        service.update(
+          mockUser as unknown as User,
+          contactId,
+          updateContactDto,
+        ),
       ).rejects.toThrow();
     });
   });
@@ -272,7 +288,10 @@ describe('ContactsService', () => {
         affected: 1,
       });
 
-      const result = await service.remove(mockUser, contactId);
+      const result = await service.remove(
+        mockUser as unknown as User,
+        contactId,
+      );
 
       expect(mockContactRepository.softDelete).toHaveBeenCalledWith(contactId);
       expect(result).toEqual(existingContact);
@@ -285,7 +304,9 @@ describe('ContactsService', () => {
         .spyOn(service, 'findOne')
         .mockRejectedValue(new Error('Contact not found'));
 
-      await expect(service.remove(mockUser, contactId)).rejects.toThrow();
+      await expect(
+        service.remove(mockUser as unknown as User, contactId),
+      ).rejects.toThrow();
     });
   });
 });

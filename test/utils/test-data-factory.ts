@@ -2,6 +2,12 @@
  * Test data factory for generating unique test data across test suites
  */
 
+import { MailerService } from '@nestjs-modules/mailer';
+
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { MailService } from '@contactApp/modules/mail/mail.service';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+
 export interface TestUserData {
   id?: number;
   email: string;
@@ -58,7 +64,14 @@ export function createTestUserSignUpData(
  * @param testSuiteName - Name of the test suite to ensure uniqueness
  * @returns Unique contact data object
  */
-export function createTestContactData(testSuiteName: string) {
+export function createTestContactData(testSuiteName: string): Partial<{
+  id: number | undefined;
+  firstName: string;
+  lastName: string;
+  company: string;
+  jobTitle: string;
+  user: User;
+}> {
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 8);
 
@@ -68,7 +81,7 @@ export function createTestContactData(testSuiteName: string) {
     lastName: `Test-${timestamp}`,
     company: `Test Company ${randomSuffix}`,
     jobTitle: 'Test Position',
-    user: undefined as any,
+    user: undefined as unknown as User,
   };
 }
 
@@ -77,7 +90,12 @@ export function createTestContactData(testSuiteName: string) {
  * @param testSuiteName - Name of the test suite to ensure uniqueness
  * @returns Unique email data object
  */
-export function createTestEmailData(testSuiteName: string) {
+export function createTestEmailData(testSuiteName: string): Partial<{
+  id: number | undefined;
+  email_address: string;
+  email_type: { id: number };
+  contact: Contact;
+}> {
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 8);
 
@@ -85,7 +103,7 @@ export function createTestEmailData(testSuiteName: string) {
     id: undefined as number | undefined,
     email_address: `email-${testSuiteName.toLowerCase().replace(/\s+/g, '-')}-${timestamp}-${randomSuffix}@test.com`,
     email_type: { id: 1 },
-    contact: undefined as any,
+    contact: undefined as unknown as Contact,
   };
 }
 
@@ -93,7 +111,7 @@ export function createTestEmailData(testSuiteName: string) {
  * Creates a mock mailer service for testing
  * This can be used to mock the MailerService in tests
  */
-export const createMockMailerService = () => ({
+export const createMockMailerService = (): Partial<MailerService> => ({
   sendMail: jest.fn().mockResolvedValue(true),
 });
 
@@ -101,7 +119,7 @@ export const createMockMailerService = () => ({
  * Creates a mock mail service for testing
  * This can be used to mock the MailService in tests
  */
-export const createMockMailService = () => ({
+export const createMockMailService = (): Partial<MailService> => ({
   userSignUp: jest.fn().mockResolvedValue(true),
   forgotPassword: jest.fn().mockResolvedValue(true),
 });
@@ -115,31 +133,31 @@ export class TestDatabaseCleaner {
   private static createdEmails: number[] = [];
   private static createdFiles: number[] = [];
 
-  static addUser(userId: number) {
+  static addUser(userId: number): void {
     if (userId && !this.createdUsers.includes(userId)) {
       this.createdUsers.push(userId);
     }
   }
 
-  static addContact(contactId: number) {
+  static addContact(contactId: number): void {
     if (contactId && !this.createdContacts.includes(contactId)) {
       this.createdContacts.push(contactId);
     }
   }
 
-  static addEmail(emailId: number) {
+  static addEmail(emailId: number): void {
     if (emailId && !this.createdEmails.includes(emailId)) {
       this.createdEmails.push(emailId);
     }
   }
 
-  static addFile(fileId: number) {
+  static addFile(fileId: number): void {
     if (fileId && !this.createdFiles.includes(fileId)) {
       this.createdFiles.push(fileId);
     }
   }
 
-  static async cleanupAll() {
+  static async cleanupAll(): Promise<void> {
     const { User } = await import(
       '@contactApp/modules/users/entity/user.entity'
     );
@@ -180,11 +198,12 @@ export class TestDatabaseCleaner {
         this.createdUsers = [];
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Error during test cleanup:', error);
     }
   }
 
-  static reset() {
+  static reset(): void {
     this.createdUsers = [];
     this.createdContacts = [];
     this.createdEmails = [];

@@ -38,6 +38,7 @@ import { User } from '../users/entity/user.entity';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { Contact } from './entities/contact.entity';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -73,7 +74,10 @@ export class ContactsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  create(@Request() request: any, @Body() createContactDto: CreateContactDto) {
+  create(
+    @Request() request: { user: User },
+    @Body() createContactDto: CreateContactDto,
+  ): Promise<Contact> {
     return this.contactsService.create(request.user as User, createContactDto);
   }
 
@@ -132,12 +136,21 @@ export class ContactsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAll(
-    @Request() request: any,
+    @Request() request: { user: User },
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('search') search: string,
     @Query('type') type: SearchTypes,
-  ) {
+  ): Promise<{
+    data: Contact[];
+    metadata: {
+      page?: number;
+      items_per_page?: number;
+      total_items?: number;
+      total_pages?: number;
+      hasNextPage?: boolean;
+    };
+  }> {
     if (limit > 50) {
       limit = 50;
     }
@@ -177,10 +190,10 @@ export class ContactsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async exportContacts(
-    @Request() request: any,
+    @Request() request: { user: User },
     @Response() res: Res,
     @Query('id') id?: string,
-  ) {
+  ): Promise<void> {
     const csvContacts = await this.contactsService.exportContacts(
       request.user as User,
       id ? +id : undefined,
@@ -235,7 +248,10 @@ export class ContactsController {
       fileFilter,
     }),
   )
-  async importContacts(@Request() request: any, @UploadedFile() file: any) {
+  async importContacts(
+    @Request() request: { user: User },
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ message: string }> {
     return await this.contactsService.importContacts(
       request.user as User,
       file,
@@ -268,7 +284,10 @@ export class ContactsController {
   })
   @ApiResponse({ status: 404, description: 'Contact not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findOne(@Request() request: any, @Param('id') id: string) {
+  findOne(
+    @Request() request: { user: User },
+    @Param('id') id: string,
+  ): Promise<Contact> {
     return this.contactsService.findOne(request.user as User, +id);
   }
 
@@ -282,10 +301,10 @@ export class ContactsController {
   @ApiResponse({ status: 404, description: 'Contact not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   update(
-    @Request() request: any,
+    @Request() request: { user: User },
     @Param('id') id: string,
     @Body() updateContactDto: UpdateContactDto,
-  ) {
+  ): Promise<Contact> {
     return this.contactsService.update(
       request.user as User,
       +id,
@@ -302,7 +321,10 @@ export class ContactsController {
   @ApiResponse({ status: 200, description: 'Contact deleted successfully' })
   @ApiResponse({ status: 404, description: 'Contact not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  remove(@Request() request: any, @Param('id') id: string) {
+  remove(
+    @Request() request: { user: User },
+    @Param('id') id: string,
+  ): Promise<Contact> {
     return this.contactsService.remove(request.user, +id);
   }
 }

@@ -6,12 +6,10 @@ import { LoggerService } from '../services/logger.service';
 import { MetricsService } from '../services/metrics.service';
 
 // Extend Express Request interface to include correlation ID
-declare global {
-  namespace Express {
-    interface Request {
-      correlationId?: string;
-      startTime?: number;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    correlationId?: string;
+    startTime?: number;
   }
 }
 
@@ -42,7 +40,9 @@ export class RequestLoggingMiddleware implements NestMiddleware {
       `Request details: ${JSON.stringify({
         method: req.method,
         url: req.url,
-        headers: this.sanitizeHeaders(req.headers),
+        headers: this.sanitizeHeaders(
+          req.headers as unknown as Record<string, string | string[]>,
+        ),
         query: req.query,
         ip: req.ip || req.connection.remoteAddress,
         userAgent: req.get('User-Agent'),
@@ -52,7 +52,11 @@ export class RequestLoggingMiddleware implements NestMiddleware {
 
     // Capture response when it finishes
     const originalSend = res.send;
-    res.send = function (body: any) {
+    res.send = function (body: {
+      message: string;
+      error?: string;
+      errors?: Record<string, { message: string }>;
+    }): Response<unknown, Record<string, unknown>> {
       const responseTime = Date.now() - (req.startTime || Date.now());
       const statusCode = res.statusCode;
 
@@ -67,6 +71,7 @@ export class RequestLoggingMiddleware implements NestMiddleware {
           `RequestLogging [${correlationId}]`,
         );
       } else {
+        // eslint-disable-next-line no-console
         console.log(
           `[${new Date().toISOString()}] ${req.method} ${req.url} ${statusCode} - ${responseTime}ms [${correlationId}]`,
         );
@@ -83,7 +88,7 @@ export class RequestLoggingMiddleware implements NestMiddleware {
           timestamp: new Date(),
           userAgent: req.get('User-Agent'),
           ip: req.ip || req.connection.remoteAddress,
-          userId: (req as any).user?.id,
+          userId: (req as { user?: { id: number } }).user?.id,
         });
       }
 
@@ -106,7 +111,9 @@ export class RequestLoggingMiddleware implements NestMiddleware {
   /**
    * Sanitize headers to remove sensitive information
    */
-  private sanitizeHeaders(headers: any): any {
+  private sanitizeHeaders(
+    headers: Record<string, string | string[]>,
+  ): Record<string, unknown> {
     const sanitized = { ...headers };
 
     // Remove sensitive headers

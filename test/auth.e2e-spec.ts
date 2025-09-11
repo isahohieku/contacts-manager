@@ -15,8 +15,8 @@ import { createMockMailService } from './utils/test-data-factory';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
-  let userDbData: any = null;
-  let loggedInUser: any = null;
+  let userDbData: User | null = null;
+  let loggedInUser: (User & { token: string; user }) | null = null;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -106,7 +106,7 @@ describe('AuthController (e2e)', () => {
   it('should verify user account with POST /api/auth/email/confirm', async () => {
     const user = await User.findOne({
       where: {
-        id: userDbData.id,
+        id: userDbData?.id,
       },
     });
     if (!user) {
@@ -240,7 +240,7 @@ describe('AuthController (e2e)', () => {
     const userForgotPassword = await Forgot.findOne({
       where: {
         user: {
-          id: userDbData.id,
+          id: userDbData?.id,
         },
       },
     });
@@ -278,7 +278,7 @@ describe('AuthController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/auth/me')
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.OK)
       .then(({ body }) => {
@@ -307,7 +307,7 @@ describe('AuthController (e2e)', () => {
         firstName,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.OK)
       .then(({ body }) => {
@@ -337,7 +337,7 @@ describe('AuthController (e2e)', () => {
         password: userSignUpDetails.password,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.UNPROCESSABLE_ENTITY)
       .then(({ body }) => {
@@ -355,7 +355,7 @@ describe('AuthController (e2e)', () => {
         password: userSignUpDetails.password,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.UNPROCESSABLE_ENTITY)
       .then(({ body }) => {
@@ -368,7 +368,7 @@ describe('AuthController (e2e)', () => {
 
   it('should throw error if user user a different provider to login with POST /api/auth/login', async () => {
     await User.save({
-      ...loggedInUser.user,
+      ...loggedInUser?.user,
       provider: { id: 2 },
     });
     return request(app.getHttpServer())
@@ -378,7 +378,7 @@ describe('AuthController (e2e)', () => {
         password: userSignUpDetails.password,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.UNPROCESSABLE_ENTITY)
       .then(({ body }) => {
@@ -393,7 +393,7 @@ describe('AuthController (e2e)', () => {
     return request(app.getHttpServer())
       .delete('/api/auth/me')
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.OK);
   });

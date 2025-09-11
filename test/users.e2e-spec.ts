@@ -20,7 +20,7 @@ describe('UserController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
-  let normalUserDbData: any = null;
+  let normalUserDbData: User | null = null;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -48,9 +48,9 @@ describe('UserController (e2e)', () => {
         ...userData,
         password,
       });
-      (userData as any).id = user.id;
+      (userData as unknown as User).id = user.id;
       // Update userData with unique email for token generation
-      (userData as any).email = userData.email;
+      (userData as unknown as User).email = userData.email;
     }
     const authSecret = configService.get<string>('auth.secret');
     if (!authSecret) {
@@ -204,17 +204,17 @@ describe('UserController (e2e)', () => {
       });
   });
 
-  it(`should get a user with GET /api/users/${normalUserDbData?.id} - `, () => {
+  it(`should get a user with GET /api/users/${(normalUserDbData as unknown as User)?.id} - `, () => {
     return request(app.getHttpServer())
-      .get(`/api/users/${normalUserDbData.id}`)
+      .get(`/api/users/${(normalUserDbData as unknown as User)?.id}`)
       .set({
         Authorization: `Bearer ${token}`,
       })
       .expect(HttpStatus.OK)
       .then(({ body }) => {
         expect(typeof body).toBe('object');
-        expect(body.firstName).toBe(normalUserDbData.firstName);
-        expect(body.lastName).toBe(normalUserDbData.lastName);
+        expect(body.firstName).toBe(normalUserDbData?.firstName);
+        expect(body.lastName).toBe(normalUserDbData?.lastName);
         expect(typeof new Date(body.birthday).getTime()).toBe('number');
         expect(typeof new Date(body.anniversary).getTime()).toBe('number');
         expect(body).toHaveProperty('id');
@@ -230,7 +230,7 @@ describe('UserController (e2e)', () => {
     if (!authSecret) {
       throw new Error('Auth secret not configured');
     }
-    const normalUserToken = jwt.sign(normalUserDbData, authSecret);
+    const normalUserToken = jwt.sign(normalUserDbData as User, authSecret);
     return request(app.getHttpServer())
       .get('/api/users/0')
       .set({
@@ -261,13 +261,13 @@ describe('UserController (e2e)', () => {
       });
   });
 
-  it(`should update a user with PATCH /api/users/${normalUserDbData?.id}`, () => {
+  it(`should update a user with PATCH /api/users/${(normalUserDbData as unknown as User)?.id}`, () => {
     const user = {
       firstName: 'Jin',
       lastName: 'Kazama',
     };
     return request(app.getHttpServer())
-      .patch(`/api/users/${normalUserDbData.id}`)
+      .patch(`/api/users/${normalUserDbData?.id}`)
       .send(user)
       .set({
         Authorization: `Bearer ${token}`,
@@ -303,9 +303,9 @@ describe('UserController (e2e)', () => {
       });
   });
 
-  it(`should remove a user with DELETE /api/users/${normalUserDbData?.id}`, () => {
+  it(`should remove a user with DELETE /api/users/${(normalUserDbData as unknown as User)?.id}`, () => {
     return request(app.getHttpServer())
-      .delete(`/api/users/${normalUserDbData.id}`)
+      .delete(`/api/users/${normalUserDbData?.id}`)
       .set({
         Authorization: `Bearer ${token}`,
       })

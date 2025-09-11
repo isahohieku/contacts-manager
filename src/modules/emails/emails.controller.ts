@@ -12,9 +12,13 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+import { EmailType } from '../email-types/entities/email-type.entity';
+import { User } from '../users/entity/user.entity';
+
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { EmailsService } from './emails.service';
+import { Email } from './entities/email.entity';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
@@ -27,31 +31,40 @@ export class EmailsController {
   constructor(private readonly emailsService: EmailsService) {}
 
   @Post()
-  create(@Request() request, @Body() createEmailDto: CreateEmailDto) {
+  create(
+    @Request() request: { user: User },
+    @Body() createEmailDto: CreateEmailDto,
+  ): Promise<Email> {
     return this.emailsService.create(request.user, createEmailDto);
   }
 
   @Get('email-types')
-  getEmailTypes() {
+  getEmailTypes(): Promise<EmailType[]> {
     return this.emailsService.getEmailTypes();
   }
 
   @Get(':id')
-  findOne(@Request() request, @Param('id') id: string) {
+  findOne(
+    @Request() request: { user: User },
+    @Param('id') id: string,
+  ): Promise<Email> {
     return this.emailsService.findOne(request.user, +id);
   }
 
   @Patch(':id')
   update(
-    @Request() request,
+    @Request() request: { user: User },
     @Param('id') id: string,
     @Body() updateEmailDto: UpdateEmailDto,
-  ) {
+  ): Promise<Email> {
     return this.emailsService.update(request.user, +id, updateEmailDto);
   }
 
   @Delete(':id')
-  remove(@Request() request, @Param('id') id: string) {
+  remove(
+    @Request() request: { user: User },
+    @Param('id') id: string,
+  ): Promise<Email> {
     return this.emailsService.remove(request.user, +id);
   }
 }

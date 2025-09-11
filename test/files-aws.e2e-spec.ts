@@ -4,14 +4,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { TestAppModule } from './utils/test-app.module';
 import { MailService } from '@contactApp/modules/mail/mail.service';
 import { User } from '@contactApp/modules/users/entity/user.entity';
 
+import { TestAppModule } from './utils/test-app.module';
 import {
   createTestUserData,
   createMockMailService,
   TestDatabaseCleaner,
+  TestUserData,
 } from './utils/test-data-factory';
 
 process.env.FILE_DRIVER = 's3';
@@ -20,7 +21,7 @@ describe('FileStorageService (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
-  let userData: any;
+  let userData: TestUserData;
 
   beforeEach(async () => {
     // Generate unique test data for this test suite

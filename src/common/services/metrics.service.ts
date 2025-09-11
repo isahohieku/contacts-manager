@@ -34,7 +34,7 @@ export interface DatabaseMetric {
   query: string;
   duration: number;
   timestamp: Date;
-  parameters?: any[];
+  parameters?: (string | number)[];
   error?: string;
 }
 
@@ -141,7 +141,13 @@ export class MetricsService {
   /**
    * Get request metrics summary
    */
-  getRequestMetrics(timeRangeMs = 60000): any {
+  getRequestMetrics(timeRangeMs = 60000): {
+    totalRequests: number;
+    averageResponseTime: number;
+    errorRate: number;
+    statusCodes: Record<number, number>;
+    timeRange: string;
+  } {
     const cutoff = new Date(Date.now() - timeRangeMs);
     const recentMetrics = this.requestMetrics.filter(
       (m) => m.timestamp >= cutoff,
@@ -181,7 +187,12 @@ export class MetricsService {
   /**
    * Get error metrics summary
    */
-  getErrorMetrics(timeRangeMs = 60000): any {
+  getErrorMetrics(timeRangeMs = 60000): {
+    totalErrors: number;
+    errorsByType: Record<string, number>;
+    errorsByPath: Record<string, number>;
+    timeRange: string;
+  } {
     const cutoff = new Date(Date.now() - timeRangeMs);
     const recentErrors = this.errorMetrics.filter((m) => m.timestamp >= cutoff);
 
@@ -213,7 +224,12 @@ export class MetricsService {
   /**
    * Get cache metrics summary
    */
-  getCacheMetrics(timeRangeMs = 60000): any {
+  getCacheMetrics(timeRangeMs = 60000): {
+    hitRate: number;
+    totalOperations: number;
+    operationCounts: Record<string, number>;
+    timeRange: string;
+  } {
     const cutoff = new Date(Date.now() - timeRangeMs);
     const recentMetrics = this.cacheMetrics.filter(
       (m) => m.timestamp >= cutoff,
@@ -243,7 +259,13 @@ export class MetricsService {
   /**
    * Get database metrics summary
    */
-  getDatabaseMetrics(timeRangeMs = 60000): any {
+  getDatabaseMetrics(timeRangeMs = 60000): {
+    totalQueries: number;
+    averageQueryTime: number;
+    slowQueries: number;
+    errorQueries: number;
+    timeRange: string;
+  } {
     const cutoff = new Date(Date.now() - timeRangeMs);
     const recentMetrics = this.databaseMetrics.filter(
       (m) => m.timestamp >= cutoff,
@@ -289,7 +311,36 @@ export class MetricsService {
   /**
    * Get comprehensive metrics dashboard data
    */
-  getDashboardMetrics(): any {
+  getDashboardMetrics(): {
+    requests: {
+      totalRequests: number;
+      averageResponseTime: number;
+      errorRate: number;
+      statusCodes: Record<number, number>;
+      timeRange: string;
+    };
+    errors: {
+      totalErrors: number;
+      errorsByType: Record<string, number>;
+      errorsByPath: Record<string, number>;
+      timeRange: string;
+    };
+    cache: {
+      hitRate: number;
+      totalOperations: number;
+      operationCounts: Record<string, number>;
+      timeRange: string;
+    };
+    database: {
+      totalQueries: number;
+      averageQueryTime: number;
+      slowQueries: number;
+      errorQueries: number;
+      timeRange: string;
+    };
+    system: SystemMetric;
+    timestamp: string;
+  } {
     return {
       requests: this.getRequestMetrics(),
       errors: this.getErrorMetrics(),
@@ -324,7 +375,7 @@ export class MetricsService {
   /**
    * Trim metrics arrays to prevent memory leaks
    */
-  private trimMetrics(metrics: any[]): void {
+  private trimMetrics(metrics: { timestamp }[]): void {
     if (metrics.length > this.maxMetrics) {
       metrics.splice(0, metrics.length - this.maxMetrics);
     }

@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository, SelectQueryBuilder, FindManyOptions } from 'typeorm';
+import {
+  Repository,
+  FindManyOptions,
+  SelectQueryBuilder,
+  InsertQueryBuilder,
+} from 'typeorm';
 
 import { QueryOptimizationService } from './query-optimization.service';
 
@@ -14,10 +19,12 @@ interface TestEntity {
 describe('QueryOptimizationService', () => {
   let service: QueryOptimizationService;
   let mockRepository: jest.Mocked<Repository<TestEntity>>;
-  let mockQueryBuilder: any;
+  let mockQueryBuilder: jest.Mocked<
+    SelectQueryBuilder<TestEntity> & InsertQueryBuilder<TestEntity>
+  >;
 
   beforeEach(async () => {
-    // Create mock query builder with all necessary methods
+    // Create mock query builder with all necessary methods for both select and insert operations
     mockQueryBuilder = {
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
@@ -33,12 +40,14 @@ describe('QueryOptimizationService', () => {
       values: jest.fn().mockReturnThis(),
       orIgnore: jest.fn().mockReturnThis(),
       execute: jest.fn().mockResolvedValue({ affected: 1 }),
-    } as any;
+    } as unknown as jest.Mocked<
+      SelectQueryBuilder<TestEntity> & InsertQueryBuilder<TestEntity>
+    >;
 
     // Create mock repository
     mockRepository = {
       createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
-    } as any;
+    } as unknown as jest.Mocked<Repository<TestEntity>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [QueryOptimizationService],
@@ -93,7 +102,7 @@ describe('QueryOptimizationService', () => {
 
     it('should handle non-array relations', () => {
       const baseQuery: FindManyOptions<TestEntity> = {
-        relations: {} as any, // Non-array relations
+        relations: {} as unknown as string[], // Non-array relations
       };
 
       service.optimizeQuery(mockRepository, baseQuery);
@@ -401,7 +410,7 @@ describe('QueryOptimizationService', () => {
     });
 
     it('should handle empty entities array', async () => {
-      const entities: any[] = [];
+      const entities = [];
 
       await service.bulkInsert(mockRepository, entities);
 

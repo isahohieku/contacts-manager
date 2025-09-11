@@ -27,11 +27,10 @@ export class CacheService {
         'reset' in this.cacheManager &&
         typeof this.cacheManager.reset === 'function'
       ) {
-        await (this.cacheManager as any).reset();
+        await this.cacheManager.reset();
       }
     } catch (error) {
       // Fallback: silently fail as this is not critical
-      console.warn('Cache reset failed:', error.message);
     }
   }
 
@@ -66,6 +65,8 @@ export class CacheService {
 
   // Cache invalidation helpers
   async invalidateUserCache(userId: number): Promise<void> {
+    // eslint-disable-next-line no-console
+    console.log({ invalidateUserCache: userId });
     // This would require a more sophisticated cache implementation
     // For now, we'll just reset the entire cache
     // In production, you'd want to use cache tags or patterns
@@ -73,6 +74,8 @@ export class CacheService {
   }
 
   async invalidateContactsCache(userId: number): Promise<void> {
+    // eslint-disable-next-line no-console
+    console.log({ invalidateContactsCache: userId });
     // Similar to above - in production you'd want pattern-based invalidation
     await this.reset();
   }

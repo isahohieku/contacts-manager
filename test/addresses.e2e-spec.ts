@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { TestAppModule } from './utils/test-app.module';
 import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
 import { Address } from '@contactApp/modules/addresses/entities/address.entity';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
@@ -16,6 +15,7 @@ import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/e
 import { addressData } from './mock-data/address';
 import { contactData } from './mock-data/contact';
 import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
 import { createMockMailService } from './utils/test-data-factory';
 
 describe('AddressController (e2e)', () => {

@@ -9,7 +9,10 @@ import {
 } from '@nestjs/swagger';
 
 import { LoggerService } from '../../common/services/logger.service';
-import { MetricsService } from '../../common/services/metrics.service';
+import {
+  MetricsService,
+  SystemMetric,
+} from '../../common/services/metrics.service';
 
 @ApiTags('Monitoring')
 @Controller('monitoring')
@@ -85,7 +88,36 @@ export class MonitoringController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getMetrics() {
+  async getMetrics(): Promise<{
+    requests: {
+      totalRequests: number;
+      averageResponseTime: number;
+      errorRate: number;
+      statusCodes: Record<number, number>;
+      timeRange: string;
+    };
+    errors: {
+      totalErrors: number;
+      errorsByType: Record<string, number>;
+      errorsByPath: Record<string, number>;
+      timeRange: string;
+    };
+    cache: {
+      hitRate: number;
+      totalOperations: number;
+      operationCounts: Record<string, number>;
+      timeRange: string;
+    };
+    database: {
+      totalQueries: number;
+      averageQueryTime: number;
+      slowQueries: number;
+      errorQueries: number;
+      timeRange: string;
+    };
+    system: SystemMetric;
+    timestamp: string;
+  }> {
     this.logger.log('Metrics endpoint accessed', 'MonitoringController');
     return this.metricsService.getDashboardMetrics();
   }
@@ -120,7 +152,13 @@ export class MonitoringController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getRequestMetrics(@Query('timeRange') timeRange?: string) {
+  async getRequestMetrics(@Query('timeRange') timeRange?: string): Promise<{
+    totalRequests: number;
+    averageResponseTime: number;
+    errorRate: number;
+    statusCodes: Record<number, number>;
+    timeRange: string;
+  }> {
     const timeRangeMs = timeRange ? parseInt(timeRange, 10) : 60000;
     this.logger.log(
       `Request metrics accessed for ${timeRangeMs}ms range`,
@@ -160,7 +198,12 @@ export class MonitoringController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getErrorMetrics(@Query('timeRange') timeRange?: string) {
+  async getErrorMetrics(@Query('timeRange') timeRange?: string): Promise<{
+    totalErrors: number;
+    errorsByType: Record<string, number>;
+    errorsByPath: Record<string, number>;
+    timeRange: string;
+  }> {
     const timeRangeMs = timeRange ? parseInt(timeRange, 10) : 60000;
     this.logger.log(
       `Error metrics accessed for ${timeRangeMs}ms range`,
@@ -198,7 +241,12 @@ export class MonitoringController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getCacheMetrics(@Query('timeRange') timeRange?: string) {
+  async getCacheMetrics(@Query('timeRange') timeRange?: string): Promise<{
+    hitRate: number;
+    totalOperations: number;
+    operationCounts: Record<string, number>;
+    timeRange: string;
+  }> {
     const timeRangeMs = timeRange ? parseInt(timeRange, 10) : 60000;
     this.logger.log(
       `Cache metrics accessed for ${timeRangeMs}ms range`,
@@ -234,7 +282,13 @@ export class MonitoringController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getDatabaseMetrics(@Query('timeRange') timeRange?: string) {
+  async getDatabaseMetrics(@Query('timeRange') timeRange?: string): Promise<{
+    totalQueries: number;
+    averageQueryTime: number;
+    slowQueries: number;
+    errorQueries: number;
+    timeRange: string;
+  }> {
     const timeRangeMs = timeRange ? parseInt(timeRange, 10) : 60000;
     this.logger.log(
       `Database metrics accessed for ${timeRangeMs}ms range`,
@@ -271,7 +325,7 @@ export class MonitoringController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getSystemMetrics() {
+  async getSystemMetrics(): Promise<SystemMetric> {
     this.logger.log('System metrics accessed', 'MonitoringController');
     return this.metricsService.getCurrentSystemMetrics();
   }

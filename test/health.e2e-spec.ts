@@ -47,7 +47,7 @@ describe('Health Controller (e2e)', () => {
         .expect(HttpStatus.OK);
 
       const databaseCheck = response.body.checks.find(
-        (check: any) => check.name === 'database',
+        (check: { name: string }) => check.name === 'database',
       );
       expect(databaseCheck).toBeDefined();
       expect(databaseCheck).toHaveProperty('status');
@@ -60,7 +60,7 @@ describe('Health Controller (e2e)', () => {
         .expect(HttpStatus.OK);
 
       const memoryCheck = response.body.checks.find(
-        (check: any) => check.name === 'memory',
+        (check: { name: string }) => check.name === 'memory',
       );
       expect(memoryCheck).toBeDefined();
       expect(memoryCheck).toHaveProperty('status');
@@ -74,7 +74,7 @@ describe('Health Controller (e2e)', () => {
         .expect(HttpStatus.OK);
 
       const diskCheck = response.body.checks.find(
-        (check: any) => check.name === 'disk',
+        (check: { name: string }) => check.name === 'disk',
       );
       expect(diskCheck).toBeDefined();
       expect(diskCheck).toHaveProperty('status');

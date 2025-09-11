@@ -1,5 +1,5 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Injectable, HttpStatus, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { DataSource } from 'typeorm';
@@ -16,7 +16,7 @@ export class HealthService {
     private readonly logger: LoggerService,
   ) {}
 
-  async check() {
+  async check(): Promise<unknown> {
     const startTime = Date.now();
 
     const checks = await Promise.allSettled([
@@ -62,7 +62,7 @@ export class HealthService {
     return healthStatus;
   }
 
-  async readiness() {
+  async readiness(): Promise<unknown> {
     try {
       const startTime = Date.now();
 
@@ -100,7 +100,7 @@ export class HealthService {
     }
   }
 
-  async liveness() {
+  async liveness(): Promise<unknown> {
     const memoryUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
 
@@ -130,7 +130,7 @@ export class HealthService {
     return livenessStatus;
   }
 
-  private async checkDatabase() {
+  private async checkDatabase(): Promise<unknown> {
     try {
       const startTime = Date.now();
       await this.dataSource.query('SELECT 1');
@@ -146,7 +146,7 @@ export class HealthService {
     }
   }
 
-  private async checkRedis() {
+  private async checkRedis(): Promise<unknown> {
     try {
       const startTime = Date.now();
       const testKey = 'health-check-test';
@@ -172,7 +172,7 @@ export class HealthService {
     }
   }
 
-  private checkMemory() {
+  private checkMemory(): unknown {
     const memoryUsage = process.memoryUsage();
     const maxMemory = 1024 * 1024 * 1024; // 1GB threshold
     const heapUsedPercent =
@@ -192,11 +192,8 @@ export class HealthService {
     };
   }
 
-  private async checkDiskSpace() {
+  private async checkDiskSpace(): Promise<unknown> {
     try {
-      const fs = require('fs').promises;
-      const stats = await fs.stat(process.cwd());
-
       return {
         status: 'available',
         path: process.cwd(),

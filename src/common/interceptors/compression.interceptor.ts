@@ -9,7 +9,7 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class CompressionInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const response = context.switchToHttp().getResponse();
 
     return next.handle().pipe(
@@ -33,12 +33,14 @@ export class CompressionInterceptor implements NestInterceptor {
     );
   }
 
-  private isStaticResponse(data: any): boolean {
+  private isStaticResponse(data: {
+    metadata?: { hasNextPage: boolean };
+  }): boolean {
     // Consider responses with metadata as potentially cacheable
-    return data.metadata && !data.metadata.hasNextPage;
+    return (data.metadata && !data.metadata.hasNextPage) || false;
   }
 
-  private generateETag(data: any): string {
+  private generateETag(data: unknown): string {
     // Simple ETag generation based on data hash
     const content = JSON.stringify(data);
     let hash = 0;

@@ -4,9 +4,7 @@
   "check-coverage": false,
   "reporter": ["text", "lcov", "html"],
   "report-dir": "coverage",
-  "include": [
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "src/**/*.spec.ts",
     "src/**/*.integration.spec.ts",
@@ -20,9 +18,7 @@
     "dist/**",
     "node_modules/**"
   ],
-  "extension": [
-    ".ts"
-  ],
+  "extension": [".ts"],
   "cache": true,
   "temp-dir": ".nyc_output"
 }

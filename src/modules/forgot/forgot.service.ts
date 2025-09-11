@@ -14,13 +14,13 @@ export class ForgotService {
     private forgotRepository: Repository<Forgot>,
   ) {}
 
-  async findOne(options: FindOptions<Forgot>) {
+  async findOne(options: FindOptions<Forgot>): Promise<Forgot | null> {
     return this.forgotRepository.findOne({
       where: options.where,
     });
   }
 
-  async create(data: DeepPartial<Forgot>) {
+  async create(data: DeepPartial<Forgot>): Promise<Forgot> {
     return this.forgotRepository.save(this.forgotRepository.create(data));
   }
 

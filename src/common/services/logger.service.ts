@@ -23,7 +23,15 @@ export class LoggerService implements NestLoggerService {
         winston.format.json(),
         winston.format.printf(
           ({ timestamp, level, message, context, correlationId, ...meta }) => {
-            const logEntry: any = {
+            const logEntry: {
+              timestamp: unknown | string;
+              level: string;
+              message: unknown | string;
+              service: string;
+              context?: object;
+              correlationId?: object;
+              [key: string]: unknown;
+            } = {
               timestamp,
               level,
               message,
@@ -87,7 +95,7 @@ export class LoggerService implements NestLoggerService {
     });
   }
 
-  log(message: string, context?: string, correlationId?: string) {
+  log(message: string, context?: string, correlationId?: string): void {
     this.logger.info(message, { context, correlationId });
   }
 
@@ -96,23 +104,23 @@ export class LoggerService implements NestLoggerService {
     trace?: string,
     context?: string,
     correlationId?: string,
-  ) {
+  ): void {
     this.logger.error(message, { trace, context, correlationId });
   }
 
-  warn(message: string, context?: string, correlationId?: string) {
+  warn(message: string, context?: string, correlationId?: string): void {
     this.logger.warn(message, { context, correlationId });
   }
 
-  debug(message: string, context?: string, correlationId?: string) {
+  debug(message: string, context?: string, correlationId?: string): void {
     this.logger.debug(message, { context, correlationId });
   }
 
-  verbose(message: string, context?: string, correlationId?: string) {
+  verbose(message: string, context?: string, correlationId?: string): void {
     this.logger.verbose(message, { context, correlationId });
   }
 
-  fatal(message: string, context?: string, correlationId?: string) {
+  fatal(message: string, context?: string, correlationId?: string): void {
     this.logger.error(message, { context, correlationId, level: 'fatal' });
   }
 
@@ -122,8 +130,8 @@ export class LoggerService implements NestLoggerService {
   logStructured(
     level: string,
     message: string,
-    metadata: Record<string, any> = {},
-  ) {
+    metadata: Record<string, unknown> = {},
+  ): void {
     this.logger.log(level, message, metadata);
   }
 
@@ -133,8 +141,8 @@ export class LoggerService implements NestLoggerService {
   logPerformance(
     operation: string,
     duration: number,
-    metadata: Record<string, any> = {},
-  ) {
+    metadata: Record<string, unknown> = {},
+  ): void {
     this.logger.info(`Performance: ${operation} completed in ${duration}ms`, {
       context: 'Performance',
       operation,
@@ -146,7 +154,7 @@ export class LoggerService implements NestLoggerService {
   /**
    * Log security events
    */
-  logSecurity(event: string, details: Record<string, any> = {}) {
+  logSecurity(event: string, details: Record<string, unknown> = {}): void {
     this.logger.warn(`Security Event: ${event}`, {
       context: 'Security',
       event,
@@ -157,7 +165,7 @@ export class LoggerService implements NestLoggerService {
   /**
    * Log business events
    */
-  logBusiness(event: string, details: Record<string, any> = {}) {
+  logBusiness(event: string, details: Record<string, unknown> = {}): void {
     this.logger.info(`Business Event: ${event}`, {
       context: 'Business',
       event,

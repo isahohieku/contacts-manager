@@ -15,7 +15,11 @@ const fileTypes: Record<FileTypes, RegExp> = {
   csv: allowedImportFileTypes,
 };
 
-export const fileFilter = (req, file, callback) => {
+export const fileFilter = (
+  req: { query: { type?: FileTypes } },
+  file: Express.Multer.File,
+  callback: (error: Error | null, acceptFile: boolean) => void,
+): void => {
   const { type = FileTypes.CSV } = req.query as { type: FileTypes };
 
   if (!file.originalname.match(fileTypes[type])) {

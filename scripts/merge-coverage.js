@@ -56,7 +56,11 @@ function calculateCoverageStats(coverageData) {
       // Count covered lines
       const coveredLineSet = new Set();
       for (const [stmtId, count] of Object.entries(fileData.s)) {
-        if (count > 0 && fileData.statementMap[stmtId] && fileData.statementMap[stmtId].start) {
+        if (
+          count > 0 &&
+          fileData.statementMap[stmtId] &&
+          fileData.statementMap[stmtId].start
+        ) {
           coveredLineSet.add(fileData.statementMap[stmtId].start.line);
         }
       }
@@ -68,7 +72,7 @@ function calculateCoverageStats(coverageData) {
     statements: { covered: coveredStatements, total: totalStatements },
     functions: { covered: coveredFunctions, total: totalFunctions },
     branches: { covered: coveredBranches, total: totalBranches },
-    lines: { covered: coveredLines, total: totalLines }
+    lines: { covered: coveredLines, total: totalLines },
   };
 }
 
@@ -76,17 +80,37 @@ function calculateCoverageStats(coverageData) {
  * Display coverage summary
  */
 function displayCoverageSummary(stats) {
-  const stmtPct = stats.statements.total > 0 ? ((stats.statements.covered / stats.statements.total) * 100).toFixed(2) : 0;
-  const funcPct = stats.functions.total > 0 ? ((stats.functions.covered / stats.functions.total) * 100).toFixed(2) : 0;
-  const branchPct = stats.branches.total > 0 ? ((stats.branches.covered / stats.branches.total) * 100).toFixed(2) : 0;
-  const linePct = stats.lines.total > 0 ? ((stats.lines.covered / stats.lines.total) * 100).toFixed(2) : 0;
+  const stmtPct =
+    stats.statements.total > 0
+      ? ((stats.statements.covered / stats.statements.total) * 100).toFixed(2)
+      : 0;
+  const funcPct =
+    stats.functions.total > 0
+      ? ((stats.functions.covered / stats.functions.total) * 100).toFixed(2)
+      : 0;
+  const branchPct =
+    stats.branches.total > 0
+      ? ((stats.branches.covered / stats.branches.total) * 100).toFixed(2)
+      : 0;
+  const linePct =
+    stats.lines.total > 0
+      ? ((stats.lines.covered / stats.lines.total) * 100).toFixed(2)
+      : 0;
 
   console.log('\n=== MERGED COVERAGE SUMMARY ===');
   console.log('--------------------------------');
-  console.log(`Statements: ${stmtPct}% (${stats.statements.covered}/${stats.statements.total})`);
-  console.log(`Functions:  ${funcPct}% (${stats.functions.covered}/${stats.functions.total})`);
-  console.log(`Branches:   ${branchPct}% (${stats.branches.covered}/${stats.branches.total})`);
-  console.log(`Lines:      ${linePct}% (${stats.lines.covered}/${stats.lines.total})`);
+  console.log(
+    `Statements: ${stmtPct}% (${stats.statements.covered}/${stats.statements.total})`,
+  );
+  console.log(
+    `Functions:  ${funcPct}% (${stats.functions.covered}/${stats.functions.total})`,
+  );
+  console.log(
+    `Branches:   ${branchPct}% (${stats.branches.covered}/${stats.branches.total})`,
+  );
+  console.log(
+    `Lines:      ${linePct}% (${stats.lines.covered}/${stats.lines.total})`,
+  );
   console.log('--------------------------------\n');
 }
 
@@ -99,10 +123,22 @@ function generateCustomHtmlReport(coverageData, stats, outputDir) {
     fs.mkdirSync(htmlDir, { recursive: true });
   }
 
-  const stmtPct = stats.statements.total > 0 ? ((stats.statements.covered / stats.statements.total) * 100).toFixed(2) : 0;
-  const funcPct = stats.functions.total > 0 ? ((stats.functions.covered / stats.functions.total) * 100).toFixed(2) : 0;
-  const branchPct = stats.branches.total > 0 ? ((stats.branches.covered / stats.branches.total) * 100).toFixed(2) : 0;
-  const linePct = stats.lines.total > 0 ? ((stats.lines.covered / stats.lines.total) * 100).toFixed(2) : 0;
+  const stmtPct =
+    stats.statements.total > 0
+      ? ((stats.statements.covered / stats.statements.total) * 100).toFixed(2)
+      : 0;
+  const funcPct =
+    stats.functions.total > 0
+      ? ((stats.functions.covered / stats.functions.total) * 100).toFixed(2)
+      : 0;
+  const branchPct =
+    stats.branches.total > 0
+      ? ((stats.branches.covered / stats.branches.total) * 100).toFixed(2)
+      : 0;
+  const linePct =
+    stats.lines.total > 0
+      ? ((stats.lines.covered / stats.lines.total) * 100).toFixed(2)
+      : 0;
 
   const html = `
 <!DOCTYPE html>
@@ -182,27 +218,33 @@ function getColorClass(percentage) {
 
 function generateFileList(coverageData) {
   const files = Object.keys(coverageData).sort();
-  return files.map(filePath => {
-    const fileData = coverageData[filePath];
-    const relativePath = filePath.replace(process.cwd(), '').replace(/^\//, '');
+  return files
+    .map((filePath) => {
+      const fileData = coverageData[filePath];
+      const relativePath = filePath
+        .replace(process.cwd(), '')
+        .replace(/^\//, '');
 
-    // Calculate file-specific coverage
-    const stmts = Object.values(fileData.s || {});
-    const funcs = Object.values(fileData.f || {});
-    const branches = Object.values(fileData.b || {}).flat();
+      // Calculate file-specific coverage
+      const stmts = Object.values(fileData.s || {});
+      const funcs = Object.values(fileData.f || {});
+      const branches = Object.values(fileData.b || {}).flat();
 
-    const stmtCovered = stmts.filter(s => s > 0).length;
-    const stmtTotal = stmts.length;
-    const funcCovered = funcs.filter(f => f > 0).length;
-    const funcTotal = funcs.length;
-    const branchCovered = branches.filter(b => b > 0).length;
-    const branchTotal = branches.length;
+      const stmtCovered = stmts.filter((s) => s > 0).length;
+      const stmtTotal = stmts.length;
+      const funcCovered = funcs.filter((f) => f > 0).length;
+      const funcTotal = funcs.length;
+      const branchCovered = branches.filter((b) => b > 0).length;
+      const branchTotal = branches.length;
 
-    const stmtPct = stmtTotal > 0 ? ((stmtCovered / stmtTotal) * 100).toFixed(1) : 0;
-    const funcPct = funcTotal > 0 ? ((funcCovered / funcTotal) * 100).toFixed(1) : 0;
-    const branchPct = branchTotal > 0 ? ((branchCovered / branchTotal) * 100).toFixed(1) : 0;
+      const stmtPct =
+        stmtTotal > 0 ? ((stmtCovered / stmtTotal) * 100).toFixed(1) : 0;
+      const funcPct =
+        funcTotal > 0 ? ((funcCovered / funcTotal) * 100).toFixed(1) : 0;
+      const branchPct =
+        branchTotal > 0 ? ((branchCovered / branchTotal) * 100).toFixed(1) : 0;
 
-    return `
+      return `
         <div class="file-item">
             <div class="file-name">${relativePath}</div>
             <div class="file-stats">
@@ -211,7 +253,8 @@ function generateFileList(coverageData) {
                 <span class="${getColorClass(branchPct)}">B: ${branchPct}%</span>
             </div>
         </div>`;
-  }).join('');
+    })
+    .join('');
 }
 
 /**
@@ -236,12 +279,16 @@ function generateLcovReport(coverageData, outputDir) {
 
       for (const [fnId, count] of Object.entries(fileData.f)) {
         const fnData = fileData.fnMap[fnId];
-        const fnName = fnData ? (fnData.name || `(anonymous_${fnId})`) : `(anonymous_${fnId})`;
+        const fnName = fnData
+          ? fnData.name || `(anonymous_${fnId})`
+          : `(anonymous_${fnId})`;
         lcovContent += `FNDA:${count},${fnName}\n`;
       }
 
       const totalFunctions = Object.keys(fileData.f).length;
-      const coveredFunctions = Object.values(fileData.f).filter(count => count > 0).length;
+      const coveredFunctions = Object.values(fileData.f).filter(
+        (count) => count > 0,
+      ).length;
       lcovContent += `FNF:${totalFunctions}\n`;
       lcovContent += `FNH:${coveredFunctions}\n`;
     }
@@ -257,7 +304,9 @@ function generateLcovReport(coverageData, outputDir) {
       }
 
       const totalBranches = Object.values(fileData.b).flat().length;
-      const coveredBranches = Object.values(fileData.b).flat().filter(count => count > 0).length;
+      const coveredBranches = Object.values(fileData.b)
+        .flat()
+        .filter((count) => count > 0).length;
       lcovContent += `BRF:${totalBranches}\n`;
       lcovContent += `BRH:${coveredBranches}\n`;
     }
@@ -274,12 +323,16 @@ function generateLcovReport(coverageData, outputDir) {
         }
       }
 
-      for (const [line, hits] of Object.entries(lineHits).sort(([a], [b]) => parseInt(a) - parseInt(b))) {
+      for (const [line, hits] of Object.entries(lineHits).sort(
+        ([a], [b]) => parseInt(a) - parseInt(b),
+      )) {
         lcovContent += `DA:${line},${hits}\n`;
       }
 
       const totalLines = Object.keys(lineHits).length;
-      const coveredLines = Object.values(lineHits).filter(hits => hits > 0).length;
+      const coveredLines = Object.values(lineHits).filter(
+        (hits) => hits > 0,
+      ).length;
       lcovContent += `LF:${totalLines}\n`;
       lcovContent += `LH:${coveredLines}\n`;
     }
@@ -350,7 +403,8 @@ function mergeCoverageReports() {
           for (const [key, branches] of Object.entries(incoming.b)) {
             if (existing.b[key]) {
               for (let i = 0; i < branches.length; i++) {
-                existing.b[key][i] = (existing.b[key][i] || 0) + (branches[i] || 0);
+                existing.b[key][i] =
+                  (existing.b[key][i] || 0) + (branches[i] || 0);
               }
             } else {
               existing.b[key] = branches;
@@ -377,7 +431,9 @@ function mergeCoverageReports() {
   try {
     generateCustomHtmlReport(mergedCoverage, stats, coverageDir);
     console.log('Custom HTML report generated successfully!');
-    console.log('Open coverage/index.html in your browser to view the detailed report.');
+    console.log(
+      'Open coverage/index.html in your browser to view the detailed report.',
+    );
   } catch (error) {
     console.error('Error generating custom HTML report:', error.message);
   }

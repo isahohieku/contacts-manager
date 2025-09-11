@@ -8,7 +8,10 @@ import { repositories } from '@contactApp/shared/entities/all-entities';
 
 @ValidatorConstraint({ name: 'IsExist', async: true })
 export class IsExist implements ValidatorConstraintInterface {
-  async validate(value: string, validationArguments: ValidationArguments) {
+  async validate(
+    value: string,
+    validationArguments: ValidationArguments,
+  ): Promise<boolean> {
     const repository =
       repositories[validationArguments.constraints[0] as string];
     const pathToProperty = validationArguments.constraints[1];

@@ -2,31 +2,31 @@ import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import { FilesErrorCodes } from '@contactApp/shared/utils/constants/files/errors';
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
+
 import { mockUser } from '../../../test/utils/test-helpers';
-
 import { FileStorageService } from '../file-storage/file-storage.service';
+import { User } from '../users/entity/user.entity';
 
-import { FilesService } from './files.service';
 import { FileEntity } from './entities/file.entity';
+import { FilesService } from './files.service';
 
 // Mock handleError
 jest.mock('@contactApp/shared/utils/handlers/error.handler');
 
 describe('FilesService', () => {
   let service: FilesService;
-  let fileRepository: Repository<FileEntity>;
-  let configService: ConfigService;
-  let fileStorageService: FileStorageService;
+
+  // Cast mockUser to User type for proper typing
+  const testUser = mockUser as unknown as User;
 
   const mockFile = {
     id: 'cbcfa8b8-3a25-4adb-a9c6-e325f0d0f3ae',
     path: '/api/v1/files/test-file.jpg',
-    owner: mockUser,
+    owner: testUser,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -75,9 +75,6 @@ describe('FilesService', () => {
     }).compile();
 
     service = module.get<FilesService>(FilesService);
-    fileRepository = module.get<Repository<FileEntity>>(getRepositoryToken(FileEntity));
-    configService = module.get<ConfigService>(ConfigService);
-    fileStorageService = module.get<FileStorageService>(FileStorageService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -93,13 +90,13 @@ describe('FilesService', () => {
     it('should return file when found', async () => {
       mockFileRepository.findOne.mockResolvedValue(mockFile);
 
-      const result = await service.findOne(mockUser, fileId);
+      const result = await service.findOne(testUser, fileId);
 
       expect(mockFileRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: fileId,
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -113,13 +110,15 @@ describe('FilesService', () => {
         throw mockError;
       });
 
-      await expect(service.findOne(mockUser, fileId)).rejects.toThrow(mockError);
+      await expect(service.findOne(testUser, fileId)).rejects.toThrow(
+        mockError,
+      );
 
       expect(mockFileRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: fileId,
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -136,13 +135,15 @@ describe('FilesService', () => {
       const repositoryError = new Error('Database connection failed');
       mockFileRepository.findOne.mockRejectedValue(repositoryError);
 
-      await expect(service.findOne(mockUser, fileId)).rejects.toThrow(repositoryError);
+      await expect(service.findOne(testUser, fileId)).rejects.toThrow(
+        repositoryError,
+      );
 
       expect(mockFileRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: fileId,
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -163,12 +164,12 @@ describe('FilesService', () => {
       mockFileRepository.create.mockReturnValue(expectedFile);
       mockFileRepository.save.mockResolvedValue(expectedFile);
 
-      const result = await service.uploadFile(mockUser, mockUploadedFile);
+      const result = await service.uploadFile(testUser, mockUploadedFile);
 
       expect(mockConfigService.get).toHaveBeenCalledWith('app.apiPrefix');
       expect(mockConfigService.get).toHaveBeenCalledWith('file.driver');
       expect(mockFileRepository.create).toHaveBeenCalledWith({
-        owner: mockUser,
+        owner: testUser,
         path: '/app/v1/files/test-file.jpg',
       });
       expect(mockFileRepository.save).toHaveBeenCalledWith(expectedFile);
@@ -188,12 +189,12 @@ describe('FilesService', () => {
       mockFileRepository.create.mockReturnValue(expectedFile);
       mockFileRepository.save.mockResolvedValue(expectedFile);
 
-      const result = await service.uploadFile(mockUser, mockUploadedFile);
+      const result = await service.uploadFile(testUser, mockUploadedFile);
 
       expect(mockConfigService.get).toHaveBeenCalledWith('app.apiPrefix');
       expect(mockConfigService.get).toHaveBeenCalledWith('file.driver');
       expect(mockFileRepository.create).toHaveBeenCalledWith({
-        owner: mockUser,
+        owner: testUser,
         path: 'https://s3.amazonaws.com/bucket/test-file.jpg',
       });
       expect(mockFileRepository.save).toHaveBeenCalledWith(expectedFile);
@@ -206,7 +207,9 @@ describe('FilesService', () => {
         throw mockError;
       });
 
-      await expect(service.uploadFile(mockUser, null)).rejects.toThrow(mockError);
+      await expect(
+        service.uploadFile(testUser, null as unknown as Express.Multer.File),
+      ).rejects.toThrow(mockError);
 
       expect(handleError).toHaveBeenCalledWith(
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -225,7 +228,12 @@ describe('FilesService', () => {
         throw mockError;
       });
 
-      await expect(service.uploadFile(mockUser, undefined)).rejects.toThrow(mockError);
+      await expect(
+        service.uploadFile(
+          testUser,
+          undefined as unknown as Express.Multer.File,
+        ),
+      ).rejects.toThrow(mockError);
 
       expect(handleError).toHaveBeenCalledWith(
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -240,7 +248,6 @@ describe('FilesService', () => {
 
     it('should handle repository errors during upload', async () => {
       const repositoryError = new Error('Database connection failed');
-
       mockConfigService.get
         .mockReturnValueOnce('api') // app.apiPrefix
         .mockReturnValueOnce('local'); // file.driver
@@ -248,7 +255,9 @@ describe('FilesService', () => {
       mockFileRepository.create.mockReturnValue(mockFile);
       mockFileRepository.save.mockRejectedValue(repositoryError);
 
-      await expect(service.uploadFile(mockUser, mockUploadedFile)).rejects.toThrow(repositoryError);
+      await expect(
+        service.uploadFile(testUser, mockUploadedFile),
+      ).rejects.toThrow(repositoryError);
 
       expect(mockFileRepository.create).toHaveBeenCalled();
       expect(mockFileRepository.save).toHaveBeenCalled();
@@ -263,10 +272,12 @@ describe('FilesService', () => {
       mockFileStorageService.removeFromStorage.mockResolvedValue(undefined);
       mockFileRepository.softDelete.mockResolvedValue({ affected: 1 });
 
-      const result = await service.removeFile(mockUser, fileId);
+      const result = await service.removeFile(testUser, fileId);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, fileId);
-      expect(mockFileStorageService.removeFromStorage).toHaveBeenCalledWith(mockFile.path);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, fileId);
+      expect(mockFileStorageService.removeFromStorage).toHaveBeenCalledWith(
+        mockFile.path,
+      );
       expect(mockFileRepository.softDelete).toHaveBeenCalledWith(fileId);
       expect(result).toEqual(mockFile);
     });
@@ -275,9 +286,11 @@ describe('FilesService', () => {
       const mockError = new Error('File not found');
       service.findOne = jest.fn().mockRejectedValue(mockError);
 
-      await expect(service.removeFile(mockUser, fileId)).rejects.toThrow(mockError);
+      await expect(service.removeFile(testUser, fileId)).rejects.toThrow(
+        mockError,
+      );
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, fileId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, fileId);
       expect(mockFileStorageService.removeFromStorage).not.toHaveBeenCalled();
       expect(mockFileRepository.softDelete).not.toHaveBeenCalled();
     });
@@ -287,10 +300,14 @@ describe('FilesService', () => {
       service.findOne = jest.fn().mockResolvedValue(mockFile);
       mockFileStorageService.removeFromStorage.mockRejectedValue(storageError);
 
-      await expect(service.removeFile(mockUser, fileId)).rejects.toThrow(storageError);
+      await expect(service.removeFile(testUser, fileId)).rejects.toThrow(
+        storageError,
+      );
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, fileId);
-      expect(mockFileStorageService.removeFromStorage).toHaveBeenCalledWith(mockFile.path);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, fileId);
+      expect(mockFileStorageService.removeFromStorage).toHaveBeenCalledWith(
+        mockFile.path,
+      );
       expect(mockFileRepository.softDelete).not.toHaveBeenCalled();
     });
 
@@ -300,10 +317,14 @@ describe('FilesService', () => {
       mockFileStorageService.removeFromStorage.mockResolvedValue(undefined);
       mockFileRepository.softDelete.mockRejectedValue(repositoryError);
 
-      await expect(service.removeFile(mockUser, fileId)).rejects.toThrow(repositoryError);
+      await expect(service.removeFile(testUser, fileId)).rejects.toThrow(
+        repositoryError,
+      );
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, fileId);
-      expect(mockFileStorageService.removeFromStorage).toHaveBeenCalledWith(mockFile.path);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, fileId);
+      expect(mockFileStorageService.removeFromStorage).toHaveBeenCalledWith(
+        mockFile.path,
+      );
       expect(mockFileRepository.softDelete).toHaveBeenCalledWith(fileId);
     });
   });

@@ -67,7 +67,13 @@ export class AuthProvidersService {
    * ID, role, and status. If the password is invalid, it throws a 422 error with an appropriate
    * error message.
    */
-  async loginWithEmail(user: User, loginDto: AuthEmailLoginDto) {
+  async loginWithEmail(
+    user: User,
+    loginDto: AuthEmailLoginDto,
+  ): Promise<{
+    token: string;
+    user: User;
+  }> {
     // Compare the provided password with the user's password in the database
     const isValidPassword = await bcrypt.compare(
       loginDto.password,

@@ -11,7 +11,6 @@ import {
 
 describe('MetricsService', () => {
   let service: MetricsService;
-  let loggerService: LoggerService;
 
   const mockLoggerService = {
     warn: jest.fn(),
@@ -33,13 +32,12 @@ describe('MetricsService', () => {
     }).compile();
 
     service = module.get<MetricsService>(MetricsService);
-    loggerService = module.get<LoggerService>(LoggerService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
 
     // Mock setInterval to prevent actual timer execution
-    jest.spyOn(global, 'setInterval').mockImplementation(() => ({}) as any);
+    jest.spyOn(global, 'setInterval').mockImplementation(() => ({}) as never);
   });
 
   afterEach(() => {

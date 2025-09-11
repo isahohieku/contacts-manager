@@ -1,15 +1,13 @@
-import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import {
   createMockRepository,
   mockUser,
-  mockAuthProvider,
 } from '../../../test/utils/test-helpers';
 import { RoleEnum } from '../../shared/utils/types/roles.type';
 import { StatusEnum } from '../../shared/utils/types/statuses.type';
+import { Country } from '../countries/entities/country.entity';
 import { ForgotService } from '../forgot/forgot.service';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
@@ -22,11 +20,6 @@ import { AuthProvider } from './entities/auth-providers.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let authProviderRepository: Repository<AuthProvider>;
-  let usersService: UsersService;
-  let forgotService: ForgotService;
-  let mailService: MailService;
-  let authProvidersService: AuthProvidersService;
 
   const mockAuthProviderRepository = createMockRepository<AuthProvider>();
   const mockUsersService = {
@@ -87,14 +80,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    authProviderRepository = module.get<Repository<AuthProvider>>(
-      getRepositoryToken(AuthProvider),
-    );
-    usersService = module.get<UsersService>(UsersService);
-    forgotService = module.get<ForgotService>(ForgotService);
-    mailService = module.get<MailService>(MailService);
-    authProvidersService =
-      module.get<AuthProvidersService>(AuthProvidersService);
   });
 
   afterEach(() => {
@@ -247,8 +232,8 @@ describe('AuthService', () => {
       password: 'password123',
       firstName: 'New',
       lastName: 'User',
-      provider: mockAuthProvider as any,
-      country: { id: 1, code: 'NG' } as any,
+      provider: mockAuthProvider as AuthProvider,
+      country: { id: 1, code: 'NG' } as Country,
     };
 
     it('should register a new user successfully', async () => {

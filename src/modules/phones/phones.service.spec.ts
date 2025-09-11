@@ -1,20 +1,22 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
-import { ContactsService } from '../contacts/contacts.service';
-import { PhoneNumberErrorCodes } from '@contactApp/shared/utils/constants/phone-numbers/errors';
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { PhoneNumberErrorCodes } from '@contactApp/shared/utils/constants/phone-numbers/errors';
 import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { validatePhoneNumber } from '@contactApp/shared/utils/validators/phone-number';
-import { mockUser, mockContact } from '../../../test/utils/test-helpers';
 
-import { PhonesService } from './phones.service';
+import { mockUser, mockContact } from '../../../test/utils/test-helpers';
+import { ContactsService } from '../contacts/contacts.service';
+import { Contact } from '../contacts/entities/contact.entity';
+import { PhoneType } from '../phone-types/entities/phone-type.entity';
+import { User } from '../users/entity/user.entity';
+
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
 import { Phone } from './entities/phone.entity';
-import { PhoneType } from '../phone-types/entities/phone-type.entity';
+import { PhonesService } from './phones.service';
 
 // Mock handleError
 jest.mock('@contactApp/shared/utils/handlers/error.handler');
@@ -31,8 +33,9 @@ jest.mock('../phone-types/entities/phone-type.entity', () => ({
 
 describe('PhonesService', () => {
   let service: PhonesService;
-  let phoneRepository: Repository<Phone>;
-  let contactsService: ContactsService;
+
+  // Create properly typed test user
+  const testUser = mockUser as unknown as User;
 
   const mockPhone = {
     id: 1,
@@ -85,8 +88,6 @@ describe('PhonesService', () => {
     }).compile();
 
     service = module.get<PhonesService>(PhonesService);
-    phoneRepository = module.get<Repository<Phone>>(getRepositoryToken(Phone));
-    contactsService = module.get<ContactsService>(ContactsService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -100,7 +101,7 @@ describe('PhonesService', () => {
     const createPhoneDto: CreatePhoneDto = {
       phone_number: '+2348036133002',
       phone_type: { id: 1 },
-      contact: { id: 1 } as any,
+      contact: { id: 1 } as Contact,
     };
 
     it('should create a phone successfully without validation', async () => {
@@ -110,9 +111,12 @@ describe('PhonesService', () => {
       mockPhoneRepository.create.mockReturnValue(expectedPhone);
       mockPhoneRepository.save.mockResolvedValue(expectedPhone);
 
-      const result = await service.create(mockUser, createPhoneDto, false);
+      const result = await service.create(testUser, createPhoneDto, false);
 
-      expect(mockContactsService.findOne).toHaveBeenCalledWith(mockUser, createPhoneDto.contact.id);
+      expect(mockContactsService.findOne).toHaveBeenCalledWith(
+        testUser,
+        createPhoneDto.contact.id,
+      );
       expect(mockPhoneRepository.create).toHaveBeenCalledWith(createPhoneDto);
       expect(mockPhoneRepository.save).toHaveBeenCalledWith(expectedPhone);
       expect(validatePhoneNumber).not.toHaveBeenCalled();
@@ -127,13 +131,16 @@ describe('PhonesService', () => {
       mockPhoneRepository.create.mockReturnValue(expectedPhone);
       mockPhoneRepository.save.mockResolvedValue(expectedPhone);
 
-      const result = await service.create(mockUser, createPhoneDto, true);
+      const result = await service.create(testUser, createPhoneDto, true);
 
       expect(validatePhoneNumber).toHaveBeenCalledWith(
         createPhoneDto.phone_number,
-        mockUser.country,
+        testUser.country,
       );
-      expect(mockContactsService.findOne).toHaveBeenCalledWith(mockUser, createPhoneDto.contact.id);
+      expect(mockContactsService.findOne).toHaveBeenCalledWith(
+        testUser,
+        createPhoneDto.contact.id,
+      );
       expect(mockPhoneRepository.create).toHaveBeenCalledWith(createPhoneDto);
       expect(mockPhoneRepository.save).toHaveBeenCalledWith(expectedPhone);
       expect(result).toEqual(expectedPhone);
@@ -146,11 +153,13 @@ describe('PhonesService', () => {
         throw mockError;
       });
 
-      await expect(service.create(mockUser, createPhoneDto, true)).rejects.toThrow(mockError);
+      await expect(
+        service.create(testUser, createPhoneDto, true),
+      ).rejects.toThrow(mockError);
 
       expect(validatePhoneNumber).toHaveBeenCalledWith(
         createPhoneDto.phone_number,
-        mockUser.country,
+        testUser.country,
       );
       expect(handleError).toHaveBeenCalledWith(
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -168,9 +177,14 @@ describe('PhonesService', () => {
       const mockError = new Error('Contact not found');
       mockContactsService.findOne.mockRejectedValue(mockError);
 
-      await expect(service.create(mockUser, createPhoneDto, false)).rejects.toThrow(mockError);
+      await expect(
+        service.create(testUser, createPhoneDto, false),
+      ).rejects.toThrow(mockError);
 
-      expect(mockContactsService.findOne).toHaveBeenCalledWith(mockUser, createPhoneDto.contact.id);
+      expect(mockContactsService.findOne).toHaveBeenCalledWith(
+        testUser,
+        createPhoneDto.contact.id,
+      );
       expect(mockPhoneRepository.create).not.toHaveBeenCalled();
       expect(mockPhoneRepository.save).not.toHaveBeenCalled();
     });
@@ -187,17 +201,34 @@ describe('PhonesService', () => {
         select: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(mockPhone),
       };
-      
+
       mockPhoneRepository.createQueryBuilder.mockReturnValue(queryBuilder);
 
-      const result = await service.findOne(mockUser, phoneId);
+      const result = await service.findOne(testUser, phoneId);
 
-      expect(mockPhoneRepository.createQueryBuilder).toHaveBeenCalledWith('phone');
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('phone.contact', 'contact');
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('phone.phone_type', 'phone_type');
-      expect(queryBuilder.where).toHaveBeenCalledWith('phone.id = :id', { id: phoneId });
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith('contact.owner.id = :userId', { userId: mockUser.id });
-      expect(queryBuilder.select).toHaveBeenCalledWith(['phone', 'contact', 'phone_type']);
+      expect(mockPhoneRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'phone',
+      );
+      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'phone.contact',
+        'contact',
+      );
+      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'phone.phone_type',
+        'phone_type',
+      );
+      expect(queryBuilder.where).toHaveBeenCalledWith('phone.id = :id', {
+        id: phoneId,
+      });
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'contact.owner.id = :userId',
+        { userId: testUser.id },
+      );
+      expect(queryBuilder.select).toHaveBeenCalledWith([
+        'phone',
+        'contact',
+        'phone_type',
+      ]);
       expect(result).toEqual(mockPhone);
     });
 
@@ -209,14 +240,16 @@ describe('PhonesService', () => {
         select: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(null),
       };
-      
+
       mockPhoneRepository.createQueryBuilder.mockReturnValue(queryBuilder);
       const mockError = new Error('Phone not found');
       (handleError as jest.Mock).mockImplementation(() => {
         throw mockError;
       });
 
-      await expect(service.findOne(mockUser, phoneId)).rejects.toThrow(mockError);
+      await expect(service.findOne(testUser, phoneId)).rejects.toThrow(
+        mockError,
+      );
 
       expect(handleError).toHaveBeenCalledWith(
         HttpStatus.NOT_FOUND,
@@ -239,16 +272,20 @@ describe('PhonesService', () => {
       const updatedPhone = { ...mockPhone, ...updatePhoneDto };
 
       // Mock findOne calls
-      service.findOne = jest.fn()
+      service.findOne = jest
+        .fn()
         .mockResolvedValueOnce(mockPhone) // First call in update method
         .mockResolvedValueOnce(updatedPhone); // Second call to return updated phone
 
       mockPhoneRepository.update.mockResolvedValue({ affected: 1 });
 
-      const result = await service.update(mockUser, phoneId, updatePhoneDto);
+      const result = await service.update(testUser, phoneId, updatePhoneDto);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, phoneId);
-      expect(mockPhoneRepository.update).toHaveBeenCalledWith(phoneId, updatePhoneDto);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, phoneId);
+      expect(mockPhoneRepository.update).toHaveBeenCalledWith(
+        phoneId,
+        updatePhoneDto,
+      );
       expect(result).toEqual(updatedPhone);
     });
 
@@ -256,9 +293,11 @@ describe('PhonesService', () => {
       const mockError = new Error('Phone not found');
       service.findOne = jest.fn().mockRejectedValue(mockError);
 
-      await expect(service.update(mockUser, phoneId, updatePhoneDto)).rejects.toThrow(mockError);
+      await expect(
+        service.update(testUser, phoneId, updatePhoneDto),
+      ).rejects.toThrow(mockError);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, phoneId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, phoneId);
       expect(mockPhoneRepository.update).not.toHaveBeenCalled();
     });
   });
@@ -270,9 +309,9 @@ describe('PhonesService', () => {
       service.findOne = jest.fn().mockResolvedValue(mockPhone);
       mockPhoneRepository.softDelete.mockResolvedValue({ affected: 1 });
 
-      const result = await service.remove(mockUser, phoneId);
+      const result = await service.remove(testUser, phoneId);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, phoneId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, phoneId);
       expect(mockPhoneRepository.softDelete).toHaveBeenCalledWith(phoneId);
       expect(result).toEqual(mockPhone);
     });
@@ -281,9 +320,11 @@ describe('PhonesService', () => {
       const mockError = new Error('Phone not found');
       service.findOne = jest.fn().mockRejectedValue(mockError);
 
-      await expect(service.remove(mockUser, phoneId)).rejects.toThrow(mockError);
+      await expect(service.remove(testUser, phoneId)).rejects.toThrow(
+        mockError,
+      );
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, phoneId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, phoneId);
       expect(mockPhoneRepository.softDelete).not.toHaveBeenCalled();
     });
   });

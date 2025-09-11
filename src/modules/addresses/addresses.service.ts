@@ -22,7 +22,10 @@ export class AddressesService {
     private readonly contactsService: ContactsService,
   ) {}
 
-  async create(user: User, createAddressDto: CreateAddressDto) {
+  async create(
+    user: User,
+    createAddressDto: CreateAddressDto,
+  ): Promise<Address> {
     await this.contactsService.findOne(user, createAddressDto.contact.id);
 
     const address = await this.addressRepository.save(
@@ -33,7 +36,7 @@ export class AddressesService {
     return address;
   }
 
-  async findOne(user: User, id: number) {
+  async findOne(user: User, id: number): Promise<Address> {
     const userId = user.id;
 
     const address = await this.addressRepository
@@ -59,7 +62,11 @@ export class AddressesService {
     );
   }
 
-  async update(user: User, id: number, updateAddressDto: UpdateAddressDto) {
+  async update(
+    user: User,
+    id: number,
+    updateAddressDto: UpdateAddressDto,
+  ): Promise<Address> {
     await this.findOne(user, id);
 
     await this.addressRepository.save(
@@ -71,13 +78,13 @@ export class AddressesService {
     return this.findOne(user, id);
   }
 
-  async remove(user: User, id: number) {
+  async remove(user: User, id: number): Promise<Address> {
     const address = await this.findOne(user, id);
     await this.addressRepository.softDelete(id);
     return address;
   }
 
-  async getAddressTypes() {
+  async getAddressTypes(): Promise<AddressType[]> {
     const addressTypes = await AddressType.find();
     return addressTypes;
   }

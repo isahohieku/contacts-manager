@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
-import { TestAppModule } from './utils/test-app.module';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
 import { MailService } from '@contactApp/modules/mail/mail.service';
 import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
@@ -15,6 +14,7 @@ import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
 import { contactData } from './mock-data/contact';
 import { tagData } from './mock-data/tag';
 import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
 import { createMockMailService } from './utils/test-data-factory';
 
 describe('TagController (e2e)', () => {

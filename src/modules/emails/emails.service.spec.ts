@@ -1,19 +1,21 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
-import { ContactsService } from '../contacts/contacts.service';
 import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
-import { mockUser, mockContact } from '../../../test/utils/test-helpers';
 
-import { EmailsService } from './emails.service';
+import { mockUser, mockContact } from '../../../test/utils/test-helpers';
+import { ContactsService } from '../contacts/contacts.service';
+import { Contact } from '../contacts/entities/contact.entity';
+import { EmailType } from '../email-types/entities/email-type.entity';
+import { User } from '../users/entity/user.entity';
+
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
+import { EmailsService } from './emails.service';
 import { Email } from './entities/email.entity';
-import { EmailType } from '../email-types/entities/email-type.entity';
 
 // Mock handleError
 jest.mock('@contactApp/shared/utils/handlers/error.handler');
@@ -27,8 +29,6 @@ jest.mock('../email-types/entities/email-type.entity', () => ({
 
 describe('EmailsService', () => {
   let service: EmailsService;
-  let emailRepository: Repository<Email>;
-  let contactsService: ContactsService;
 
   const mockEmail = {
     id: 1,
@@ -79,8 +79,6 @@ describe('EmailsService', () => {
     }).compile();
 
     service = module.get<EmailsService>(EmailsService);
-    emailRepository = module.get<Repository<Email>>(getRepositoryToken(Email));
-    contactsService = module.get<ContactsService>(ContactsService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -94,7 +92,7 @@ describe('EmailsService', () => {
     const createEmailDto: CreateEmailDto = {
       email_address: 'test@example.com',
       email_type: { id: 1 },
-      contact: { id: 1 } as any,
+      contact: { id: 1 } as Contact,
     };
 
     it('should create an email successfully', async () => {
@@ -104,9 +102,15 @@ describe('EmailsService', () => {
       mockEmailRepository.create.mockReturnValue(expectedEmail);
       mockEmailRepository.save.mockResolvedValue(expectedEmail);
 
-      const result = await service.create(mockUser, createEmailDto);
+      const result = await service.create(
+        mockUser as unknown as User,
+        createEmailDto,
+      );
 
-      expect(mockContactsService.findOne).toHaveBeenCalledWith(mockUser, createEmailDto.contact.id);
+      expect(mockContactsService.findOne).toHaveBeenCalledWith(
+        mockUser as unknown as User,
+        createEmailDto.contact.id,
+      );
       expect(mockEmailRepository.create).toHaveBeenCalledWith(createEmailDto);
       expect(mockEmailRepository.save).toHaveBeenCalledWith(expectedEmail);
       expect(result).toEqual(expectedEmail);
@@ -116,9 +120,14 @@ describe('EmailsService', () => {
       const mockError = new Error('Contact not found');
       mockContactsService.findOne.mockRejectedValue(mockError);
 
-      await expect(service.create(mockUser, createEmailDto)).rejects.toThrow(mockError);
+      await expect(
+        service.create(mockUser as unknown as User, createEmailDto),
+      ).rejects.toThrow(mockError);
 
-      expect(mockContactsService.findOne).toHaveBeenCalledWith(mockUser, createEmailDto.contact.id);
+      expect(mockContactsService.findOne).toHaveBeenCalledWith(
+        mockUser as unknown as User,
+        createEmailDto.contact.id,
+      );
       expect(mockEmailRepository.create).not.toHaveBeenCalled();
       expect(mockEmailRepository.save).not.toHaveBeenCalled();
     });
@@ -135,17 +144,37 @@ describe('EmailsService', () => {
         select: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(mockEmail),
       };
-      
+
       mockEmailRepository.createQueryBuilder.mockReturnValue(queryBuilder);
 
-      const result = await service.findOne(mockUser, emailId);
+      const result = await service.findOne(
+        mockUser as unknown as User,
+        emailId,
+      );
 
-      expect(mockEmailRepository.createQueryBuilder).toHaveBeenCalledWith('email');
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('email.contact', 'contact');
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('email.email_type', 'email_type');
-      expect(queryBuilder.where).toHaveBeenCalledWith('email.id = :id', { id: emailId });
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith('contact.owner.id = :userId', { userId: mockUser.id });
-      expect(queryBuilder.select).toHaveBeenCalledWith(['email', 'contact.id', 'email_type']);
+      expect(mockEmailRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'email',
+      );
+      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'email.contact',
+        'contact',
+      );
+      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'email.email_type',
+        'email_type',
+      );
+      expect(queryBuilder.where).toHaveBeenCalledWith('email.id = :id', {
+        id: emailId,
+      });
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'contact.owner.id = :userId',
+        { userId: mockUser.id },
+      );
+      expect(queryBuilder.select).toHaveBeenCalledWith([
+        'email',
+        'contact.id',
+        'email_type',
+      ]);
       expect(result).toEqual(mockEmail);
     });
 
@@ -157,14 +186,16 @@ describe('EmailsService', () => {
         select: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(null),
       };
-      
+
       mockEmailRepository.createQueryBuilder.mockReturnValue(queryBuilder);
       const mockError = new Error('Email not found');
       (handleError as jest.Mock).mockImplementation(() => {
         throw mockError;
       });
 
-      await expect(service.findOne(mockUser, emailId)).rejects.toThrow(mockError);
+      await expect(
+        service.findOne(mockUser as unknown as User, emailId),
+      ).rejects.toThrow(mockError);
 
       expect(handleError).toHaveBeenCalledWith(
         HttpStatus.NOT_FOUND,
@@ -187,16 +218,27 @@ describe('EmailsService', () => {
       const updatedEmail = { ...mockEmail, ...updateEmailDto };
 
       // Mock findOne calls
-      service.findOne = jest.fn()
+      service.findOne = jest
+        .fn()
         .mockResolvedValueOnce(mockEmail) // First call in update method
         .mockResolvedValueOnce(updatedEmail); // Second call to return updated email
 
-      mockEmailRepository.create.mockReturnValue({ id: emailId, ...updateEmailDto });
+      mockEmailRepository.create.mockReturnValue({
+        id: emailId,
+        ...updateEmailDto,
+      });
       mockEmailRepository.save.mockResolvedValue(updatedEmail);
 
-      const result = await service.update(mockUser, emailId, updateEmailDto);
+      const result = await service.update(
+        mockUser as unknown as User,
+        emailId,
+        updateEmailDto,
+      );
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, emailId);
+      expect(service.findOne).toHaveBeenCalledWith(
+        mockUser as unknown as User,
+        emailId,
+      );
       expect(mockEmailRepository.create).toHaveBeenCalledWith({
         id: emailId,
         ...updateEmailDto,
@@ -209,9 +251,14 @@ describe('EmailsService', () => {
       const mockError = new Error('Email not found');
       service.findOne = jest.fn().mockRejectedValue(mockError);
 
-      await expect(service.update(mockUser, emailId, updateEmailDto)).rejects.toThrow(mockError);
+      await expect(
+        service.update(mockUser as unknown as User, emailId, updateEmailDto),
+      ).rejects.toThrow(mockError);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, emailId);
+      expect(service.findOne).toHaveBeenCalledWith(
+        mockUser as unknown as User,
+        emailId,
+      );
       expect(mockEmailRepository.create).not.toHaveBeenCalled();
       expect(mockEmailRepository.save).not.toHaveBeenCalled();
     });
@@ -224,9 +271,12 @@ describe('EmailsService', () => {
       service.findOne = jest.fn().mockResolvedValue(mockEmail);
       mockEmailRepository.softDelete.mockResolvedValue({ affected: 1 });
 
-      const result = await service.remove(mockUser, emailId);
+      const result = await service.remove(mockUser as unknown as User, emailId);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, emailId);
+      expect(service.findOne).toHaveBeenCalledWith(
+        mockUser as unknown as User,
+        emailId,
+      );
       expect(mockEmailRepository.softDelete).toHaveBeenCalledWith(emailId);
       expect(result).toEqual(mockEmail);
     });
@@ -235,9 +285,14 @@ describe('EmailsService', () => {
       const mockError = new Error('Email not found');
       service.findOne = jest.fn().mockRejectedValue(mockError);
 
-      await expect(service.remove(mockUser, emailId)).rejects.toThrow(mockError);
+      await expect(
+        service.remove(mockUser as unknown as User, emailId),
+      ).rejects.toThrow(mockError);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, emailId);
+      expect(service.findOne).toHaveBeenCalledWith(
+        mockUser as unknown as User,
+        emailId,
+      );
       expect(mockEmailRepository.softDelete).not.toHaveBeenCalled();
     });
   });

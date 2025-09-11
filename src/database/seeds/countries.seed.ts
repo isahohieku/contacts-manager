@@ -4,7 +4,7 @@ import { countryCodes } from '../../modules/countries/countries';
 import { Country } from '../../modules/countries/entities/country.entity';
 
 export default class CreateCountries {
-  public async run(factory: any, dataSource: DataSource): Promise<void> {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
     const count = await dataSource
       .createQueryBuilder()
       .select()

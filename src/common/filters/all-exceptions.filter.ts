@@ -42,7 +42,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message:
         typeof message === 'string'
           ? message
-          : (message as any).message || message,
+          : (message as { message: string }).message || message,
     };
 
     // Log the error with correlation ID
@@ -61,7 +61,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       path: request.url,
       method: request.method,
       timestamp: new Date(),
-      userId: (request as any).user?.id,
+      userId: (request as { user?: { id: number } }).user?.id,
       statusCode: status,
     });
 

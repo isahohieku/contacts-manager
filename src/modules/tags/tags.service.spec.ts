@@ -1,29 +1,32 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
-import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
 import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
-import { mockUser } from '../../../test/utils/test-helpers';
 
-import { TagsService } from './tags.service';
+import { mockUser } from '../../../test/utils/test-helpers';
+import { User } from '../users/entity/user.entity';
+
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { Tag } from './entities/tag.entity';
+import { TagsService } from './tags.service';
 
 // Mock handleError
 jest.mock('@contactApp/shared/utils/handlers/error.handler');
 
 describe('TagsService', () => {
   let service: TagsService;
-  let tagsRepository: Repository<Tag>;
+
+  // Create properly typed test user
+  const testUser = mockUser as unknown as User;
 
   const mockTag = {
     id: 1,
     name: 'Friends',
-    owner: mockUser,
+    owner: testUser,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -49,7 +52,6 @@ describe('TagsService', () => {
     }).compile();
 
     service = module.get<TagsService>(TagsService);
-    tagsRepository = module.get<Repository<Tag>>(getRepositoryToken(Tag));
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -70,11 +72,11 @@ describe('TagsService', () => {
       mockTagsRepository.create.mockReturnValue(expectedTag);
       mockTagsRepository.save.mockResolvedValue(expectedTag);
 
-      const result = await service.create(mockUser, createTagDto);
+      const result = await service.create(testUser, createTagDto);
 
       expect(mockTagsRepository.create).toHaveBeenCalledWith({
         ...createTagDto,
-        owner: mockUser,
+        owner: testUser,
       });
       expect(mockTagsRepository.save).toHaveBeenCalledWith(expectedTag);
       expect(result).toEqual(expectedTag);
@@ -87,11 +89,11 @@ describe('TagsService', () => {
       mockTagsRepository.create.mockReturnValue(expectedTag);
       mockTagsRepository.save.mockResolvedValue(expectedTag);
 
-      const result = await service.create(mockUser, differentTagDto);
+      const result = await service.create(testUser, differentTagDto);
 
       expect(mockTagsRepository.create).toHaveBeenCalledWith({
         ...differentTagDto,
-        owner: mockUser,
+        owner: testUser,
       });
       expect(mockTagsRepository.save).toHaveBeenCalledWith(expectedTag);
       expect(result).toEqual(expectedTag);
@@ -102,11 +104,13 @@ describe('TagsService', () => {
       mockTagsRepository.create.mockReturnValue(mockTag);
       mockTagsRepository.save.mockRejectedValue(repositoryError);
 
-      await expect(service.create(mockUser, createTagDto)).rejects.toThrow(repositoryError);
+      await expect(service.create(testUser, createTagDto)).rejects.toThrow(
+        repositoryError,
+      );
 
       expect(mockTagsRepository.create).toHaveBeenCalledWith({
         ...createTagDto,
-        owner: mockUser,
+        owner: testUser,
       });
       expect(mockTagsRepository.save).toHaveBeenCalled();
     });
@@ -122,12 +126,12 @@ describe('TagsService', () => {
 
       mockTagsRepository.find.mockResolvedValue(mockTags);
 
-      const result = await service.findAll(mockUser);
+      const result = await service.findAll(testUser);
 
       expect(mockTagsRepository.find).toHaveBeenCalledWith({
         where: {
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -137,12 +141,12 @@ describe('TagsService', () => {
     it('should return empty array when user has no tags', async () => {
       mockTagsRepository.find.mockResolvedValue([]);
 
-      const result = await service.findAll(mockUser);
+      const result = await service.findAll(testUser);
 
       expect(mockTagsRepository.find).toHaveBeenCalledWith({
         where: {
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -153,12 +157,12 @@ describe('TagsService', () => {
       const repositoryError = new Error('Database connection failed');
       mockTagsRepository.find.mockRejectedValue(repositoryError);
 
-      await expect(service.findAll(mockUser)).rejects.toThrow(repositoryError);
+      await expect(service.findAll(testUser)).rejects.toThrow(repositoryError);
 
       expect(mockTagsRepository.find).toHaveBeenCalledWith({
         where: {
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -171,13 +175,13 @@ describe('TagsService', () => {
     it('should return tag when found', async () => {
       mockTagsRepository.findOne.mockResolvedValue(mockTag);
 
-      const result = await service.findOne(mockUser, tagId);
+      const result = await service.findOne(testUser, tagId);
 
       expect(mockTagsRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: tagId,
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -191,13 +195,13 @@ describe('TagsService', () => {
         throw mockError;
       });
 
-      await expect(service.findOne(mockUser, tagId)).rejects.toThrow(mockError);
+      await expect(service.findOne(testUser, tagId)).rejects.toThrow(mockError);
 
       expect(mockTagsRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: tagId,
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -214,13 +218,15 @@ describe('TagsService', () => {
       const repositoryError = new Error('Database connection failed');
       mockTagsRepository.findOne.mockRejectedValue(repositoryError);
 
-      await expect(service.findOne(mockUser, tagId)).rejects.toThrow(repositoryError);
+      await expect(service.findOne(testUser, tagId)).rejects.toThrow(
+        repositoryError,
+      );
 
       expect(mockTagsRepository.findOne).toHaveBeenCalledWith({
         where: {
           id: tagId,
           owner: {
-            id: mockUser.id,
+            id: testUser.id,
           },
         },
       });
@@ -237,16 +243,17 @@ describe('TagsService', () => {
       const updatedTag = { ...mockTag, ...updateTagDto };
 
       // Mock findOne calls
-      service.findOne = jest.fn()
+      service.findOne = jest
+        .fn()
         .mockResolvedValueOnce(mockTag) // First call in update method
         .mockResolvedValueOnce(updatedTag); // Second call to return updated tag
 
       mockTagsRepository.create.mockReturnValue({ id: tagId, ...updateTagDto });
       mockTagsRepository.save.mockResolvedValue(updatedTag);
 
-      const result = await service.update(mockUser, tagId, updateTagDto);
+      const result = await service.update(testUser, tagId, updateTagDto);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, tagId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, tagId);
       expect(mockTagsRepository.create).toHaveBeenCalledWith({
         id: tagId,
         ...updateTagDto,
@@ -259,25 +266,30 @@ describe('TagsService', () => {
       const mockError = new Error('Tag not found');
       service.findOne = jest.fn().mockRejectedValue(mockError);
 
-      await expect(service.update(mockUser, tagId, updateTagDto)).rejects.toThrow(mockError);
+      await expect(
+        service.update(testUser, tagId, updateTagDto),
+      ).rejects.toThrow(mockError);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, tagId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, tagId);
       expect(mockTagsRepository.create).not.toHaveBeenCalled();
       expect(mockTagsRepository.save).not.toHaveBeenCalled();
     });
 
     it('should handle repository errors during update', async () => {
       const repositoryError = new Error('Database connection failed');
-      service.findOne = jest.fn()
+      service.findOne = jest
+        .fn()
         .mockResolvedValueOnce(mockTag)
         .mockRejectedValue(repositoryError);
 
       mockTagsRepository.create.mockReturnValue({ id: tagId, ...updateTagDto });
       mockTagsRepository.save.mockResolvedValue(mockTag);
 
-      await expect(service.update(mockUser, tagId, updateTagDto)).rejects.toThrow(repositoryError);
+      await expect(
+        service.update(testUser, tagId, updateTagDto),
+      ).rejects.toThrow(repositoryError);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, tagId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, tagId);
       expect(mockTagsRepository.create).toHaveBeenCalled();
       expect(mockTagsRepository.save).toHaveBeenCalled();
     });
@@ -290,9 +302,9 @@ describe('TagsService', () => {
       service.findOne = jest.fn().mockResolvedValue(mockTag);
       mockTagsRepository.softDelete.mockResolvedValue({ affected: 1 });
 
-      const result = await service.remove(mockUser, tagId);
+      const result = await service.remove(testUser, tagId);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, tagId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, tagId);
       expect(mockTagsRepository.softDelete).toHaveBeenCalledWith(tagId);
       expect(result).toEqual(mockTag);
     });
@@ -301,9 +313,9 @@ describe('TagsService', () => {
       const mockError = new Error('Tag not found');
       service.findOne = jest.fn().mockRejectedValue(mockError);
 
-      await expect(service.remove(mockUser, tagId)).rejects.toThrow(mockError);
+      await expect(service.remove(testUser, tagId)).rejects.toThrow(mockError);
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, tagId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, tagId);
       expect(mockTagsRepository.softDelete).not.toHaveBeenCalled();
     });
 
@@ -312,9 +324,11 @@ describe('TagsService', () => {
       service.findOne = jest.fn().mockResolvedValue(mockTag);
       mockTagsRepository.softDelete.mockRejectedValue(repositoryError);
 
-      await expect(service.remove(mockUser, tagId)).rejects.toThrow(repositoryError);
+      await expect(service.remove(testUser, tagId)).rejects.toThrow(
+        repositoryError,
+      );
 
-      expect(service.findOne).toHaveBeenCalledWith(mockUser, tagId);
+      expect(service.findOne).toHaveBeenCalledWith(testUser, tagId);
       expect(mockTagsRepository.softDelete).toHaveBeenCalledWith(tagId);
     });
   });

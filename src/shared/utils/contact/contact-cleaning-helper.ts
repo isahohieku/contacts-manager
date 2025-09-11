@@ -1,62 +1,56 @@
 import readline from 'readline';
+import { Readable } from 'stream';
 
 /**
  * Recursively parses string properties in an object that represent arrays or objects.
- *
- * @param {object} obj - The object to parse string arrays in.
- * @param {boolean} isRoot - Whether or not the current object is the root object.
- * @return {object} The object with string arrays parsed into actual arrays or objects.
  */
-const parseStringArrays = (obj) => {
-  // Iterate over each property in the object
-  for (const key in obj) {
-    // Check if the property is a string and can be JSON parsed
-    if (
-      typeof obj[key] === 'string' &&
-      (obj[key].startsWith('[') || obj[key].startsWith('{'))
-    ) {
-      try {
-        // Attempt to parse the string as JSON
-        obj[key] = JSON.parse(obj[key]);
+const parseStringArrays = (obj: unknown): void => {
+  if (Array.isArray(obj)) {
+    obj.forEach((item) => parseStringArrays(item));
+    return;
+  }
 
-        // Recursively parse nested properties
-        parseStringArrays(obj[key]);
-      } catch {
-        // If JSON parsing fails, ignore and continue
+  if (typeof obj === 'object' && obj !== null) {
+    for (const key in obj as Record<string, unknown>) {
+      const value = (obj as Record<string, unknown>)[key];
+
+      if (
+        typeof value === 'string' &&
+        (value.startsWith('[') || value.startsWith('{'))
+      ) {
+        try {
+          (obj as Record<string, unknown>)[key] = JSON.parse(value);
+          parseStringArrays((obj as Record<string, unknown>)[key]);
+        } catch {
+          // Ignore JSON parsing errors
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        parseStringArrays(value);
       }
-    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      // Recursively handle objects and arrays
-      parseStringArrays(obj[key]);
     }
   }
 };
 
 /**
- * Recursively removes 'createdAt', 'updatedAt', and 'deletedAt' keys from an object or array of objects.
- *
- * @param {object|array} obj - The object or array of objects to clean.
- * @return {object|array} The cleaned object or array of objects.
+ * Recursively removes 'createdAt', 'updatedAt', and 'deletedAt' keys from an object or array.
  */
-const cleanObject = (obj) => {
+const cleanObject = <T>(obj: T): T => {
   if (Array.isArray(obj)) {
-    return obj.map(cleanObject);
+    return obj.map((item) => cleanObject(item)) as unknown as T;
   } else if (typeof obj === 'object' && obj !== null) {
-    const cleanedObj = {};
-    for (const key in obj) {
-      if (key !== 'createdAt' && key !== 'updatedAt' && key !== 'deletedAt') {
-        cleanedObj[key] = cleanObject(obj[key]);
+    const cleanedObj: Record<string, unknown> = {};
+    for (const key in obj as Record<string, unknown>) {
+      if (!['createdAt', 'updatedAt', 'deletedAt'].includes(key)) {
+        cleanedObj[key] = cleanObject((obj as Record<string, unknown>)[key]);
       }
     }
-    return cleanedObj;
+    return cleanedObj as unknown as T;
   }
   return obj;
 };
 
 /**
- * Recursively cleans and parses a contact object or array of objects.
- *
- * @param {object|array} data - The contact object or array of objects to clean and parse.
- * @return {object|array} The cleaned and parsed contact object or array of objects.
+ * Cleans and parses a contact object or array of objects.
  */
 export const processContactCleanup = <T>(data: T): T => {
   parseStringArrays(data);
@@ -65,48 +59,37 @@ export const processContactCleanup = <T>(data: T): T => {
 
 /**
  * Detects the most likely separator in a file content by analyzing the first few lines of the file.
- *
- * @param {ReadableStream} fileStream - The file stream to detect the separator from.
- * @return {string} The most likely separator in the file content.
  */
-export const detectSeparator = async (fileStream) => {
-  const possibleSeparators = [',', ';', '\t', '|'];
+export const detectSeparator = async (
+  fileStream: Readable,
+): Promise<string> => {
+  const possibleSeparators: string[] = [',', ';', '\t', '|'];
   const rl = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity,
   });
 
   let lineCount = 0;
-  const separatorScores = possibleSeparators.map(() => 0); // Scores for each separator
-  let totalLines = 0; // Total non-empty lines processed
+  const separatorScores = possibleSeparators.map(() => 0);
+  let totalLines = 0;
 
-  // Process the lines in the stream
   for await (const line of rl) {
-    lineCount += 1;
+    lineCount++;
     const trimmedLine = line.trim();
 
-    // Skip empty lines
     if (!trimmedLine) continue;
 
-    // Count occurrences of each separator in the current line
     possibleSeparators.forEach((separator, index) => {
       const count = trimmedLine.split(separator).length - 1;
-
-      // Award points for lines that have consistent separator use
       if (count > 0) {
         separatorScores[index] += count;
       }
     });
 
     totalLines++;
-
-    // Stop after reading a few lines (e.g., 5 lines)
-    if (lineCount >= 0) {
-      break;
-    }
+    if (lineCount >= 5) break; // limit to 5 lines
   }
 
-  // Check if any separator was consistently used
   const bestSeparatorIndex = separatorScores.indexOf(
     Math.max(...separatorScores),
   );

@@ -4,7 +4,7 @@ import { AddressTypeEnum } from '../../modules/address-types/address-type.enum';
 import { AddressType } from '../../modules/address-types/entities/address-type.entity';
 
 export default class CreateAddressType {
-  public async run(factory: any, dataSource: DataSource): Promise<void> {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
     const count = await dataSource
       .createQueryBuilder()
       .select()

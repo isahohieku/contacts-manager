@@ -1,4 +1,5 @@
 import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -13,7 +14,6 @@ jest.mock('@contactApp/shared/utils/handlers/error.handler');
 
 describe('RolesGuard', () => {
   let guard: RolesGuard;
-  let reflector: Reflector;
 
   const mockReflector = {
     getAllAndOverride: jest.fn(),
@@ -31,7 +31,6 @@ describe('RolesGuard', () => {
     }).compile();
 
     guard = module.get<RolesGuard>(RolesGuard);
-    reflector = module.get<Reflector>(Reflector);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -43,7 +42,9 @@ describe('RolesGuard', () => {
 
   describe('canActivate', () => {
     let mockExecutionContext: ExecutionContext;
-    let mockRequest: any;
+    let mockRequest: {
+      user?: { id: number; role: { id?: number | string } | null } | null;
+    };
 
     beforeEach(() => {
       mockRequest = {
@@ -101,7 +102,9 @@ describe('RolesGuard', () => {
 
     it('should allow access for admin role when multiple roles are required', () => {
       const requiredRoles = [1, 2, 3]; // Admin, User, and another role
-      mockRequest.user.role.id = 1; // Admin role
+      if (mockRequest.user?.role) {
+        mockRequest.user.role.id = 1; // Admin role
+      }
       mockReflector.getAllAndOverride.mockReturnValue(requiredRoles);
 
       const result = guard.canActivate(
@@ -134,7 +137,9 @@ describe('RolesGuard', () => {
 
     it('should throw error when user has no role', () => {
       const requiredRoles = [1, 2];
-      mockRequest.user.role = null;
+      if (mockRequest.user?.role) {
+        mockRequest.user.role = null;
+      }
       const mockError = new Error('Forbidden');
       mockReflector.getAllAndOverride.mockReturnValue(requiredRoles);
       (handleError as jest.Mock).mockImplementation(() => {
@@ -156,7 +161,9 @@ describe('RolesGuard', () => {
 
     it('should throw error when user role id is undefined', () => {
       const requiredRoles = [1, 2];
-      mockRequest.user.role = { id: undefined };
+      if (mockRequest.user?.role) {
+        mockRequest.user.role.id = undefined;
+      }
       const mockError = new Error('Forbidden');
       mockReflector.getAllAndOverride.mockReturnValue(requiredRoles);
       (handleError as jest.Mock).mockImplementation(() => {
@@ -243,7 +250,9 @@ describe('RolesGuard', () => {
 
     it('should handle role comparison with different data types', () => {
       const requiredRoles = [2];
-      mockRequest.user.role.id = '2'; // String instead of number
+      if (mockRequest.user?.role) {
+        mockRequest.user.role.id = '2'; // String instead of number
+      }
       mockReflector.getAllAndOverride.mockReturnValue(requiredRoles);
       (handleError as jest.Mock).mockImplementation(() => {
         throw new Error('Forbidden');
@@ -275,7 +284,9 @@ describe('RolesGuard', () => {
 
     it('should work with multiple role requirements', () => {
       const requiredRoles = [1, 2, 3, 4];
-      mockRequest.user.role.id = 3;
+      if (mockRequest.user?.role) {
+        mockRequest.user.role.id = 3;
+      }
       mockReflector.getAllAndOverride.mockReturnValue(requiredRoles);
 
       const result = guard.canActivate(
@@ -303,7 +314,9 @@ describe('RolesGuard', () => {
       mockReflector.getAllAndOverride.mockReturnValue(requiredRoles);
       const switchToHttpSpy = jest.spyOn(mockExecutionContext, 'switchToHttp');
       const getRequestSpy = jest.fn().mockReturnValue(mockRequest);
-      switchToHttpSpy.mockReturnValue({ getRequest: getRequestSpy } as any);
+      switchToHttpSpy.mockReturnValue({
+        getRequest: getRequestSpy,
+      } as unknown as HttpArgumentsHost);
 
       guard.canActivate(mockExecutionContext as ExecutionContext);
 

@@ -3,6 +3,7 @@ import { Response } from 'express';
 
 import { SearchTypes } from '@contactApp/shared/utils/types/contacts.type';
 
+import { Tag } from '../tags/entities/tag.entity';
 import { User } from '../users/entity/user.entity';
 
 import { ContactsController } from './contacts.controller';
@@ -13,7 +14,6 @@ import { Contact } from './entities/contact.entity';
 
 describe('ContactsController', () => {
   let controller: ContactsController;
-  let contactsService: ContactsService;
 
   const mockUser: User = {
     id: 1,
@@ -36,7 +36,7 @@ describe('ContactsController', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
-  } as any;
+  } as unknown as Contact;
 
   const mockContactsService = {
     create: jest.fn(),
@@ -60,7 +60,6 @@ describe('ContactsController', () => {
     }).compile();
 
     controller = module.get<ContactsController>(ContactsController);
-    contactsService = module.get<ContactsService>(ContactsService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -161,13 +160,13 @@ describe('ContactsController', () => {
         1,
         10,
         '',
-        undefined as any,
+        SearchTypes.CONTACT,
       );
 
       expect(mockContactsService.findAllWithPagination).toHaveBeenCalledWith(
         { page: 1, limit: 10 },
         '',
-        undefined,
+        SearchTypes.CONTACT,
         mockUser,
       );
       expect(result).toBe(expectedResult);
@@ -196,13 +195,13 @@ describe('ContactsController', () => {
         1,
         10,
         searchTerm,
-        undefined as any,
+        SearchTypes.CONTACT,
       );
 
       expect(mockContactsService.findAllWithPagination).toHaveBeenCalledWith(
         { page: 1, limit: 10 },
         searchTerm,
-        undefined,
+        SearchTypes.CONTACT,
         mockUser,
       );
       expect(result).toBe(expectedResult);
@@ -259,13 +258,13 @@ describe('ContactsController', () => {
         1,
         100,
         '',
-        undefined as any,
+        SearchTypes.CONTACT,
       );
 
       expect(mockContactsService.findAllWithPagination).toHaveBeenCalledWith(
         { page: 1, limit: 50 }, // Should be capped at 50
         '',
-        undefined,
+        SearchTypes.CONTACT,
         mockUser,
       );
       expect(result).toBe(expectedResult);
@@ -293,13 +292,13 @@ describe('ContactsController', () => {
         2,
         20,
         '',
-        undefined as any,
+        SearchTypes.CONTACT,
       );
 
       expect(mockContactsService.findAllWithPagination).toHaveBeenCalledWith(
         { page: 2, limit: 20 },
         '',
-        undefined,
+        SearchTypes.CONTACT,
         mockUser,
       );
       expect(result).toBe(expectedResult);
@@ -404,7 +403,10 @@ describe('ContactsController', () => {
 
       mockContactsService.importContacts.mockResolvedValue(expectedResult);
 
-      const result = await controller.importContacts(request, file);
+      const result = await controller.importContacts(
+        request,
+        file as unknown as Express.Multer.File,
+      );
 
       expect(mockContactsService.importContacts).toHaveBeenCalledWith(
         mockUser,
@@ -427,7 +429,10 @@ describe('ContactsController', () => {
 
       mockContactsService.importContacts.mockResolvedValue(expectedResult);
 
-      const result = await controller.importContacts(request, file);
+      const result = await controller.importContacts(
+        request,
+        file as unknown as Express.Multer.File,
+      );
 
       expect(mockContactsService.importContacts).toHaveBeenCalledWith(
         mockUser,
@@ -521,7 +526,7 @@ describe('ContactsController', () => {
       const contactId = '1';
       const updateContactDto: UpdateContactDto = {
         firstName: 'John',
-        tags: [{ id: 1, name: 'Important' } as any],
+        tags: [{ id: 1, name: 'Important' } as Tag],
       };
 
       const updatedContact = { ...mockContact, ...updateContactDto };

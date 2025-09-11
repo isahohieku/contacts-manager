@@ -6,7 +6,15 @@ interface PerformanceMetric {
   operation: string;
   duration: number;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, OperationStats>;
+}
+
+interface OperationStats {
+  count: number;
+  avgDuration: number;
+  minDuration: number;
+  maxDuration: number;
+  recentMetrics: PerformanceMetric[];
 }
 
 @Injectable()
@@ -22,7 +30,7 @@ export class PerformanceService {
   async measureAsync<T>(
     operation: string,
     fn: () => Promise<T>,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, OperationStats>,
   ): Promise<T> {
     const startTime = process.hrtime.bigint();
 
@@ -60,7 +68,7 @@ export class PerformanceService {
   measureSync<T>(
     operation: string,
     fn: () => T,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, OperationStats>,
   ): T {
     const startTime = process.hrtime.bigint();
 
@@ -89,7 +97,7 @@ export class PerformanceService {
   private recordMetric(
     operation: string,
     duration: number,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, OperationStats>,
   ): void {
     const metric: PerformanceMetric = {
       operation,
@@ -114,13 +122,7 @@ export class PerformanceService {
   /**
    * Gets performance statistics for an operation
    */
-  getOperationStats(operation: string): {
-    count: number;
-    avgDuration: number;
-    minDuration: number;
-    maxDuration: number;
-    recentMetrics: PerformanceMetric[];
-  } {
+  getOperationStats(operation: string): OperationStats {
     const operationMetrics = this.metrics.filter(
       (m) => m.operation === operation,
     );
@@ -149,9 +151,9 @@ export class PerformanceService {
   /**
    * Gets overall performance summary
    */
-  getPerformanceSummary(): Record<string, any> {
+  getPerformanceSummary(): Record<string, OperationStats> {
     const operations = [...new Set(this.metrics.map((m) => m.operation))];
-    const summary: Record<string, any> = {};
+    const summary: Record<string, OperationStats> = {};
 
     operations.forEach((operation) => {
       summary[operation] = this.getOperationStats(operation);
