@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Add dummy ormconfig.json
+        run: touch ormconfig.json
+
       - name: Run ESLint
         run: yarn lint
 
