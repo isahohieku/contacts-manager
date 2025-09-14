@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Add dummy ormconfig.json
+        run: touch ormconfig.json
+
       - name: Run ESLint
         run: yarn lint
 
@@ -51,6 +54,9 @@ jobs:
 
       - name: Type check
         run: yarn build
+
+      - name: Remove dummy ormconfig.json
+        run: rm ormconfig.json
 
   # Job 2: Unit Tests (Fast, no external dependencies)
   unit-tests:
