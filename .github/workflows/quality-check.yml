@@ -45,6 +45,9 @@ jobs:
       - name: Run unit tests (fast feedback)
         run: yarn test:unit
 
+      - name: Remove dummy ormconfig.json
+        run: rm ormconfig.json
+
       - name: Check for security vulnerabilities
         run: yarn audit --level moderate
 
