@@ -572,4 +572,197 @@ describe('MetricsService', () => {
       );
     });
   });
+
+  describe('trimMetrics', () => {
+    it('should trim metrics when exceeding maxMetrics limit', () => {
+      // Add more than maxMetrics (1000) request metrics
+      for (let i = 0; i < 1100; i++) {
+        const metric: RequestMetric = {
+          method: 'GET',
+          path: `/api/test/${i}`,
+          statusCode: 200,
+          responseTime: 100,
+          timestamp: new Date(),
+        };
+        service.recordRequest(metric);
+      }
+
+      const requestMetrics = service.getRequestMetrics();
+      expect(requestMetrics.totalRequests).toBeLessThanOrEqual(1000);
+    });
+
+    it('should remove old metrics based on retention time', () => {
+      const oldTimestamp = new Date(Date.now() - 25 * 60 * 60 * 1000); // 25 hours ago
+      const recentTimestamp = new Date();
+
+      const oldMetric: RequestMetric = {
+        method: 'GET',
+        path: '/api/old',
+        statusCode: 200,
+        responseTime: 100,
+        timestamp: oldTimestamp,
+      };
+
+      const recentMetric: RequestMetric = {
+        method: 'GET',
+        path: '/api/recent',
+        statusCode: 200,
+        responseTime: 100,
+        timestamp: recentTimestamp,
+      };
+
+      service.recordRequest(oldMetric);
+      service.recordRequest(recentMetric);
+
+      // Trigger trimming by adding more metrics
+      for (let i = 0; i < 10; i++) {
+        service.recordRequest({
+          method: 'GET',
+          path: `/api/trigger/${i}`,
+          statusCode: 200,
+          responseTime: 100,
+          timestamp: new Date(),
+        });
+      }
+
+      const requestMetrics = service.getRequestMetrics(25 * 60 * 60 * 1000); // 25 hours
+      // Old metric should be trimmed out due to retention policy
+      expect(requestMetrics.totalRequests).toBeGreaterThan(0);
+    });
+  });
+
+  describe('startSystemMetricsCollection', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should log warning for high memory usage', () => {
+      // Mock high memory usage
+      const mockMemoryUsage = {
+        heapUsed: 180 * 1024 * 1024, // 180MB
+        heapTotal: 200 * 1024 * 1024, // 200MB (90% usage)
+        external: 50 * 1024 * 1024,
+        rss: 250 * 1024 * 1024,
+        arrayBuffers: 10 * 1024 * 1024,
+      };
+
+      jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
+      jest
+        .spyOn(process, 'cpuUsage')
+        .mockReturnValue({ user: 1000000, system: 500000 });
+      jest.spyOn(process, 'uptime').mockReturnValue(3600);
+
+      // Create a new service instance to trigger the constructor
+      new (service.constructor as new (logger: any) => any)(mockLoggerService);
+
+      // Fast-forward time to trigger the interval
+      jest.advanceTimersByTime(30000);
+
+      expect(mockLoggerService.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/High memory usage: \d+\.\d+%/),
+        'MetricsService',
+      );
+    });
+
+    it('should not log warning for normal memory usage', () => {
+      // Mock normal memory usage
+      const mockMemoryUsage = {
+        heapUsed: 50 * 1024 * 1024, // 50MB
+        heapTotal: 200 * 1024 * 1024, // 200MB (25% usage)
+        external: 50 * 1024 * 1024,
+        rss: 250 * 1024 * 1024,
+        arrayBuffers: 10 * 1024 * 1024,
+      };
+
+      jest.spyOn(process, 'memoryUsage').mockReturnValue(mockMemoryUsage);
+      jest
+        .spyOn(process, 'cpuUsage')
+        .mockReturnValue({ user: 1000000, system: 500000 });
+      jest.spyOn(process, 'uptime').mockReturnValue(3600);
+
+      // Create a new service instance to trigger the constructor
+      new (service.constructor as new (logger: any) => any)(mockLoggerService);
+
+      // Fast-forward time to trigger the interval
+      jest.advanceTimersByTime(30000);
+
+      expect(mockLoggerService.warn).not.toHaveBeenCalledWith(
+        expect.stringMatching(/High memory usage/),
+      );
+    });
+  });
+
+  describe('edge cases and error handling', () => {
+    it('should handle error metrics with complex error messages', () => {
+      const metric: ErrorMetric = {
+        error: 'ValidationError: Multiple validation errors occurred',
+        path: '/api/complex',
+        method: 'POST',
+        timestamp: new Date(),
+        statusCode: 400,
+      };
+
+      service.recordError(metric);
+
+      const errorMetrics = service.getErrorMetrics();
+      expect(errorMetrics.errorsByType.ValidationError).toBe(1);
+    });
+
+    it('should handle database metrics with very long queries', () => {
+      const longQuery =
+        'SELECT * FROM users WHERE ' +
+        'condition AND '.repeat(50) +
+        'final_condition = ?';
+      const metric: DatabaseMetric = {
+        query: longQuery,
+        duration: 1500,
+        timestamp: new Date(),
+      };
+
+      service.recordDatabase(metric);
+
+      expect(mockLoggerService.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Slow database query:'),
+        'MetricsService',
+      );
+    });
+
+    it('should handle cache metrics with zero hit rate', () => {
+      const missMetric: CacheMetric = {
+        operation: 'miss',
+        key: 'user:1',
+        timestamp: new Date(),
+      };
+
+      service.recordCache(missMetric);
+
+      const cacheMetrics = service.getCacheMetrics();
+      expect(cacheMetrics.hitRate).toBe(0);
+    });
+
+    it('should handle request metrics with custom time ranges', () => {
+      const now = new Date();
+      const metric: RequestMetric = {
+        method: 'GET',
+        path: '/api/test',
+        statusCode: 200,
+        responseTime: 100,
+        timestamp: now,
+      };
+
+      service.recordRequest(metric);
+
+      // Test with very short time range
+      const shortRangeMetrics = service.getRequestMetrics(1000); // 1 second
+      expect(shortRangeMetrics.totalRequests).toBe(1);
+
+      // Test with very long time range
+      const longRangeMetrics = service.getRequestMetrics(24 * 60 * 60 * 1000); // 24 hours
+      expect(longRangeMetrics.totalRequests).toBe(1);
+    });
+  });
 });

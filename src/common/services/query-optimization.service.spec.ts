@@ -493,4 +493,239 @@ describe('QueryOptimizationService', () => {
       expect(mockQueryBuilder.take).not.toHaveBeenCalled();
     });
   });
+
+  describe('edge cases and error handling', () => {
+    it('should handle empty base query', () => {
+      const baseQuery = {} as FindManyOptions<TestEntity>;
+
+      const result = service.optimizeQuery(mockRepository, baseQuery);
+
+      expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('entity');
+      expect(result).toBe(mockQueryBuilder);
+      expect(mockQueryBuilder.where).not.toHaveBeenCalled();
+    });
+
+    it('should handle empty relations array', () => {
+      const baseQuery: FindManyOptions<TestEntity> = {
+        relations: [],
+      };
+
+      service.optimizeQuery(mockRepository, baseQuery);
+
+      expect(mockQueryBuilder.leftJoinAndSelect).not.toHaveBeenCalled();
+    });
+
+    it('should handle complex where conditions', () => {
+      const complexWhere = {
+        id: 1,
+        name: 'test',
+        userId: 2,
+      };
+      const baseQuery: FindManyOptions<TestEntity> = {
+        where: complexWhere,
+      };
+
+      service.optimizeQuery(mockRepository, baseQuery);
+
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(complexWhere);
+    });
+
+    it('should handle multiple order fields with mixed directions', () => {
+      const baseQuery: FindManyOptions<TestEntity> = {
+        order: {
+          name: 'ASC',
+          email: 'DESC',
+          id: 'ASC',
+          userId: 'DESC',
+        },
+      };
+
+      service.optimizeQuery(mockRepository, baseQuery);
+
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledTimes(4);
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
+        'entity.name',
+        'ASC',
+      );
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
+        'entity.email',
+        'DESC',
+      );
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
+        'entity.id',
+        'ASC',
+      );
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
+        'entity.userId',
+        'DESC',
+      );
+    });
+
+    it('should handle zero skip and take values', () => {
+      const baseQuery: FindManyOptions<TestEntity> = {
+        skip: 0,
+        take: 0,
+      };
+
+      service.optimizeQuery(mockRepository, baseQuery);
+
+      // Zero values are falsy, so they won't be applied (this is the current behavior)
+      expect(mockQueryBuilder.skip).not.toHaveBeenCalled();
+      expect(mockQueryBuilder.take).not.toHaveBeenCalled();
+    });
+
+    it('should handle large pagination values', () => {
+      const baseQuery: FindManyOptions<TestEntity> = {
+        skip: 10000,
+        take: 5000,
+      };
+
+      service.optimizeQuery(mockRepository, baseQuery);
+
+      expect(mockQueryBuilder.skip).toHaveBeenCalledWith(10000);
+      expect(mockQueryBuilder.take).toHaveBeenCalledWith(5000);
+    });
+
+    it('should handle special characters in search terms', () => {
+      const searchFields = ['name', 'email'];
+      const searchTerm = "O'Connor & Sons (50% off!)";
+
+      service.createSearchQuery(mockRepository, searchFields, searchTerm);
+
+      expect(mockQueryBuilder.setParameter).toHaveBeenCalledWith(
+        'search0',
+        "%O'Connor & Sons (50% off!)%",
+      );
+      expect(mockQueryBuilder.setParameter).toHaveBeenCalledWith(
+        'search1',
+        "%O'Connor & Sons (50% off!)%",
+      );
+    });
+
+    it('should handle very long search terms', () => {
+      const searchFields = ['name'];
+      const longSearchTerm = 'a'.repeat(1000);
+
+      service.createSearchQuery(mockRepository, searchFields, longSearchTerm);
+
+      expect(mockQueryBuilder.setParameter).toHaveBeenCalledWith(
+        'search0',
+        `%${longSearchTerm}%`,
+      );
+    });
+
+    it('should handle many search fields', () => {
+      const manySearchFields = Array.from(
+        { length: 20 },
+        (_, i) => `field${i}`,
+      );
+      const searchTerm = 'test';
+
+      service.createSearchQuery(mockRepository, manySearchFields, searchTerm);
+
+      expect(mockQueryBuilder.setParameter).toHaveBeenCalledTimes(20);
+      manySearchFields.forEach((_, index) => {
+        expect(mockQueryBuilder.setParameter).toHaveBeenCalledWith(
+          `search${index}`,
+          '%test%',
+        );
+      });
+
+      const expectedCondition = manySearchFields
+        .map((field, index) => `entity.${field} ILIKE :search${index}`)
+        .join(' OR ');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        `(${expectedCondition})`,
+      );
+    });
+
+    it('should handle user filter with zero userId', () => {
+      const searchFields = ['name'];
+      const searchTerm = 'test';
+      const userField = 'userId';
+      const userId = 0;
+
+      service.createSearchQuery(
+        mockRepository,
+        searchFields,
+        searchTerm,
+        userField,
+        userId,
+      );
+
+      // Zero userId is falsy, so user filter won't be applied (current behavior)
+      // Only search conditions will be applied
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        '(entity.name ILIKE :search0)',
+      );
+      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalled();
+    });
+
+    it('should handle bulk insert with execution errors', async () => {
+      const entities = [{ id: 1, name: 'Entity 1' }];
+      mockQueryBuilder.execute.mockRejectedValue(new Error('Database error'));
+
+      await expect(
+        service.bulkInsert(mockRepository, entities),
+      ).rejects.toThrow('Database error');
+
+      expect(mockRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(mockQueryBuilder.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle bulk insert with very large chunk sizes', async () => {
+      const entities = Array.from({ length: 5 }, (_, i) => ({
+        id: i,
+        name: `Entity ${i}`,
+      }));
+      const veryLargeChunkSize = 10000;
+
+      await service.bulkInsert(mockRepository, entities, veryLargeChunkSize);
+
+      expect(mockRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(mockQueryBuilder.values).toHaveBeenCalledWith(entities);
+      expect(mockQueryBuilder.execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('performance optimizations', () => {
+    it('should apply performance hints correctly', () => {
+      const result = service.addPerformanceHints(mockQueryBuilder);
+
+      expect(mockQueryBuilder.addSelect).toHaveBeenCalledWith('1');
+      expect(mockQueryBuilder.cache).toHaveBeenCalledWith(true);
+      expect(result).toBe(mockQueryBuilder);
+    });
+
+    it('should chain performance hints with other query operations', () => {
+      const baseQuery: FindManyOptions<TestEntity> = {
+        where: { id: 1 },
+      };
+
+      const optimizedQuery = service.optimizeQuery(mockRepository, baseQuery);
+      const withHints = service.addPerformanceHints(optimizedQuery);
+
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 1 });
+      expect(mockQueryBuilder.addSelect).toHaveBeenCalledWith('1');
+      expect(mockQueryBuilder.cache).toHaveBeenCalledWith(true);
+      expect(withHints).toBe(mockQueryBuilder);
+    });
+
+    it('should handle bulk insert with optimal chunk processing', async () => {
+      const largeEntitySet = Array.from({ length: 2500 }, (_, i) => ({
+        id: i,
+        name: `Entity ${i}`,
+      }));
+      const optimalChunkSize = 500;
+
+      await service.bulkInsert(
+        mockRepository,
+        largeEntitySet,
+        optimalChunkSize,
+      );
+
+      expect(mockRepository.createQueryBuilder).toHaveBeenCalledTimes(5); // 2500 / 500 = 5 chunks
+      expect(mockQueryBuilder.execute).toHaveBeenCalledTimes(5);
+    });
+  });
 });

@@ -394,4 +394,176 @@ describe('PerformanceService', () => {
       expect(slowStats.avgDuration).toBeGreaterThan(40); // Should be at least 40ms
     });
   });
+
+  describe('edge cases and error handling', () => {
+    it('should handle operations with undefined metadata', async () => {
+      const operation = 'undefined-metadata-operation';
+      const mockFn = jest.fn().mockResolvedValue('result');
+
+      const result = await service.measureAsync(operation, mockFn, undefined);
+
+      expect(result).toBe('result');
+      const stats = service.getOperationStats(operation);
+      expect(stats.count).toBe(1);
+      expect(stats.recentMetrics[0].metadata).toBeUndefined();
+    });
+
+    it('should handle sync operations with complex return values', () => {
+      const operation = 'complex-return-operation';
+      const complexResult = { data: [1, 2, 3], meta: { count: 3 } };
+      const mockFn = jest.fn().mockReturnValue(complexResult);
+
+      const result = service.measureSync(operation, mockFn);
+
+      expect(result).toEqual(complexResult);
+      const stats = service.getOperationStats(operation);
+      expect(stats.count).toBe(1);
+    });
+
+    it('should handle operations with very short execution times', async () => {
+      const operation = 'instant-operation';
+      const mockFn = jest.fn().mockResolvedValue('instant');
+
+      await service.measureAsync(operation, mockFn);
+
+      const stats = service.getOperationStats(operation);
+      expect(stats.count).toBe(1);
+      expect(stats.avgDuration).toBeGreaterThanOrEqual(0);
+      expect(stats.minDuration).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should handle operations with null return values', async () => {
+      const operation = 'null-return-operation';
+      const mockFn = jest.fn().mockResolvedValue(null);
+
+      const result = await service.measureAsync(operation, mockFn);
+
+      expect(result).toBeNull();
+      const stats = service.getOperationStats(operation);
+      expect(stats.count).toBe(1);
+    });
+
+    it('should handle sync operations that throw non-Error objects', () => {
+      const operation = 'non-error-throw-operation';
+      const mockFn = jest.fn().mockImplementation(() => {
+        throw 'String error'; // eslint-disable-line @typescript-eslint/no-throw-literal
+      });
+
+      expect(() => service.measureSync(operation, mockFn)).toThrow(
+        'String error',
+      );
+
+      const errorStats = service.getOperationStats(`${operation}_error`);
+      expect(errorStats.count).toBe(1);
+    });
+
+    it('should handle async operations that reject with non-Error objects', async () => {
+      const operation = 'non-error-reject-operation';
+      const mockFn = jest.fn().mockRejectedValue('String rejection');
+
+      await expect(service.measureAsync(operation, mockFn)).rejects.toBe(
+        'String rejection',
+      );
+
+      const errorStats = service.getOperationStats(`${operation}_error`);
+      expect(errorStats.count).toBe(1);
+    });
+
+    it('should handle operations with very large metadata objects', async () => {
+      const operation = 'large-metadata-operation';
+      const largeMetadata = {
+        data: Array.from({ length: 1000 }, (_, i) => ({
+          id: i,
+          value: `item-${i}`,
+        })),
+        config: { setting1: true, setting2: 'value', setting3: 42 },
+      };
+      const mockFn = jest.fn().mockResolvedValue('result');
+
+      const result = await service.measureAsync(
+        operation,
+        mockFn,
+        largeMetadata as never,
+      );
+
+      expect(result).toBe('result');
+      const stats = service.getOperationStats(operation);
+      expect(stats.count).toBe(1);
+      expect(stats.recentMetrics[0].metadata).toEqual(largeMetadata);
+    });
+
+    it('should handle operations with circular reference metadata', async () => {
+      const operation = 'circular-metadata-operation';
+      const circularMetadata: any = { name: 'test' };
+      circularMetadata.self = circularMetadata; // Create circular reference
+      const mockFn = jest.fn().mockResolvedValue('result');
+
+      const result = await service.measureAsync(
+        operation,
+        mockFn,
+        circularMetadata,
+      );
+
+      expect(result).toBe('result');
+      const stats = service.getOperationStats(operation);
+      expect(stats.count).toBe(1);
+      // Metadata should still be stored even with circular references
+      expect(stats.recentMetrics[0].metadata).toBeDefined();
+    });
+  });
+
+  describe('performance optimization', () => {
+    it('should efficiently handle rapid successive operations', async () => {
+      const operation = 'rapid-operations';
+      const mockFn = jest.fn().mockResolvedValue('result');
+
+      const startTime = Date.now();
+
+      // Execute 100 operations rapidly
+      const promises = Array.from({ length: 100 }, () =>
+        service.measureAsync(operation, mockFn),
+      );
+
+      await Promise.all(promises);
+
+      const endTime = Date.now();
+      const totalTime = endTime - startTime;
+
+      const stats = service.getOperationStats(operation);
+      expect(stats.count).toBe(100);
+      expect(totalTime).toBeLessThan(5000); // Should complete within 5 seconds
+    });
+
+    it('should maintain accuracy with mixed operation types', async () => {
+      const baseOperation = 'mixed-type-operation';
+      const asyncFn = jest.fn().mockResolvedValue('async');
+      const syncFn = jest.fn().mockReturnValue('sync');
+      const errorAsyncFn = jest
+        .fn()
+        .mockRejectedValue(new Error('async error'));
+      const errorSyncFn = jest.fn().mockImplementation(() => {
+        throw new Error('sync error');
+      });
+
+      // Execute mixed operations
+      await service.measureAsync(baseOperation, asyncFn);
+      service.measureSync(baseOperation, syncFn);
+
+      try {
+        await service.measureAsync(baseOperation, errorAsyncFn);
+      } catch (error) {
+        // Expected error
+      }
+
+      try {
+        service.measureSync(baseOperation, errorSyncFn);
+      } catch (error) {
+        // Expected error
+      }
+
+      const summary = service.getPerformanceSummary();
+      expect(summary[baseOperation].count).toBe(2); // 2 successful operations
+      expect(summary[`${baseOperation}_error`].count).toBe(2); // 2 error operations
+    });
+  });
 });
