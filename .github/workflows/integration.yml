@@ -4,11 +4,7 @@ on:
   push:
     branches:
       - "**"
-  pull_request:
-    branches:
-      - main
-      - develop
-    types: [opened, synchronize, reopened, ready_for_review]
+
   workflow_dispatch:
     inputs:
       run_full_suite:
