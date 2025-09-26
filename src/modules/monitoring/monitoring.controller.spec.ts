@@ -176,11 +176,14 @@ describe('MonitoringController', () => {
         mockRequestMetrics,
       );
 
+      const result = await controller.getRequestMetrics('invalid');
+
       expect(mockLoggerService.log).toHaveBeenCalledWith(
         'Request metrics accessed for NaNms range',
         'MonitoringController',
       );
       expect(mockMetricsService.getRequestMetrics).toHaveBeenCalledWith(NaN);
+      expect(result).toEqual(mockRequestMetrics);
     });
 
     it('should handle zero time range', async () => {
@@ -188,11 +191,14 @@ describe('MonitoringController', () => {
         mockRequestMetrics,
       );
 
+      const result = await controller.getRequestMetrics('0');
+
       expect(mockLoggerService.log).toHaveBeenCalledWith(
         'Request metrics accessed for 0ms range',
         'MonitoringController',
       );
       expect(mockMetricsService.getRequestMetrics).toHaveBeenCalledWith(0);
+      expect(result).toEqual(mockRequestMetrics);
     });
 
     it('should handle negative time range', async () => {
@@ -200,11 +206,14 @@ describe('MonitoringController', () => {
         mockRequestMetrics,
       );
 
+      const result = await controller.getRequestMetrics('-1000');
+
       expect(mockLoggerService.log).toHaveBeenCalledWith(
         'Request metrics accessed for -1000ms range',
         'MonitoringController',
       );
       expect(mockMetricsService.getRequestMetrics).toHaveBeenCalledWith(-1000);
+      expect(result).toEqual(mockRequestMetrics);
     });
 
     it('should handle metrics service errors', async () => {
@@ -257,11 +266,14 @@ describe('MonitoringController', () => {
     it('should handle large time range values', async () => {
       mockMetricsService.getErrorMetrics.mockResolvedValue(mockErrorMetrics);
 
+      const result = await controller.getErrorMetrics('86400000');
+
       expect(mockLoggerService.log).toHaveBeenCalledWith(
         'Error metrics accessed for 86400000ms range',
         'MonitoringController',
       );
       expect(mockMetricsService.getErrorMetrics).toHaveBeenCalledWith(86400000);
+      expect(result).toEqual(mockErrorMetrics);
     });
 
     it('should handle metrics service errors', async () => {
@@ -368,11 +380,14 @@ describe('MonitoringController', () => {
         mockDatabaseMetrics,
       );
 
+      const result = await controller.getDatabaseMetrics('1');
+
       expect(mockLoggerService.log).toHaveBeenCalledWith(
         'Database metrics accessed for 1ms range',
         'MonitoringController',
       );
       expect(mockMetricsService.getDatabaseMetrics).toHaveBeenCalledWith(1);
+      expect(result).toEqual(mockDatabaseMetrics);
     });
 
     it('should handle metrics service errors', async () => {
@@ -456,8 +471,11 @@ describe('MonitoringController', () => {
         timeRange: '60s',
       });
 
+      const result = await controller.getRequestMetrics('');
+
       // Empty string is falsy, so controller uses default 60000
       expect(mockMetricsService.getRequestMetrics).toHaveBeenCalledWith(60000);
+      expect(result.timeRange).toBe('60s');
     });
 
     it('should handle whitespace-only time range', async () => {
@@ -468,8 +486,11 @@ describe('MonitoringController', () => {
         timeRange: '60s',
       });
 
+      const result = await controller.getErrorMetrics('   ');
+
       // Whitespace string parseInt returns NaN, controller passes NaN to service
       expect(mockMetricsService.getErrorMetrics).toHaveBeenCalledWith(NaN);
+      expect(result.timeRange).toBe('60s');
     });
 
     it('should handle decimal time range values', async () => {
@@ -480,7 +501,10 @@ describe('MonitoringController', () => {
         timeRange: '123s',
       });
 
+      const result = await controller.getCacheMetrics('123.45');
+
       expect(mockMetricsService.getCacheMetrics).toHaveBeenCalledWith(123);
+      expect(result.timeRange).toBe('123s');
     });
 
     it('should handle very large time range values', async () => {
@@ -492,9 +516,12 @@ describe('MonitoringController', () => {
         timeRange: '999999999s',
       });
 
+      const result = await controller.getDatabaseMetrics('999999999999');
+
       expect(mockMetricsService.getDatabaseMetrics).toHaveBeenCalledWith(
         999999999999,
       );
+      expect(result.timeRange).toBe('999999999s');
     });
   });
 

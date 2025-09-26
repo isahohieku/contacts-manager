@@ -116,7 +116,7 @@ export class RequestLoggingMiddleware implements NestMiddleware {
   ): Record<string, unknown> {
     const sanitized = { ...headers };
 
-    // Remove sensitive headers
+    // Remove sensitive headers (case-insensitive)
     const sensitiveHeaders = [
       'authorization',
       'cookie',
@@ -124,9 +124,14 @@ export class RequestLoggingMiddleware implements NestMiddleware {
       'x-auth-token',
     ];
 
-    sensitiveHeaders.forEach((header) => {
-      if (sanitized[header]) {
-        sanitized[header] = '[REDACTED]';
+    sensitiveHeaders.forEach((sensitiveHeader) => {
+      // Find header with case-insensitive matching
+      const headerKey = Object.keys(sanitized).find(
+        (key) => key.toLowerCase() === sensitiveHeader.toLowerCase(),
+      );
+
+      if (headerKey && sanitized[headerKey]) {
+        sanitized[headerKey] = '[REDACTED]';
       }
     });
 

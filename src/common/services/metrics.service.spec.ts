@@ -657,7 +657,9 @@ describe('MetricsService', () => {
       jest.spyOn(process, 'uptime').mockReturnValue(3600);
 
       // Create a new service instance to trigger the constructor
-      new (service.constructor as new (logger: any) => any)(mockLoggerService);
+      new (service.constructor as new (logger: { warn: jest.Mock }) => void)(
+        mockLoggerService,
+      );
 
       // Fast-forward time to trigger the interval
       jest.advanceTimersByTime(30000);
@@ -685,7 +687,9 @@ describe('MetricsService', () => {
       jest.spyOn(process, 'uptime').mockReturnValue(3600);
 
       // Create a new service instance to trigger the constructor
-      new (service.constructor as new (logger: any) => any)(mockLoggerService);
+      new (service.constructor as new (logger: { warn: jest.Mock }) => void)(
+        mockLoggerService,
+      );
 
       // Fast-forward time to trigger the interval
       jest.advanceTimersByTime(30000);

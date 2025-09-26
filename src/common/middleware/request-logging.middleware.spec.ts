@@ -56,8 +56,12 @@ describe('RequestLoggingMiddleware', () => {
       connection: { remoteAddress: '192.168.1.1' },
       get: jest.fn((header: string) => {
         if (header === 'User-Agent') return 'test-agent';
-        return undefined;
-      }),
+        if (header === 'set-cookie') return undefined as string[] | undefined;
+        return undefined as string | undefined;
+      }) as jest.MockedFunction<{
+        (name: 'set-cookie'): string[] | undefined;
+        (name: string): string | undefined;
+      }>,
       app: {
         locals: {
           logger: loggerService,
@@ -67,7 +71,7 @@ describe('RequestLoggingMiddleware', () => {
         },
       },
       route: { path: '/test-endpoint' },
-    } as any;
+    } as unknown as Partial<Request>;
 
     const originalSend = jest.fn();
     mockResponse = {
@@ -75,7 +79,7 @@ describe('RequestLoggingMiddleware', () => {
       statusCode: 200,
       send: originalSend,
       app: mockRequest.app,
-    } as any;
+    } as Partial<Response>;
 
     mockNext = jest.fn();
 
@@ -161,6 +165,8 @@ describe('RequestLoggingMiddleware', () => {
     });
 
     it('should override response.send to log response details', () => {
+      const originalSend = mockResponse.send as jest.Mock;
+
       middleware.use(
         mockRequest as Request,
         mockResponse as Response,
@@ -168,7 +174,6 @@ describe('RequestLoggingMiddleware', () => {
       );
 
       const responseBody = { message: 'success', data: [] };
-      const originalSend = mockResponse.send as jest.Mock;
 
       // Simulate response
       mockResponse.statusCode = 201;
@@ -229,7 +234,7 @@ describe('RequestLoggingMiddleware', () => {
         headers: {
           'user-agent': ['test-agent-1', 'test-agent-2'],
           authorization: ['Bearer token1', 'Bearer token2'],
-        } as any,
+        } as { [key: string]: string | string[] },
       };
 
       middleware.use(
@@ -283,7 +288,7 @@ describe('RequestLoggingMiddleware', () => {
       );
 
       expect(mockNext).toHaveBeenCalled();
-      expect(mockRequest.correlationId).toBeDefined();
+      expect(requestWithUser.correlationId).toBeDefined();
     });
 
     it('should handle different HTTP methods', () => {
@@ -318,7 +323,7 @@ describe('RequestLoggingMiddleware', () => {
       );
 
       expect(mockNext).toHaveBeenCalled();
-      expect(mockRequest.correlationId).toBeDefined();
+      expect(requestWithoutLocals.correlationId).toBeDefined();
     });
   });
 
@@ -332,7 +337,13 @@ describe('RequestLoggingMiddleware', () => {
         'content-type': 'application/json',
       };
 
-      const sanitized = (middleware as any).sanitizeHeaders(headers);
+      const sanitized = (
+        middleware as unknown as {
+          sanitizeHeaders: (
+            headers: Record<string, string | string[]>,
+          ) => Record<string, unknown>;
+        }
+      ).sanitizeHeaders(headers);
 
       expect(sanitized).toEqual({
         authorization: '[REDACTED]',
@@ -350,7 +361,13 @@ describe('RequestLoggingMiddleware', () => {
         Cookie: 'session=abc123',
       };
 
-      const sanitized = (middleware as any).sanitizeHeaders(headers);
+      const sanitized = (
+        middleware as unknown as {
+          sanitizeHeaders: (
+            headers: Record<string, string | string[]>,
+          ) => Record<string, unknown>;
+        }
+      ).sanitizeHeaders(headers);
 
       expect(sanitized).toEqual({
         Authorization: '[REDACTED]',
@@ -362,7 +379,13 @@ describe('RequestLoggingMiddleware', () => {
     it('should handle empty headers object', () => {
       const headers = {};
 
-      const sanitized = (middleware as any).sanitizeHeaders(headers);
+      const sanitized = (
+        middleware as unknown as {
+          sanitizeHeaders: (
+            headers: Record<string, string | string[]>,
+          ) => Record<string, unknown>;
+        }
+      ).sanitizeHeaders(headers);
 
       expect(sanitized).toEqual({});
     });

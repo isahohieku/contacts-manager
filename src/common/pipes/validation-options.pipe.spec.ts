@@ -31,7 +31,12 @@ describe('ValidationOptions', () => {
       expect(exception).toBeInstanceOf(HttpException);
       expect(exception.getStatus()).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
 
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        status: number;
+        message: string;
+        error: boolean;
+        errors: Record<string, string>;
+      };
       expect(response).toEqual({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         message:
@@ -72,7 +77,12 @@ describe('ValidationOptions', () => {
       expect(exception).toBeInstanceOf(HttpException);
       expect(exception.getStatus()).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
 
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        status: number;
+        message: string;
+        error: boolean;
+        errors: Record<string, string>;
+      };
       expect(response).toEqual({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         message:
@@ -98,7 +108,9 @@ describe('ValidationOptions', () => {
       const exception = validationOptions.exceptionFactory!(validationErrors);
 
       expect(exception).toBeInstanceOf(HttpException);
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        errors: Record<string, string>;
+      };
       expect(response.errors).toEqual({
         username: '',
       });
@@ -115,7 +127,9 @@ describe('ValidationOptions', () => {
       const exception = validationOptions.exceptionFactory!(validationErrors);
 
       expect(exception).toBeInstanceOf(HttpException);
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        errors: Record<string, string>;
+      };
       expect(response.errors).toEqual({
         username: '',
       });
@@ -127,7 +141,9 @@ describe('ValidationOptions', () => {
       const exception = validationOptions.exceptionFactory!(validationErrors);
 
       expect(exception).toBeInstanceOf(HttpException);
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        errors: Record<string, string>;
+      };
       expect(response.errors).toEqual({});
     });
 
@@ -143,7 +159,9 @@ describe('ValidationOptions', () => {
 
       const exception = validationOptions.exceptionFactory!(validationErrors);
 
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        errors: Record<string, string>;
+      };
       expect(response.errors).toEqual({
         name: 'name should not be empty',
       });
@@ -164,7 +182,9 @@ describe('ValidationOptions', () => {
 
       const exception = validationOptions.exceptionFactory!(validationErrors);
 
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        errors: Record<string, string>;
+      };
       expect(response.errors).toEqual({
         description:
           'description must be shorter than or equal to 255 characters, description must not contain special characters like @, #, $',
@@ -190,7 +210,9 @@ describe('ValidationOptions', () => {
 
       const exception = validationOptions.exceptionFactory!(validationErrors);
 
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        errors: Record<string, string>;
+      };
       expect(response.errors).toEqual({
         'address.street': 'street should not be empty',
         'address.city':
@@ -209,7 +231,12 @@ describe('ValidationOptions', () => {
       ];
 
       const exception = validationOptions.exceptionFactory!(validationErrors);
-      const response = exception.getResponse() as any;
+      const response = exception.getResponse() as {
+        status: number;
+        message: string;
+        error: boolean;
+        errors: Record<string, string>;
+      };
 
       // Verify all required fields are present
       expect(response).toHaveProperty('status');

@@ -1,18 +1,33 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Request, Response } from 'express';
 
 import { LoggerService } from '../services/logger.service';
 import { MetricsService } from '../services/metrics.service';
 
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
+// Extend Express Request interface to include correlation ID (same as in middleware)
+declare module 'express-serve-static-core' {
+  interface Request {
+    correlationId?: string;
+    startTime?: number;
+  }
+}
+
+// Define extended request interface for testing
+interface ExtendedRequest extends Request {
+  correlationId?: string;
+  user?: { id: number };
+}
+
 describe('AllExceptionsFilter', () => {
   let filter: AllExceptionsFilter;
   let loggerService: jest.Mocked<LoggerService>;
   let metricsService: jest.Mocked<MetricsService>;
   let mockArgumentsHost: jest.Mocked<ArgumentsHost>;
-  let mockRequest: any;
-  let mockResponse: any;
+  let mockRequest: Partial<ExtendedRequest>;
+  let mockResponse: Partial<Response>;
 
   beforeEach(async () => {
     const mockLoggerService = {
@@ -51,22 +66,22 @@ describe('AllExceptionsFilter', () => {
       method: 'GET',
       correlationId: 'test-correlation-id',
       user: { id: 123 },
-    };
+    } as Partial<ExtendedRequest>;
 
     mockResponse = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
-    };
+    } as Partial<Response>;
 
     // Mock ArgumentsHost
     const mockHttpContext = {
-      getResponse: jest.fn().mockReturnValue(mockResponse),
-      getRequest: jest.fn().mockReturnValue(mockRequest),
+      getResponse: jest.fn().mockReturnValue(mockResponse as Response),
+      getRequest: jest.fn().mockReturnValue(mockRequest as ExtendedRequest),
     };
 
     mockArgumentsHost = {
       switchToHttp: jest.fn().mockReturnValue(mockHttpContext),
-    } as any;
+    } as unknown as jest.Mocked<ArgumentsHost>;
   });
 
   afterEach(() => {
@@ -206,7 +221,7 @@ describe('AllExceptionsFilter', () => {
         url: '/test-url',
         method: 'POST',
         correlationId: 'test-correlation-id',
-      };
+      } as Partial<ExtendedRequest>;
 
       const httpContext = mockArgumentsHost.switchToHttp();
       (httpContext.getRequest as jest.Mock).mockReturnValue(requestWithoutUser);
@@ -256,7 +271,7 @@ describe('AllExceptionsFilter', () => {
         url: '/test-url',
         method: 'GET',
         user: { id: 123 },
-      };
+      } as Partial<ExtendedRequest>;
 
       const httpContext2 = mockArgumentsHost.switchToHttp();
       (httpContext2.getRequest as jest.Mock).mockReturnValue(

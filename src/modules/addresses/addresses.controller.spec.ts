@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AddressType } from '../address-types/entities/address-type.entity';
+import { Contact } from '../contacts/entities/contact.entity';
 import { User } from '../users/entity/user.entity';
 
 import { AddressesController } from './addresses.controller';
@@ -26,10 +27,10 @@ describe('AddressesController', () => {
     city: 'Test City',
     state: 'Test State',
     postal_code: '12345',
-    country: { id: 1, name: 'Test Country' } as any,
-    address_type: { id: 1, name: 'Home' } as any,
-    contact: { id: 1 } as any,
-  } as Address;
+    country: { id: 1, name: 'Test Country' } as { id: number; name: string },
+    address_type: { id: 1, name: 'Home' } as { id: number; name: string },
+    contact: { id: 1 } as { id: number },
+  } as unknown as Address;
 
   const mockAddressType: AddressType = {
     id: 1,
@@ -70,9 +71,12 @@ describe('AddressesController', () => {
         city: 'Test City',
         state: 'Test State',
         postal_code: '12345',
-        country: { id: 1, name: 'Test Country' } as any,
+        country: { id: 1, name: 'Test Country' } as {
+          id: number;
+          name: string;
+        },
         address_type: { id: 1 },
-        contact: { id: 1 } as any,
+        contact: { id: 1 } as Contact,
       };
 
       addressesService.create.mockResolvedValue(mockAddress);
@@ -95,9 +99,12 @@ describe('AddressesController', () => {
         city: 'Test City',
         state: 'Test State',
         postal_code: '12345',
-        country: { id: 1, name: 'Test Country' } as any,
+        country: { id: 1, name: 'Test Country' } as {
+          id: number;
+          name: string;
+        },
         address_type: { id: 1 },
-        contact: { id: 1 } as any,
+        contact: { id: 1 } as Contact,
       };
 
       const error = new Error('Creation failed');

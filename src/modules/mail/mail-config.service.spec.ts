@@ -123,7 +123,9 @@ describe('MailConfigService', () => {
 
       const options = service.createMailerOptions();
 
-      expect((options.transport as any).auth).toEqual({
+      expect(
+        (options.transport as { auth: { user: string; pass: string } }).auth,
+      ).toEqual({
         user: 'admin@company.com',
         pass: 'super-secret-password',
       });
@@ -138,7 +140,7 @@ describe('MailConfigService', () => {
 
       const options = service.createMailerOptions();
 
-      expect((options.defaults as any).from).toBe(
+      expect((options.defaults as { from: string }).from).toBe(
         '"My Custom App" <support@myapp.com>',
       );
     });
@@ -153,7 +155,7 @@ describe('MailConfigService', () => {
 
       const options = service.createMailerOptions();
 
-      expect((options.template as any).dir).toBe(
+      expect((options.template as { dir: string }).dir).toBe(
         path.join('/mock/cwd', 'src', 'common', 'mail', 'templates'),
       );
 
@@ -168,7 +170,7 @@ describe('MailConfigService', () => {
 
       const options = service.createMailerOptions();
 
-      expect((options.template as any).dir).toBe(
+      expect((options.template as { dir: string }).dir).toBe(
         path.join('/custom/working/dir', 'src', 'common', 'mail', 'templates'),
       );
     });
@@ -198,16 +200,20 @@ describe('MailConfigService', () => {
           },
         }),
       );
-      expect((options.defaults as any).from).toBe('"undefined" <>');
+      expect((options.defaults as { from: string }).from).toBe(
+        '"undefined" <>',
+      );
     });
 
     it('should configure HandlebarsAdapter with strict mode', () => {
       const options = service.createMailerOptions();
 
-      expect((options.template as any).adapter).toBeInstanceOf(
+      expect((options.template as { adapter: unknown }).adapter).toBeInstanceOf(
         HandlebarsAdapter,
       );
-      expect((options.template as any).options).toEqual({
+      expect(
+        (options.template as { options: { strict: boolean } }).options,
+      ).toEqual({
         strict: true,
       });
     });
@@ -243,7 +249,7 @@ describe('MailConfigService', () => {
 
       const options = service.createMailerOptions();
 
-      expect((options.transport as any).port).toBe(25);
+      expect((options.transport as { port: number }).port).toBe(25);
     });
 
     it('should create consistent template directory paths', () => {
@@ -264,7 +270,7 @@ describe('MailConfigService', () => {
           'templates',
         );
 
-        expect((options.template as any).dir).toBe(expectedPath);
+        expect((options.template as { dir: string }).dir).toBe(expectedPath);
       });
     });
   });
@@ -288,7 +294,7 @@ describe('MailConfigService', () => {
           },
         }),
       );
-      expect((options.defaults as any).from).toBe('"" <>');
+      expect((options.defaults as { from: string }).from).toBe('"" <>');
     });
 
     it('should handle special characters in configuration values', () => {
@@ -303,10 +309,13 @@ describe('MailConfigService', () => {
 
       const options = service.createMailerOptions();
 
-      expect((options.defaults as any).from).toBe(
+      expect((options.defaults as { from: string }).from).toBe(
         '"App with "Quotes" & Symbols" <test+special@example.com>',
       );
-      expect((options.transport as any).auth.pass).toBe('p@ssw0rd!@#$%^&*()');
+      expect(
+        (options.transport as { auth: { user: string; pass: string } }).auth
+          .pass,
+      ).toBe('p@ssw0rd!@#$%^&*()');
     });
   });
 });

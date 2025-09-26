@@ -169,7 +169,14 @@ describe('HealthService', () => {
     it('should return unhealthy status when database check fails', async () => {
       mockDataSource.query.mockRejectedValue(new Error('Connection timeout'));
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        status: string;
+        checks: {
+          name: string;
+          status: string;
+          details: unknown;
+        }[];
+      };
 
       expect(result.status).toBe('unhealthy');
       expect(result.checks[0]).toEqual({
@@ -188,7 +195,14 @@ describe('HealthService', () => {
     it('should return unhealthy status when redis check fails', async () => {
       mockCacheManager.set.mockRejectedValue(new Error('Redis unavailable'));
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        status: string;
+        checks: {
+          name: string;
+          status: string;
+          details: unknown;
+        }[];
+      };
 
       expect(result.status).toBe('unhealthy');
       expect(result.checks[1]).toEqual({
@@ -207,7 +221,14 @@ describe('HealthService', () => {
         arrayBuffers: 50 * 1024 * 1024,
       });
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        status: string;
+        checks: {
+          name: string;
+          status: string;
+          details: Error;
+        }[];
+      };
 
       expect(result.status).toBe('unhealthy');
       expect(result.checks[2]).toEqual({
@@ -229,7 +250,20 @@ describe('HealthService', () => {
         arrayBuffers: 1 * 1024 * 1024,
       });
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        checks: {
+          name: string;
+          status: string;
+          details: {
+            heapUsed: number;
+            heapTotal: number;
+            external: number;
+            rss: number;
+            heapUsedPercent: number;
+            status: string;
+          };
+        }[];
+      };
 
       expect(result.checks[2].details).toEqual({
         heapUsed: 85 * 1024 * 1024,
@@ -245,7 +279,10 @@ describe('HealthService', () => {
       delete process.env.npm_package_version;
       delete process.env.NODE_ENV;
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        version: string;
+        environment: string;
+      };
 
       expect(result.version).toBe('1.0.0');
       expect(result.environment).toBe('development');
@@ -254,7 +291,14 @@ describe('HealthService', () => {
     it('should handle redis data integrity failure', async () => {
       mockCacheManager.get.mockResolvedValue('wrong-value');
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        status: string;
+        checks: {
+          name: string;
+          status: string;
+          details: unknown;
+        }[];
+      };
 
       expect(result.status).toBe('unhealthy');
       expect(result.checks[1]).toEqual({
@@ -269,7 +313,15 @@ describe('HealthService', () => {
     it('should handle database not initialized', async () => {
       mockDataSource.isInitialized = false;
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        checks: {
+          name: string;
+          status: string;
+          details: {
+            connectionCount: number;
+          };
+        }[];
+      };
 
       expect(result.checks[0].details.connectionCount).toBe(0);
     });
@@ -281,7 +333,7 @@ describe('HealthService', () => {
 
       // Mock Redis to work correctly for readiness check
       let storedValue: string;
-      mockCacheManager.set.mockImplementation((key, value) => {
+      mockCacheManager.set.mockImplementation((_key, value) => {
         storedValue = value;
         return Promise.resolve(undefined);
       });
@@ -374,7 +426,11 @@ describe('HealthService', () => {
         arrayBuffers: 2 * 1024 * 1024,
       });
 
-      const result = (await service.liveness()) as any;
+      const result = (await service.liveness()) as {
+        memory: {
+          heapUsedPercent: number;
+        };
+      };
 
       expect(result.memory.heapUsedPercent).toBe(75); // 90/120 * 100 = 75%
     });
@@ -385,7 +441,12 @@ describe('HealthService', () => {
         system: 1000000,
       });
 
-      const result = (await service.liveness()) as any;
+      const result = (await service.liveness()) as {
+        cpu: {
+          user: number;
+          system: number;
+        };
+      };
 
       expect(result.cpu).toEqual({
         user: 2000000,
@@ -396,7 +457,9 @@ describe('HealthService', () => {
     it('should handle different uptime values', async () => {
       jest.spyOn(process, 'uptime').mockReturnValue(86400); // 24 hours
 
-      const result = (await service.liveness()) as any;
+      const result = (await service.liveness()) as {
+        uptime: number;
+      };
 
       expect(result.uptime).toBe(86400);
     });
@@ -407,7 +470,9 @@ describe('HealthService', () => {
       mockDataSource.query.mockRejectedValue(new Error('Connection refused'));
 
       try {
-        await (service as any).checkDatabase();
+        await (
+          service as unknown as { checkDatabase: () => Promise<unknown> }
+        ).checkDatabase();
         fail('Expected method to throw');
       } catch (error) {
         expect(error.message).toBe(
@@ -420,7 +485,9 @@ describe('HealthService', () => {
       mockCacheManager.set.mockRejectedValue(new Error('Connection timeout'));
 
       try {
-        await (service as any).checkRedis();
+        await (
+          service as unknown as { checkRedis: () => Promise<unknown> }
+        ).checkRedis();
         fail('Expected method to throw');
       } catch (error) {
         expect(error.message).toBe(
@@ -434,7 +501,9 @@ describe('HealthService', () => {
       mockCacheManager.get.mockRejectedValue(new Error('Get operation failed'));
 
       try {
-        await (service as any).checkRedis();
+        await (
+          service as unknown as { checkRedis: () => Promise<unknown> }
+        ).checkRedis();
         fail('Expected method to throw');
       } catch (error) {
         expect(error.message).toBe(
@@ -451,7 +520,9 @@ describe('HealthService', () => {
       );
 
       try {
-        await (service as any).checkRedis();
+        await (
+          service as unknown as { checkRedis: () => Promise<unknown> }
+        ).checkRedis();
         fail('Expected method to throw');
       } catch (error) {
         expect(error.message).toBe(
@@ -469,7 +540,14 @@ describe('HealthService', () => {
         arrayBuffers: 50 * 1024 * 1024,
       });
 
-      const result = (service as any).checkMemory();
+      const result = (
+        service as unknown as {
+          checkMemory: () => {
+            heapUsedPercent: number;
+            status: string;
+          };
+        }
+      ).checkMemory();
 
       expect(result.heapUsedPercent).toBe(50);
       expect(result.status).toBe('healthy');
@@ -484,14 +562,23 @@ describe('HealthService', () => {
         arrayBuffers: 1 * 1024 * 1024,
       });
 
-      const result = (service as any).checkMemory();
+      const result = (
+        service as unknown as {
+          checkMemory: () => {
+            heapUsedPercent: number;
+            status: string;
+          };
+        }
+      ).checkMemory();
 
       expect(result.heapUsedPercent).toBe(80);
       expect(result.status).toBe('healthy'); // 80% is not > 80%
     });
 
     it('should handle disk space check', async () => {
-      const result = await (service as any).checkDiskSpace();
+      const result = await (
+        service as unknown as { checkDiskSpace: () => Promise<unknown> }
+      ).checkDiskSpace();
 
       expect(result).toEqual({
         status: 'available',
@@ -505,7 +592,9 @@ describe('HealthService', () => {
       });
 
       try {
-        await (service as any).checkDiskSpace();
+        await (
+          service as unknown as { checkDiskSpace: () => Promise<unknown> }
+        ).checkDiskSpace();
         fail('Expected method to throw');
       } catch (error) {
         expect(error.message).toBe(
@@ -521,7 +610,14 @@ describe('HealthService', () => {
       mockDataSource.query.mockResolvedValue([{ '1': 1 }]);
       mockCacheManager.set.mockRejectedValue(new Error('Redis down'));
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        status: string;
+        checks: {
+          name: string;
+          status: string;
+          details: unknown;
+        }[];
+      };
 
       expect(result.status).toBe('unhealthy');
       expect(result.checks[0].status).toBe('healthy');
@@ -544,7 +640,14 @@ describe('HealthService', () => {
         throw new Error('Disk error');
       });
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        status: string;
+        checks: {
+          name: string;
+          status: string;
+          details: Error;
+        }[];
+      };
 
       expect(result.status).toBe('unhealthy');
       expect(result.checks.every((check) => check.status === 'unhealthy')).toBe(
@@ -566,7 +669,7 @@ describe('HealthService', () => {
 
       // Mock Redis to work correctly
       let storedValue: string;
-      mockCacheManager.set.mockImplementation((key, value) => {
+      mockCacheManager.set.mockImplementation((_key, value) => {
         storedValue = value;
         return Promise.resolve(undefined);
       });
@@ -575,7 +678,9 @@ describe('HealthService', () => {
       });
       mockCacheManager.del.mockResolvedValue(undefined);
 
-      const result = (await service.check()) as any;
+      const result = (await service.check()) as {
+        responseTime: number;
+      };
       const endTime = Date.now();
 
       expect(result.responseTime).toBeGreaterThan(0);

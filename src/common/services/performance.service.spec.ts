@@ -494,14 +494,16 @@ describe('PerformanceService', () => {
 
     it('should handle operations with circular reference metadata', async () => {
       const operation = 'circular-metadata-operation';
-      const circularMetadata: any = { name: 'test' };
+      const circularMetadata: { name: string; self?: unknown } = {
+        name: 'test',
+      };
       circularMetadata.self = circularMetadata; // Create circular reference
       const mockFn = jest.fn().mockResolvedValue('result');
 
       const result = await service.measureAsync(
         operation,
         mockFn,
-        circularMetadata,
+        circularMetadata as never,
       );
 
       expect(result).toBe('result');

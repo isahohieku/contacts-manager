@@ -22,7 +22,7 @@ export class HealthService {
     const checks = await Promise.allSettled([
       this.checkDatabase(),
       this.checkRedis(),
-      this.checkMemory(),
+      Promise.resolve().then(() => this.checkMemory()),
       this.checkDiskSpace(),
     ]);
 
