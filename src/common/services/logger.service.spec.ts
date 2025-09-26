@@ -151,6 +151,51 @@ describe('LoggerService', () => {
         }),
       );
     });
+
+    it('should use default environment when NODE_ENV is not set', () => {
+      delete process.env.NODE_ENV;
+
+      new LoggerService();
+
+      expect(mockWinston.createLogger).toHaveBeenCalledWith(
+        expect.objectContaining({
+          defaultMeta: expect.objectContaining({
+            environment: 'development',
+          }),
+        }),
+      );
+    });
+
+    it('should use default version when npm_package_version is not set', () => {
+      delete process.env.npm_package_version;
+
+      new LoggerService();
+
+      expect(mockWinston.createLogger).toHaveBeenCalledWith(
+        expect.objectContaining({
+          defaultMeta: expect.objectContaining({
+            version: '1.0.0',
+          }),
+        }),
+      );
+    });
+
+    it('should create winston logger with transports', () => {
+      new LoggerService();
+
+      expect(mockWinston.transports.Console).toHaveBeenCalled();
+      expect(mockWinston.transports.File).toHaveBeenCalled();
+    });
+
+    it('should create winston logger with format configuration', () => {
+      new LoggerService();
+
+      expect(mockWinston.format.combine).toHaveBeenCalled();
+      expect(mockWinston.format.timestamp).toHaveBeenCalled();
+      expect(mockWinston.format.errors).toHaveBeenCalled();
+      expect(mockWinston.format.json).toHaveBeenCalled();
+      expect(mockWinston.format.printf).toHaveBeenCalled();
+    });
   });
 
   describe('log', () => {

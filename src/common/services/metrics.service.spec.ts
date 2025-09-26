@@ -768,5 +768,35 @@ describe('MetricsService', () => {
       const longRangeMetrics = service.getRequestMetrics(24 * 60 * 60 * 1000); // 24 hours
       expect(longRangeMetrics.totalRequests).toBe(1);
     });
+
+    it('should handle error metrics without colon in error message', () => {
+      const metric: ErrorMetric = {
+        error: 'SimpleErrorMessage', // No colon, should fallback to 'Unknown'
+        path: '/api/test',
+        method: 'GET',
+        timestamp: new Date(),
+        statusCode: 500,
+      };
+
+      service.recordError(metric);
+
+      const errorMetrics = service.getErrorMetrics();
+      expect(errorMetrics.errorsByType.SimpleErrorMessage).toBe(1);
+    });
+
+    it('should handle empty error message', () => {
+      const metric: ErrorMetric = {
+        error: '', // Empty error message
+        path: '/api/test',
+        method: 'GET',
+        timestamp: new Date(),
+        statusCode: 500,
+      };
+
+      service.recordError(metric);
+
+      const errorMetrics = service.getErrorMetrics();
+      expect(errorMetrics.errorsByType.Unknown).toBe(1);
+    });
   });
 });

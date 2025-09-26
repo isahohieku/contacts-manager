@@ -11,6 +11,7 @@ describe('CacheService', () => {
     set: jest.fn(),
     del: jest.fn(),
     reset: jest.fn(),
+    wrap: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -93,12 +94,90 @@ describe('CacheService', () => {
   });
 
   describe('reset', () => {
-    it('should reset entire cache', async () => {
+    it('should reset entire cache when reset method is available', async () => {
       mockCacheManager.reset.mockResolvedValue(undefined);
 
       await service.reset();
 
       expect(mockCacheManager.reset).toHaveBeenCalled();
+    });
+
+    it('should handle cache manager without reset method', async () => {
+      const mockCacheManagerWithoutReset = {
+        get: jest.fn(),
+        set: jest.fn(),
+        del: jest.fn(),
+        // No reset method
+      };
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          CacheService,
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManagerWithoutReset,
+          },
+        ],
+      }).compile();
+
+      const serviceWithoutReset = module.get<CacheService>(CacheService);
+
+      // Should not throw an error
+      await expect(serviceWithoutReset.reset()).resolves.toBeUndefined();
+    });
+
+    it('should handle reset method that throws an error', async () => {
+      mockCacheManager.reset.mockRejectedValue(new Error('Reset failed'));
+
+      // Should not throw an error (silently fails)
+      await expect(service.reset()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('wrap', () => {
+    it('should wrap function with cache', async () => {
+      const key = 'test-key';
+      const value = { data: 'test-data' };
+      const mockFn = jest.fn().mockResolvedValue(value);
+      mockCacheManager.wrap.mockResolvedValue(value);
+
+      const result = await service.wrap(key, mockFn);
+
+      expect(mockCacheManager.wrap).toHaveBeenCalledWith(
+        key,
+        mockFn,
+        undefined,
+      );
+      expect(result).toEqual(value);
+    });
+
+    it('should wrap function with cache and custom TTL', async () => {
+      const key = 'test-key';
+      const value = { data: 'test-data' };
+      const ttl = 300;
+      const mockFn = jest.fn().mockResolvedValue(value);
+      mockCacheManager.wrap.mockResolvedValue(value);
+
+      const result = await service.wrap(key, mockFn, ttl);
+
+      expect(mockCacheManager.wrap).toHaveBeenCalledWith(key, mockFn, ttl);
+      expect(result).toEqual(value);
+    });
+
+    it('should handle function that throws an error', async () => {
+      const key = 'test-key';
+      const error = new Error('Function failed');
+      const mockFn = jest.fn().mockRejectedValue(error);
+      mockCacheManager.wrap.mockRejectedValue(error);
+
+      await expect(service.wrap(key, mockFn)).rejects.toThrow(
+        'Function failed',
+      );
+      expect(mockCacheManager.wrap).toHaveBeenCalledWith(
+        key,
+        mockFn,
+        undefined,
+      );
     });
   });
 
@@ -144,6 +223,71 @@ describe('CacheService', () => {
 
       const result = service.generateContactsCacheKey(userId, page, limit);
       expect(result).toBe('contacts:123:page:2:limit:20');
+    });
+
+    it('should generate correct contacts cache key with only search', () => {
+      const userId = 123;
+      const page = 1;
+      const limit = 10;
+      const search = 'john';
+
+      const result = service.generateContactsCacheKey(
+        userId,
+        page,
+        limit,
+        search,
+      );
+      expect(result).toBe('contacts:123:page:1:limit:10:search:john');
+    });
+
+    it('should generate correct contacts cache key with only type', () => {
+      const userId = 123;
+      const page = 1;
+      const limit = 10;
+      const type = 'email';
+
+      const result = service.generateContactsCacheKey(
+        userId,
+        page,
+        limit,
+        undefined,
+        type,
+      );
+      expect(result).toBe('contacts:123:page:1:limit:10:type:email');
+    });
+
+    it('should handle empty search string', () => {
+      const userId = 123;
+      const page = 1;
+      const limit = 10;
+      const search = '';
+      const type = 'name';
+
+      const result = service.generateContactsCacheKey(
+        userId,
+        page,
+        limit,
+        search,
+        type,
+      );
+      expect(result).toBe('contacts:123:page:1:limit:10:type:name');
+    });
+
+    it('should handle empty type string', () => {
+      const userId = 123;
+      const page = 1;
+      const limit = 10;
+      const search = 'john';
+      const type = '';
+
+      const result = service.generateContactsCacheKey(
+        userId,
+        page,
+        limit,
+        search,
+        type,
+      );
+      expect(result).toBe('contacts:123:page:1:limit:10:search:john');
     });
   });
 

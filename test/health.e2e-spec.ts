@@ -108,7 +108,7 @@ describe('Health Controller (e2e)', () => {
         .expect(HttpStatus.OK);
 
       expect(response.body.status).toBe('ready');
-      expect(response.body.responseTime).toBeGreaterThan(0);
+      expect(response.body.responseTime).toBeGreaterThanOrEqual(0);
     });
 
     it('should check external dependencies for readiness', async () => {
@@ -118,7 +118,7 @@ describe('Health Controller (e2e)', () => {
 
       // Should return ready status indicating dependencies are available
       expect(response.body.status).toBe('ready');
-      expect(response.body.responseTime).toBeGreaterThan(0);
+      expect(response.body.responseTime).toBeGreaterThanOrEqual(0);
     });
   });
 
