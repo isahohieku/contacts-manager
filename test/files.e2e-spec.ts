@@ -1,14 +1,17 @@
-import { AppModule } from '@contactApp/app.module';
-import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { FilesErrorCodes } from '@contactApp/shared/utils/constants/files/errors';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
+import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
+import { MailService } from '@contactApp/modules/mail/mail.service';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { FilesErrorCodes } from '@contactApp/shared/utils/constants/files/errors';
+
 import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
 describe('FileController (e2e)', () => {
   let app: INestApplication;
@@ -18,9 +21,12 @@ describe('FileController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     configService = moduleFixture.get<ConfigService>(ConfigService);
@@ -30,16 +36,28 @@ describe('FileController (e2e)', () => {
     });
     await app.init();
     if (!token) {
-      const user = await User.save(userData);
+      // Create unique test data for each test run
+      const uniqueUserData = {
+        ...userData,
+        email: `test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}@example.com`,
+      };
+      const user = await User.save(uniqueUserData);
       userData.id = user.id;
     }
-    token = jwt.sign(userData, configService.get('auth.secret'));
+    const authSecret = configService.get<string>('auth.secret');
+    if (!authSecret) {
+      throw new Error('Auth secret not configured');
+    }
+    token = jwt.sign(userData, authSecret);
   });
 
   afterAll(async () => {
-    await FileEntity.delete({ id: file.id });
-    await User.delete({ id: userData.id });
-    userData.id = undefined;
+    if (file?.id) {
+      await FileEntity.delete({ id: file.id });
+    }
+    if (userData?.id) {
+      await User.delete({ id: userData.id });
+    }
     await app.close();
   });
 

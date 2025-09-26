@@ -1,19 +1,18 @@
-import { Connection } from 'typeorm';
-import { Factory, Seeder } from 'typeorm-seeding';
+import { DataSource } from 'typeorm';
 
 import { EmailTypeEnum } from '../../modules/email-types/email-type.enum';
 import { EmailType } from '../../modules/email-types/entities/email-type.entity';
 
-export default class CreateEmailType implements Seeder {
-  public async run(factory: Factory, connection: Connection): Promise<void> {
-    const count = await connection
+export default class CreateEmailType {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
+    const count = await dataSource
       .createQueryBuilder()
       .select()
       .from(EmailType, 'EmailType')
       .getCount();
 
     if (count === 0) {
-      await connection
+      await dataSource
         .createQueryBuilder()
         .insert()
         .into(EmailType)

@@ -1,18 +1,21 @@
-import { AppModule } from '@contactApp/app.module';
-import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
-import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
-import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { MailService } from '@contactApp/modules/mail/mail.service';
+import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
+import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
+
 import { contactData } from './mock-data/contact';
 import { tagData } from './mock-data/tag';
 import { userData } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
 describe('TagController (e2e)', () => {
   let app: INestApplication;
@@ -21,9 +24,12 @@ describe('TagController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     configService = moduleFixture.get<ConfigService>(ConfigService);
@@ -33,10 +39,21 @@ describe('TagController (e2e)', () => {
     });
     await app.init();
     if (!token) {
-      const user = await User.save(userData);
+      // Create unique test data for each test run
+      const uniqueUserData = {
+        ...userData,
+        email: `test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}@example.com`,
+      };
+      const user = await User.save(uniqueUserData);
       userData.id = user.id;
+      // Update userData with unique email for token generation
+      userData.email = uniqueUserData.email;
     }
-    token = jwt.sign(userData, configService.get('auth.secret'));
+    const authSecret = configService.get<string>('auth.secret');
+    if (!authSecret) {
+      throw new Error('Auth secret not configured');
+    }
+    token = jwt.sign(userData, authSecret);
 
     if (!contactData.id) {
       const contact = await Contact.save({

@@ -3,65 +3,346 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - '**'
+      - "**"
+
+  workflow_dispatch:
+    inputs:
+      run_full_suite:
+        description: 'Run full test suite including E2E'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NODE_VERSION: '22'
+  CACHE_KEY_PREFIX: 'contact-list-v1'
 
 jobs:
-  Build-and-Test:
+  # Job 1: Lint and Type Check (Fast feedback)
+  lint-and-typecheck:
+    name: 'Lint & Type Check'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 'Create env file'
-        run: |
-          touch .env
-          echo NODE_ENV=${{ secrets.NODE_ENV }} >> .env
-          echo APP_PORT=${{ secrets.APP_PORT }} >> .env
-          echo APP_NAME=${{ secrets.APP_NAME }} >> .env
-          echo API_PREFIX=${{ secrets.API_PREFIX }} >> .env
-          echo APP_FALLBACK_LANGUAGE=${{ secrets.APP_FALLBACK_LANGUAGE }} >> .env
-          echo FRONTEND_DOMAIN=${{ secrets.FRONTEND_DOMAIN }} >> .env
-          echo BACKEND_DOMAIN=${{ secrets.BACKEND_DOMAIN }} >> .env
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
 
-          echo AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }} >> .env
-          echo AUTH_JWT_TOKEN_EXPIRES_IN=${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN }} >> .env
-          
-          echo DATABASE_TYPE=${{ secrets.DATABASE_TYPE }} >> .env
-          echo DATABASE_HOST=${{ secrets.DATABASE_HOST }} >> .env
-          echo DATABASE_PORT=${{ secrets.DATABASE_PORT }} >> .env
-          echo DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} >> .env
-          echo DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
-          echo DATABASE_NAME=${{ secrets.DATABASE_NAME }} >> .env
-          echo DATABASE_SYNCHRONIZE=${{ secrets.DATABASE_SYNCHRONIZE }} >> .env
-          echo DATABASE_MAX_CONNECTIONS=${{ secrets.DATABASE_MAX_CONNECTIONS }} >> .env
-          echo DATABASE_SSL_ENABLED=${{ secrets.DATABASE_SSL_ENABLED }} >> .env
-          echo DATABASE_REJECT_UNAUTHORIZED=${{ secrets.DATABASE_REJECT_UNAUTHORIZED }} >> .env
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-          echo FILE_DRIVER=${{ secrets.FILE_DRIVER }} >> .env
-          echo ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID }} >> .env
-          echo SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }} >> .env
-          echo AWS_S3_REGION=${{ secrets.AWS_S3_REGION }} >> .env
-          echo AWS_DEFAULT_S3_BUCKET=${{ secrets.AWS_DEFAULT_S3_BUCKET }} >> .env
-          
-          echo MAIL_HOST=${{ secrets.MAIL_HOST }} >> .env
-          echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
-          echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
-          echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> .env
-          echo MAIL_IGNORE_TLS=${{ secrets.MAIL_IGNORE_TLS }} >> .env
-          echo MAIL_SECURE=${{ secrets.MAIL_SECURE }} >> .env
-          echo MAIL_REQUIRE_TLS=${{ secrets.MAIL_REQUIRE_TLS }} >> .env
-          echo MAIL_DEFAULT_EMAIL=${{ secrets.MAIL_DEFAULT_EMAIL }} >> .env
-          echo MAIL_DEFAULT_NAME=${{ secrets.MAIL_DEFAULT_NAME }} >> .env
-          echo MAIL_CLIENT_PORT=${{ secrets.MAIL_CLIENT_PORT }} >> .env
-          
-          echo NODE_OPTIONS=${{ secrets.NODE_OPTIONS }} >> .env
+      - name: Add dummy ormconfig.json
+        run: touch ormconfig.json
 
-      - name: Run e2e tests
-        run: docker compose -f docker-compose.ci.yaml --env-file .env -p contacts-manager-ci up --build --exit-code-from api
+      - name: Run ESLint
+        run: yarn lint
 
-      - name: Upload test coverage
+      - name: Run Prettier check
+        run: yarn prettier:check
+
+      - name: Type check
+        run: yarn build
+
+      - name: Remove dummy ormconfig.json
+        run: rm ormconfig.json
+
+  # Job 2: Unit Tests (Fast, no external dependencies)
+  unit-tests:
+    name: 'Unit Tests'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run unit tests with coverage
+        run: yarn test:unit:cov
+
+      - name: Upload unit test coverage
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./test-coverage-report/lcov.info
+          file: ./coverage/unit/lcov.info
+          flags: unit
+          name: unit-tests
+
+      - name: Upload unit coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage
+          path: ./coverage/unit/
+          retention-days: 1
+
+  # Job 3: Integration Tests (Medium complexity, with database)
+  integration-tests:
+    name: 'Integration Tests'
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14.1
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Create test environment file
+        run: |
+          cat > .env.test << EOF
+          NODE_ENV=test
+          DATABASE_TYPE=postgres
+          DATABASE_HOST=localhost
+          DATABASE_PORT=5432
+          DATABASE_USERNAME=test_user
+          DATABASE_PASSWORD=test_password
+          DATABASE_NAME=test_db
+          DATABASE_SYNCHRONIZE=true
+          DATABASE_MAX_CONNECTIONS=10
+          DATABASE_SSL_ENABLED=false
+          DATABASE_REJECT_UNAUTHORIZED=false
+          AUTH_JWT_SECRET=test-secret-key-for-integration-tests
+          AUTH_JWT_TOKEN_EXPIRES_IN=1d
+          MAIL_HOST=localhost
+          MAIL_PORT=1025
+          MAIL_USER=test
+          MAIL_PASSWORD=test
+          MAIL_DEFAULT_EMAIL=test@example.com
+          MAIL_DEFAULT_NAME=Test
+          FILE_DRIVER=local
+          EOF
+
+      - name: Run database migrations
+        run: yarn migration:run
+        env:
+          NODE_ENV: test
+
+      - name: Run integration tests with coverage
+        run: yarn test:integration:cov
+        env:
+          NODE_ENV: test
+
+      - name: Upload integration test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/integration/lcov.info
+          flags: integration
+          name: integration-tests
+
+      - name: Upload integration coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-coverage
+          path: ./coverage/integration/
+          retention-days: 1
+
+  # Job 4: E2E Tests (Full application testing with all services)
+  e2e-tests:
+    name: 'E2E Tests'
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || inputs.run_full_suite
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create comprehensive env file
+        run: |
+          cat > .env << EOF
+          NODE_ENV=${{ secrets.NODE_ENV || 'test' }}
+          APP_PORT=${{ secrets.APP_PORT || '3000' }}
+          APP_NAME=${{ secrets.APP_NAME || 'Contact List API' }}
+          API_PREFIX=${{ secrets.API_PREFIX || 'api' }}
+          APP_FALLBACK_LANGUAGE=${{ secrets.APP_FALLBACK_LANGUAGE || 'en' }}
+          FRONTEND_DOMAIN=${{ secrets.FRONTEND_DOMAIN || 'http://localhost:3000' }}
+          BACKEND_DOMAIN=${{ secrets.BACKEND_DOMAIN || 'http://localhost:3000' }}
+
+          AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET || 'test-secret-key-for-e2e-tests' }}
+          AUTH_JWT_TOKEN_EXPIRES_IN=${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN || '1d' }}
+
+          DATABASE_TYPE=${{ secrets.DATABASE_TYPE || 'postgres' }}
+          DATABASE_HOST=${{ secrets.DATABASE_HOST || 'postgres' }}
+          DATABASE_PORT=${{ secrets.DATABASE_PORT || '5432' }}
+          DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME || 'test_user' }}
+          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD || 'test_password' }}
+          DATABASE_NAME=${{ secrets.DATABASE_NAME || 'test_db' }}
+          DATABASE_SYNCHRONIZE=${{ secrets.DATABASE_SYNCHRONIZE || 'true' }}
+          DATABASE_MAX_CONNECTIONS=${{ secrets.DATABASE_MAX_CONNECTIONS || '10' }}
+          DATABASE_SSL_ENABLED=${{ secrets.DATABASE_SSL_ENABLED || 'false' }}
+          DATABASE_REJECT_UNAUTHORIZED=${{ secrets.DATABASE_REJECT_UNAUTHORIZED || 'false' }}
+
+          FILE_DRIVER=${{ secrets.FILE_DRIVER || 'local' }}
+          ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID || '' }}
+          SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY || '' }}
+          AWS_S3_REGION=${{ secrets.AWS_S3_REGION || 'us-east-1' }}
+          AWS_DEFAULT_S3_BUCKET=${{ secrets.AWS_DEFAULT_S3_BUCKET || 'test-bucket' }}
+
+          MAIL_HOST=${{ secrets.MAIL_HOST || 'maildev' }}
+          MAIL_PORT=${{ secrets.MAIL_PORT || '1025' }}
+          MAIL_USER=${{ secrets.MAIL_USER || 'test' }}
+          MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD || 'test' }}
+          MAIL_IGNORE_TLS=${{ secrets.MAIL_IGNORE_TLS || 'true' }}
+          MAIL_SECURE=${{ secrets.MAIL_SECURE || 'false' }}
+          MAIL_REQUIRE_TLS=${{ secrets.MAIL_REQUIRE_TLS || 'false' }}
+          MAIL_DEFAULT_EMAIL=${{ secrets.MAIL_DEFAULT_EMAIL || 'test@example.com' }}
+          MAIL_DEFAULT_NAME=${{ secrets.MAIL_DEFAULT_NAME || 'Test' }}
+          MAIL_CLIENT_PORT=${{ secrets.MAIL_CLIENT_PORT || '1080' }}
+
+          NODE_OPTIONS=${{ secrets.NODE_OPTIONS || '--max-old-space-size=4096' }}
+          EOF
+
+      - name: Run E2E tests with Docker Compose
+        run: docker compose -f docker-compose.ci.yaml --env-file .env -p contacts-manager-ci up --build --exit-code-from api
+
+      - name: Copy coverage from container
+        run: |
+          # Ensure coverage directory exists
+          mkdir -p ./coverage/e2e
+          # Copy coverage files if they exist
+          docker cp contacts-manager-ci-api-1:/usr/app/coverage/e2e/ ./coverage/ 2>/dev/null || echo "No e2e coverage files found"
+
+      - name: Upload E2E test coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/e2e/lcov.info
+          flags: e2e
+          name: e2e-tests
+
+      - name: Upload E2E coverage artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-coverage
+          path: ./coverage/e2e/
+          retention-days: 1
+
+  # Job 5: Merge Coverage and Generate Final Report
+  coverage-report:
+    name: 'Coverage Report'
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, e2e-tests]
+    if: always() && (needs.unit-tests.result == 'success' || needs.integration-tests.result == 'success' || needs.e2e-tests.result == 'success')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Download unit test coverage
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: unit-coverage
+          path: ./coverage/unit/
+
+      - name: Download integration test coverage
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: integration-coverage
+          path: ./coverage/integration/
+
+      - name: Download E2E test coverage
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: e2e-coverage
+          path: ./coverage/e2e/
+
+      - name: Merge coverage reports
+        run: |
+          # Create coverage directories if they don't exist
+          mkdir -p coverage/unit coverage/integration coverage/e2e
+
+          # Run coverage merge script
+          yarn test:cov:merge || echo "Coverage merge completed with warnings"
+
+      - name: Upload merged coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/lcov.info
+          flags: merged
+          name: merged-coverage
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            ./coverage/
+            !./coverage/tmp/
+          retention-days: 30
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const coverage = fs.readFileSync('./coverage/coverage-summary.json', 'utf8');
+              const summary = JSON.parse(coverage);
+
+              const comment = `## 📊 Test Coverage Report
+
+              | Type | Statements | Functions | Branches | Lines |
+              |------|------------|-----------|----------|-------|
+              | **Total** | ${summary.total.statements.pct}% | ${summary.total.functions.pct}% | ${summary.total.branches.pct}% | ${summary.total.lines.pct}% |
+
+              Coverage report generated for commit ${context.sha.substring(0, 7)}
+              `;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Could not post coverage comment:', error.message);
+            }

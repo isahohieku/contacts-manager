@@ -1,8 +1,9 @@
-import { Address } from '@contactApp/modules/addresses/entities/address.entity';
-import { EntityHelper } from '@contactApp/shared/entities/entity-helper';
 import { ApiProperty } from '@nestjs/swagger';
 import { Allow } from 'class-validator';
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+
+import { Address } from '@contactApp/modules/addresses/entities/address.entity';
+import { EntityHelper } from '@contactApp/shared/entities/entity-helper';
 
 @Entity()
 export class AddressType extends EntityHelper {

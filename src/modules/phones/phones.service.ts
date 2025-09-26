@@ -1,11 +1,12 @@
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { PhoneNumberErrorCodes } from '@contactApp/shared/utils/constants/phone-numbers/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
-import { validatePhoneNumber } from '@contactApp/shared/utils/validators/phone-number';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CountryCode } from 'libphonenumber-js';
 import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { PhoneNumberErrorCodes } from '@contactApp/shared/utils/constants/phone-numbers/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
+import { validatePhoneNumber } from '@contactApp/shared/utils/validators/phone-number';
 
 import { ContactsService } from '../contacts/contacts.service';
 import { PhoneType } from '../phone-types/entities/phone-type.entity';
@@ -26,7 +27,7 @@ export class PhonesService {
     user: User,
     createPhoneDto: CreatePhoneDto,
     validateNumber: boolean,
-  ) {
+  ): Promise<Phone> {
     if (validateNumber) {
       if (
         !validatePhoneNumber(
@@ -56,7 +57,7 @@ export class PhonesService {
     return phoneNumber;
   }
 
-  async findOne(user: User, id: number) {
+  async findOne(user: User, id: number): Promise<Phone> {
     const userId = user.id;
 
     const phoneNumber = await this.phoneRepository
@@ -81,7 +82,11 @@ export class PhonesService {
     );
   }
 
-  async update(user: User, id: number, updatePhoneDto: UpdatePhoneDto) {
+  async update(
+    user: User,
+    id: number,
+    updatePhoneDto: UpdatePhoneDto,
+  ): Promise<Phone> {
     await this.findOne(user, id);
 
     await this.phoneRepository.update(id, {
@@ -91,13 +96,13 @@ export class PhonesService {
     return phoneNumber;
   }
 
-  async remove(user: User, id: number) {
+  async remove(user: User, id: number): Promise<Phone> {
     const phoneNumber = await this.findOne(user, id);
     await this.phoneRepository.softDelete(id);
     return phoneNumber;
   }
 
-  async getPhoneTypes() {
+  async getPhoneTypes(): Promise<PhoneType[]> {
     const phoneTypes = await PhoneType.find();
     return phoneTypes;
   }

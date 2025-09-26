@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 
-import appConfig from '@contactApp/configs/app.config';
-import databaseConfig from '@contactApp/configs/database.config';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+
+import appConfig from '@contactApp/configs/app.config';
+import databaseConfig from '@contactApp/configs/database.config';
 
 import { TypeOrmConfigService } from '../typeorm-config.service';
 
@@ -13,14 +14,17 @@ import { TypeOrmConfigService } from '../typeorm-config.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, appConfig],
-      envFilePath: ['.env'],
+      envFilePath: [
+        process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+        '.env',
+      ],
     }),
   ],
   providers: [TypeOrmConfigService],
 })
 class AppModule {}
 
-const setConfig = async () => {
+const setConfig = async (): Promise<void> => {
   const app = await NestFactory.create(AppModule);
   const typeOrmServiceConfig = app.get(TypeOrmConfigService);
   fs.writeFileSync(

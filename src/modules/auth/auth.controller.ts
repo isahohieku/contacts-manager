@@ -12,6 +12,14 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
+
+import { User } from '../users/entity/user.entity';
+
+// Create a custom interface that extends Express Request with our User type
+interface AuthenticatedRequest extends ExpressRequest {
+  user: User;
+}
 
 import { AuthService } from './auth.service';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
@@ -20,6 +28,7 @@ import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthUpdateDto } from './dto/auth-update.dto';
+import { AuthProvider } from './entities/auth-providers.entity';
 
 @ApiTags('Auth')
 @Controller({
@@ -31,43 +40,55 @@ export class AuthController {
 
   @Get('providers')
   @HttpCode(HttpStatus.OK)
-  public async getProviders() {
+  public async getProviders(): Promise<AuthProvider[]> {
     return this.service.getProviders();
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  public async login(@Body() loginDto: AuthEmailLoginDto) {
+  public async login(@Body() loginDto: AuthEmailLoginDto): Promise<{
+    token: string;
+    user: User;
+  }> {
     return this.service.validateLogin(loginDto, false);
   }
 
   @Post('admin/login')
   @HttpCode(HttpStatus.OK)
-  public async adminLogin(@Body() loginDTO: AuthEmailLoginDto) {
+  public async adminLogin(@Body() loginDTO: AuthEmailLoginDto): Promise<{
+    token: string;
+    user: User;
+  }> {
     return this.service.validateLogin(loginDTO, true);
   }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() createUserDto: AuthRegisterLoginDto) {
+  async register(@Body() createUserDto: AuthRegisterLoginDto): Promise<User> {
     return this.service.register(createUserDto);
   }
 
   @Post('email/confirm')
   @HttpCode(HttpStatus.OK)
-  async confirmEmail(@Body() confirmEmailDto: AuthConfirmEmailDto) {
+  async confirmEmail(
+    @Body() confirmEmailDto: AuthConfirmEmailDto,
+  ): Promise<void> {
     return this.service.confirmEmail(confirmEmailDto.hash);
   }
 
   @Post('forgot/password')
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body() forgotPasswordDto: AuthForgotPasswordDto) {
+  async forgotPassword(
+    @Body() forgotPasswordDto: AuthForgotPasswordDto,
+  ): Promise<void> {
     return this.service.forgotPassword(forgotPasswordDto.email);
   }
 
   @Post('reset/password')
   @HttpCode(HttpStatus.OK)
-  async resetPassword(@Body() resetPasswordDto: AuthResetPasswordDto) {
+  async resetPassword(
+    @Body() resetPasswordDto: AuthResetPasswordDto,
+  ): Promise<void> {
     return this.service.resetPassword(
       resetPasswordDto.hash,
       resetPasswordDto.password,
@@ -78,7 +99,7 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
-  public async me(@Request() request) {
+  public async me(@Request() request: AuthenticatedRequest): Promise<User> {
     return this.service.me(request.user);
   }
 
@@ -86,7 +107,10 @@ export class AuthController {
   @Patch('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
-  public async update(@Request() request, @Body() userDto: AuthUpdateDto) {
+  public async update(
+    @Request() request: AuthenticatedRequest,
+    @Body() userDto: AuthUpdateDto,
+  ): Promise<User> {
     return this.service.update(request.user, userDto);
   }
 
@@ -94,7 +118,7 @@ export class AuthController {
   @Delete('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
-  public async delete(@Request() request) {
+  public async delete(@Request() request: AuthenticatedRequest): Promise<void> {
     return this.service.softDelete(request.user);
   }
 }

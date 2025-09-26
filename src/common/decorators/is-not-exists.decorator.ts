@@ -1,9 +1,10 @@
-import { repositories } from '@contactApp/shared/entities/all-entities';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
+
+import { repositories } from '@contactApp/shared/entities/all-entities';
 
 type ValidationEntity =
   | {
@@ -13,7 +14,10 @@ type ValidationEntity =
 
 @ValidatorConstraint({ name: 'IsNotExist', async: true })
 export class IsNotExist implements ValidatorConstraintInterface {
-  async validate(value: string, validationArguments: ValidationArguments) {
+  async validate(
+    value: string,
+    validationArguments: ValidationArguments,
+  ): Promise<boolean> {
     const repository =
       repositories[validationArguments.constraints[0] as string];
     const currentValue = validationArguments.object as ValidationEntity;

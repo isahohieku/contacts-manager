@@ -1,6 +1,3 @@
-import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { EntityBase } from '@contactApp/shared/entities/entity-helper';
 import { Allow } from 'class-validator';
 import {
   Column,
@@ -10,6 +7,10 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { EntityBase } from '@contactApp/shared/entities/entity-helper';
 
 @Entity('tags')
 @Unique(['owner', 'name'])

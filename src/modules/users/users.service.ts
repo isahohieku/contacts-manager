@@ -1,14 +1,15 @@
 import * as crypto from 'crypto';
 
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, FindOptionsWhere } from 'typeorm';
+
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
 import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { genericFindManyWithPagination } from '@contactApp/shared/utils/infinity-pagination';
 import { IPaginationOptions } from '@contactApp/shared/utils/types/pagination-options';
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
 
 import { MailService } from '../mail/mail.service';
 
@@ -24,7 +25,7 @@ export class UsersService {
     private mailService: MailService,
   ) {}
 
-  async create(createProfileDto: CreateUserDto) {
+  async create(createProfileDto: CreateUserDto): Promise<User> {
     const hash = crypto
       .createHash('sha256')
       .update(randomStringGenerator())
@@ -35,7 +36,7 @@ export class UsersService {
     );
 
     await this.mailService.userSignUp({
-      to: user.email,
+      to: user.email || '',
       data: {
         hash,
       },
@@ -44,7 +45,16 @@ export class UsersService {
     return user;
   }
 
-  findManyWithPagination(options: IPaginationOptions) {
+  findManyWithPagination(options: IPaginationOptions): Promise<{
+    data: User[];
+    metadata: {
+      page?: number;
+      items_per_page?: number;
+      total_items?: number;
+      total_pages?: number;
+      hasNextPage?: boolean;
+    };
+  }> {
     const baseQuery = {
       where: {},
     };
@@ -56,7 +66,10 @@ export class UsersService {
     );
   }
 
-  async findOne(fields: FindOptionsWhere<User>, throwError = true) {
+  async findOne(
+    fields: FindOptionsWhere<User>,
+    throwError = true,
+  ): Promise<User | null> {
     const user = await this.usersRepository.findOne({
       where: fields,
     });
@@ -78,7 +91,7 @@ export class UsersService {
     );
   }
 
-  async update(id: number, updateProfileDto: UpdateUserDto) {
+  async update(id: number, updateProfileDto: UpdateUserDto): Promise<User> {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {

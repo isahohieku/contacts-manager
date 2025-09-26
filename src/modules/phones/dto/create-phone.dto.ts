@@ -1,9 +1,10 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, Validate } from 'class-validator';
+
 import { IsUniqueToContact } from '@contactApp/common/decorators/is-unique-to-contact.decorator';
 import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
 import { PhoneType } from '@contactApp/modules/phone-types/entities/phone-type.entity';
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, Validate } from 'class-validator';
 
 import { Phone } from '../entities/phone.entity';
 

@@ -1,24 +1,30 @@
-import { AppModule } from '@contactApp/app.module';
-import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
-import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
-import { Forgot } from '@contactApp/modules/forgot/entities/forgot.entity';
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
+import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
+import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
+import { Forgot } from '@contactApp/modules/forgot/entities/forgot.entity';
+import { MailService } from '@contactApp/modules/mail/mail.service';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+
 import { userSignUpDetails } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
-  let userDbData = null;
-  let loggedInUser = null;
+  let userDbData: User | null = null;
+  let loggedInUser: (User & { token: string; user }) | null = null;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+      imports: [TestAppModule],
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api', {
@@ -30,9 +36,11 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await Forgot.delete({ user: { id: userDbData.id } });
-    await User.delete({ id: userDbData.id });
-    await app.close();
+    if (userDbData?.id) {
+      await Forgot.delete({ user: { id: userDbData.id } });
+      await User.delete({ id: userDbData.id });
+      await app.close();
+    }
   });
 
   it('should get all active auth providers with GET /api/auth/providers', () => {
@@ -98,9 +106,12 @@ describe('AuthController (e2e)', () => {
   it('should verify user account with POST /api/auth/email/confirm', async () => {
     const user = await User.findOne({
       where: {
-        id: userDbData.id,
+        id: userDbData?.id,
       },
     });
+    if (!user) {
+      throw new Error('User not found');
+    }
     return request(app.getHttpServer())
       .post('/api/auth/email/confirm')
       .send({
@@ -229,10 +240,14 @@ describe('AuthController (e2e)', () => {
     const userForgotPassword = await Forgot.findOne({
       where: {
         user: {
-          id: userDbData.id,
+          id: userDbData?.id,
         },
       },
     });
+
+    if (!userForgotPassword) {
+      throw new Error('Forgot password record not found');
+    }
 
     return request(app.getHttpServer())
       .post('/api/auth/reset/password')
@@ -263,7 +278,7 @@ describe('AuthController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/auth/me')
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.OK)
       .then(({ body }) => {
@@ -292,7 +307,7 @@ describe('AuthController (e2e)', () => {
         firstName,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.OK)
       .then(({ body }) => {
@@ -322,7 +337,7 @@ describe('AuthController (e2e)', () => {
         password: userSignUpDetails.password,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.UNPROCESSABLE_ENTITY)
       .then(({ body }) => {
@@ -340,7 +355,7 @@ describe('AuthController (e2e)', () => {
         password: userSignUpDetails.password,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.UNPROCESSABLE_ENTITY)
       .then(({ body }) => {
@@ -353,7 +368,7 @@ describe('AuthController (e2e)', () => {
 
   it('should throw error if user user a different provider to login with POST /api/auth/login', async () => {
     await User.save({
-      ...loggedInUser.user,
+      ...loggedInUser?.user,
       provider: { id: 2 },
     });
     return request(app.getHttpServer())
@@ -363,7 +378,7 @@ describe('AuthController (e2e)', () => {
         password: userSignUpDetails.password,
       })
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.UNPROCESSABLE_ENTITY)
       .then(({ body }) => {
@@ -378,7 +393,7 @@ describe('AuthController (e2e)', () => {
     return request(app.getHttpServer())
       .delete('/api/auth/me')
       .set({
-        Authorization: `Bearer ${loggedInUser.token}`,
+        Authorization: `Bearer ${loggedInUser?.token}`,
       })
       .expect(HttpStatus.OK);
   });

@@ -1,15 +1,16 @@
 import * as crypto from 'crypto';
 
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
-import { StatusEnum } from '@contactApp/shared/utils/types/statuses.type';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
 import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
+import { StatusEnum } from '@contactApp/shared/utils/types/statuses.type';
 
 import { ForgotService } from '../forgot/forgot.service';
 import { MailService } from '../mail/mail.service';
@@ -53,7 +54,7 @@ export class AuthService {
    *
    * @return {AuthProvider[]} A list of active authentication providers.
    */
-  async getProviders() {
+  async getProviders(): Promise<AuthProvider[]> {
     return this.authProviderssRepository.find({ where: { active: true } });
   }
 
@@ -98,6 +99,14 @@ export class AuthService {
 
     // Step 4: Validate the provider
     // Get the provider handler for the provider
+    if (!user.provider?.id) {
+      throw handleError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.INVALID_PROVIDER,
+        { provider: UserErrorCodes.INVALID_PROVIDER },
+      );
+    }
+
     const providerHandler = this.validateProvider(
       loginDto.provider.id,
       user.provider.id,
@@ -177,7 +186,7 @@ export class AuthService {
 
     await this.forgotService.create({
       hash,
-      user,
+      user: user || undefined,
     });
 
     await this.mailService.forgotPassword({
@@ -221,12 +230,22 @@ export class AuthService {
    * @return {Promise<User>} The user's data.
    */
   async me(user: User): Promise<User> {
-    return this.usersService.findOne(
+    const foundUser = await this.usersService.findOne(
       {
         id: user.id,
       },
       false,
     );
+
+    if (!foundUser) {
+      throw handleError(
+        HttpStatus.NOT_FOUND,
+        ERROR_MESSAGES.NOT_FOUND('User', user.id),
+        { user: UserErrorCodes.NOT_FOUND },
+      );
+    }
+
+    return foundUser;
   }
 
   /**
@@ -257,6 +276,14 @@ export class AuthService {
         false,
       );
 
+      if (!currentUser) {
+        throw handleError(
+          HttpStatus.NOT_FOUND,
+          ERROR_MESSAGES.NOT_FOUND('User', existingUser.id),
+          { user: UserErrorCodes.NOT_FOUND },
+        );
+      }
+
       const isValidOldPassword = await bcrypt.compare(
         oldPassword,
         currentUser.password,
@@ -275,12 +302,22 @@ export class AuthService {
 
     await this.usersService.update(existingUser.id, updateDto as UpdateUserDto);
 
-    return this.usersService.findOne(
+    const updatedUser = await this.usersService.findOne(
       {
         id: existingUser.id,
       },
       false,
     );
+
+    if (!updatedUser) {
+      throw handleError(
+        HttpStatus.NOT_FOUND,
+        ERROR_MESSAGES.NOT_FOUND('User', existingUser.id),
+        { user: UserErrorCodes.NOT_FOUND },
+      );
+    }
+
+    return updatedUser;
   }
 
   /**
@@ -303,7 +340,7 @@ export class AuthService {
    */
   private validateUserStatusAndRole(user: User, onlyAdmin: boolean): void {
     // If the user is not active, throw a 401 error
-    if (user.status.id !== StatusEnum.active) {
+    if (user.status?.id !== StatusEnum.active) {
       const errors = {
         provider: UserErrorCodes.UNVERIFIED_USER,
       };
@@ -316,7 +353,7 @@ export class AuthService {
     }
 
     // If we want to only allow admins to log in, make sure the user is an admin
-    if (onlyAdmin && user.role.id !== RoleEnum.admin) {
+    if (onlyAdmin && user.role?.id !== RoleEnum.admin) {
       const errors = {
         user: UserErrorCodes.FORBIDDEN_RESOURCE,
       };
@@ -338,7 +375,15 @@ export class AuthService {
    * @param {number} userProviderId - The ID of the user's provider.
    * @return {Promise<void>} A promise that resolves when the provider is valid.
    */
-  private async validateProvider(providerId: number, userProviderId: number) {
+  private async validateProvider(
+    providerId: number,
+    userProviderId: number,
+  ): Promise<
+    (
+      user: User,
+      loginDto: AuthEmailLoginDto,
+    ) => Promise<{ token: string; user: User }>
+  > {
     // First, let's try to find the provider by ID
     const provider = await this.authProviderssRepository.findOne({
       where: { id: providerId, active: true },
@@ -358,6 +403,14 @@ export class AuthService {
     }
 
     // If we've made it this far, the provider is valid, so we call the provider's handler
+    if (!provider?.name) {
+      throw handleError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ERROR_MESSAGES.INVALID_PROVIDER,
+        { provider: UserErrorCodes.INVALID_PROVIDER },
+      );
+    }
+
     const providerHandler = this.authProvidersService.handleLogin(
       provider.name,
     );

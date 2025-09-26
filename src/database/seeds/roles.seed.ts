@@ -1,11 +1,10 @@
-import { Connection } from 'typeorm';
-import { Factory, Seeder } from 'typeorm-seeding';
+import { DataSource } from 'typeorm';
 
 import { Role } from '../../modules/roles/entities/role.entity';
 
-export default class CreateRole implements Seeder {
-  public async run(factory: Factory, connection: Connection): Promise<void> {
-    const countUser = await connection
+export default class CreateRole {
+  public async run(factory: unknown, dataSource: DataSource): Promise<void> {
+    const countUser = await dataSource
       .createQueryBuilder()
       .select()
       .from(Role, 'Role')
@@ -13,7 +12,7 @@ export default class CreateRole implements Seeder {
       .getCount();
 
     if (countUser === 0) {
-      await connection
+      await dataSource
         .createQueryBuilder()
         .insert()
         .into(Role)
@@ -21,7 +20,7 @@ export default class CreateRole implements Seeder {
         .execute();
     }
 
-    const countAdmin = await connection
+    const countAdmin = await dataSource
       .createQueryBuilder()
       .select()
       .from(Role, 'Role')
@@ -29,7 +28,7 @@ export default class CreateRole implements Seeder {
       .getCount();
 
     if (countAdmin === 0) {
-      await connection
+      await dataSource
         .createQueryBuilder()
         .insert()
         .into(Role)

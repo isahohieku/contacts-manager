@@ -15,8 +15,12 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+import { PhoneType } from '../phone-types/entities/phone-type.entity';
+import { User } from '../users/entity/user.entity';
+
 import { CreatePhoneDto } from './dto/create-phone.dto';
 import { UpdatePhoneDto } from './dto/update-phone.dto';
+import { Phone } from './entities/phone.entity';
 import { PhonesService } from './phones.service';
 
 // TODO: Add nestJS devtool
@@ -37,8 +41,8 @@ export class PhonesController {
     validatePhone: boolean,
     @Body()
     createPhoneDto: CreatePhoneDto,
-    @Request() request,
-  ) {
+    @Request() request: { user: User },
+  ): Promise<Phone> {
     return this.phonesService.create(
       request.user,
       createPhoneDto,
@@ -47,26 +51,32 @@ export class PhonesController {
   }
 
   @Get('phone-types')
-  getPhoneTypes() {
+  getPhoneTypes(): Promise<PhoneType[]> {
     return this.phonesService.getPhoneTypes();
   }
 
   @Patch(':id')
   update(
-    @Request() request,
+    @Request() request: { user: User },
     @Param('id') id: string,
     @Body() updatePhoneDto: UpdatePhoneDto,
-  ) {
+  ): Promise<Phone> {
     return this.phonesService.update(request.user, +id, updatePhoneDto);
   }
 
   @Delete(':id')
-  remove(@Request() request, @Param('id') id: string) {
+  remove(
+    @Request() request: { user: User },
+    @Param('id') id: string,
+  ): Promise<Phone> {
     return this.phonesService.remove(request.user, +id);
   }
 
   @Get(':id')
-  findOne(@Request() request, @Param('id') id: string) {
+  findOne(
+    @Request() request: { user: User },
+    @Param('id') id: string,
+  ): Promise<Phone> {
     return this.phonesService.findOne(request.user, +id);
   }
 }

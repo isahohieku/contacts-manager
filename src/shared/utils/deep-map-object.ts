@@ -1,23 +1,26 @@
-const deepMapObject = (data, callback) => {
-  const map = (value, key) => {
+const deepMapObject = <T>(
+  data: T,
+  callback: (value: unknown, key: string | number) => void,
+): T => {
+  const map = (value: unknown, key: string | number): void => {
     if (value !== undefined && value !== null && typeof value === 'object') {
       callback(value, key);
-    }
 
-    if (value === undefined || value === null) {
-    } else if (value.constructor === Object) {
-      for (const k in value) {
-        map(value[k], k);
-      }
-    } else if (value.constructor === Array) {
-      for (let i = 0; i < value.length; i++) {
-        map(value[i], i);
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          map(value[i], i);
+        }
+      } else {
+        for (const k in value as Record<string, unknown>) {
+          if (Object.prototype.hasOwnProperty.call(value, k)) {
+            map((value as Record<string, unknown>)[k], k);
+          }
+        }
       }
     }
   };
 
-  map(data, undefined);
-
+  map(data, 'root');
   return data;
 };
 

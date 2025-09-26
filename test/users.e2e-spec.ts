@@ -1,8 +1,3 @@
-import { AppModule } from '@contactApp/app.module';
-import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
-import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -10,20 +5,31 @@ import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
+import { SerializerInterceptor } from '@contactApp/common/interceptors/serializer.interceptor';
+import validationOptions from '@contactApp/common/pipes/validation-options.pipe';
+import { MailService } from '@contactApp/modules/mail/mail.service';
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+
 import { userData, userSignUpDetails } from './mock-data/admin-user';
 import { userData as normalUser, password } from './mock-data/user';
+import { TestAppModule } from './utils/test-app.module';
+import { createMockMailService } from './utils/test-data-factory';
 
 describe('UserController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let token;
-  let normalUserDbData = null;
+  let normalUserDbData: User | null = null;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
       providers: [ConfigService],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue(createMockMailService())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     configService = moduleFixture.get<ConfigService>(ConfigService);
@@ -42,14 +48,22 @@ describe('UserController (e2e)', () => {
         ...userData,
         password,
       });
-      userData.id = user.id;
+      (userData as unknown as User).id = user.id;
+      // Update userData with unique email for token generation
+      (userData as unknown as User).email = userData.email;
     }
-    token = jwt.sign(userData, configService.get('auth.secret'));
+    const authSecret = configService.get<string>('auth.secret');
+    if (!authSecret) {
+      throw new Error('Auth secret not configured');
+    }
+    token = jwt.sign(userData, authSecret);
   });
 
   afterAll(async () => {
     await User.delete({ id: userData.id });
-    await User.delete({ id: normalUserDbData.id });
+    if (normalUserDbData) {
+      await User.delete({ id: normalUserDbData.id });
+    }
     userData.id = undefined;
     normalUser.id = undefined;
     await app.close();
@@ -190,17 +204,17 @@ describe('UserController (e2e)', () => {
       });
   });
 
-  it(`should get a user with GET /api/users/${normalUserDbData?.id} - `, () => {
+  it(`should get a user with GET /api/users/${(normalUserDbData as unknown as User)?.id} - `, () => {
     return request(app.getHttpServer())
-      .get(`/api/users/${normalUserDbData.id}`)
+      .get(`/api/users/${(normalUserDbData as unknown as User)?.id}`)
       .set({
         Authorization: `Bearer ${token}`,
       })
       .expect(HttpStatus.OK)
       .then(({ body }) => {
         expect(typeof body).toBe('object');
-        expect(body.firstName).toBe(normalUserDbData.firstName);
-        expect(body.lastName).toBe(normalUserDbData.lastName);
+        expect(body.firstName).toBe(normalUserDbData?.firstName);
+        expect(body.lastName).toBe(normalUserDbData?.lastName);
         expect(typeof new Date(body.birthday).getTime()).toBe('number');
         expect(typeof new Date(body.anniversary).getTime()).toBe('number');
         expect(body).toHaveProperty('id');
@@ -212,10 +226,11 @@ describe('UserController (e2e)', () => {
   });
 
   it('should not allow none admin user to fetch another user with GET /api/users/0', () => {
-    const normalUserToken = jwt.sign(
-      normalUserDbData,
-      configService.get('auth.secret'),
-    );
+    const authSecret = configService.get<string>('auth.secret');
+    if (!authSecret) {
+      throw new Error('Auth secret not configured');
+    }
+    const normalUserToken = jwt.sign(normalUserDbData as User, authSecret);
     return request(app.getHttpServer())
       .get('/api/users/0')
       .set({
@@ -230,7 +245,7 @@ describe('UserController (e2e)', () => {
 
   it('should not log user into admin route if user is not admin with POST /api/auth/admin/login', async () => {
     await User.save({
-      ...normalUserDbData,
+      ...(normalUserDbData || {}),
       status: { id: 1 },
     });
     return request(app.getHttpServer())
@@ -246,13 +261,13 @@ describe('UserController (e2e)', () => {
       });
   });
 
-  it(`should update a user with PATCH /api/users/${normalUserDbData?.id}`, () => {
+  it(`should update a user with PATCH /api/users/${(normalUserDbData as unknown as User)?.id}`, () => {
     const user = {
       firstName: 'Jin',
       lastName: 'Kazama',
     };
     return request(app.getHttpServer())
-      .patch(`/api/users/${normalUserDbData.id}`)
+      .patch(`/api/users/${normalUserDbData?.id}`)
       .send(user)
       .set({
         Authorization: `Bearer ${token}`,
@@ -288,9 +303,9 @@ describe('UserController (e2e)', () => {
       });
   });
 
-  it(`should remove a user with DELETE /api/users/${normalUserDbData?.id}`, () => {
+  it(`should remove a user with DELETE /api/users/${(normalUserDbData as unknown as User)?.id}`, () => {
     return request(app.getHttpServer())
-      .delete(`/api/users/${normalUserDbData.id}`)
+      .delete(`/api/users/${normalUserDbData?.id}`)
       .set({
         Authorization: `Bearer ${token}`,
       })

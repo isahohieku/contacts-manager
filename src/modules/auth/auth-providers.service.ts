@@ -1,9 +1,10 @@
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { UserErrorCodes } from '@contactApp/shared/utils/constants/users/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 
 import { User } from '../users/entity/user.entity';
 
@@ -47,6 +48,8 @@ export class AuthProvidersService {
       // containing the JWT token and user.
       case AuthProvidersEnum.EMAIL:
         return this.loginWithEmail.bind(this);
+      default:
+        throw new Error(`Unsupported provider: ${provider}`);
     }
   }
 
@@ -64,7 +67,13 @@ export class AuthProvidersService {
    * ID, role, and status. If the password is invalid, it throws a 422 error with an appropriate
    * error message.
    */
-  async loginWithEmail(user: User, loginDto: AuthEmailLoginDto) {
+  async loginWithEmail(
+    user: User,
+    loginDto: AuthEmailLoginDto,
+  ): Promise<{
+    token: string;
+    user: User;
+  }> {
     // Compare the provided password with the user's password in the database
     const isValidPassword = await bcrypt.compare(
       loginDto.password,

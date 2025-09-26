@@ -1,9 +1,10 @@
-import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { EmailErrorCodes } from '@contactApp/shared/utils/constants/emails/errors';
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 
 import { ContactsService } from '../contacts/contacts.service';
 import { EmailType } from '../email-types/entities/email-type.entity';
@@ -21,7 +22,7 @@ export class EmailsService {
     private readonly contactsService: ContactsService,
   ) {}
 
-  async create(user: User, createEmailDto: CreateEmailDto) {
+  async create(user: User, createEmailDto: CreateEmailDto): Promise<Email> {
     await this.contactsService.findOne(user, createEmailDto.contact.id);
 
     const email = await this.emailRepository.save(
@@ -32,7 +33,7 @@ export class EmailsService {
     return email;
   }
 
-  async findOne(user: User, id: number) {
+  async findOne(user: User, id: number): Promise<Email> {
     const userId = user.id;
 
     const email = await this.emailRepository
@@ -57,7 +58,11 @@ export class EmailsService {
     );
   }
 
-  async update(user: User, id: number, updateEmailDto: UpdateEmailDto) {
+  async update(
+    user: User,
+    id: number,
+    updateEmailDto: UpdateEmailDto,
+  ): Promise<Email> {
     await this.findOne(user, id);
 
     await this.emailRepository.save(
@@ -69,13 +74,13 @@ export class EmailsService {
     return this.findOne(user, id);
   }
 
-  async remove(user: User, id: number) {
+  async remove(user: User, id: number): Promise<Email> {
     const email = await this.findOne(user, id);
     await this.emailRepository.softDelete(id);
     return email;
   }
 
-  async getEmailTypes() {
+  async getEmailTypes(): Promise<EmailType[]> {
     const emailTypes = await EmailType.find();
     return emailTypes;
   }

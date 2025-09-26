@@ -1,12 +1,23 @@
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, Repository, ObjectLiteral } from 'typeorm';
 
 import { IPaginationOptions } from './types/pagination-options';
+
+export interface IPaginationResult<T> {
+  data: T[];
+  metadata: {
+    page?: number;
+    items_per_page?: number;
+    total_items?: number;
+    total_pages?: number;
+    hasNextPage?: boolean;
+  };
+}
 
 export const infinityPagination = <T>(
   data: T[],
   { count, limit, page }: IPaginationOptions,
-) => {
-  const total_pages = limit ? Math.ceil(count / limit) : undefined;
+): IPaginationResult<T> => {
+  const total_pages = limit && count ? Math.ceil(count / limit) : undefined;
   return {
     data,
     metadata: {
@@ -19,11 +30,11 @@ export const infinityPagination = <T>(
   };
 };
 
-export const genericFindManyWithPagination = async <T>(
+export const genericFindManyWithPagination = async <T extends ObjectLiteral>(
   repository: Repository<T>,
   baseQuery: FindManyOptions<T>,
   options: IPaginationOptions,
-) => {
+): Promise<IPaginationResult<T>> => {
   const { limit, page } = options;
 
   if (page <= 0 || limit <= 0) {

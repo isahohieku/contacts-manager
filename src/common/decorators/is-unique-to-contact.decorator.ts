@@ -1,4 +1,3 @@
-import { CreateEmailDto } from '@contactApp/modules/emails/dto/create-email.dto';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -6,9 +5,14 @@ import {
 } from 'class-validator';
 import set from 'lodash/set';
 
+import { CreateEmailDto } from '@contactApp/modules/emails/dto/create-email.dto';
+
 @ValidatorConstraint({ name: 'IsUniqueToContact', async: true })
 export class IsUniqueToContact implements ValidatorConstraintInterface {
-  async validate(value: any, validationArguments: ValidationArguments) {
+  async validate(
+    value: unknown,
+    validationArguments: ValidationArguments,
+  ): Promise<boolean> {
     const repository = validationArguments.constraints[0];
     const property = validationArguments.property;
 

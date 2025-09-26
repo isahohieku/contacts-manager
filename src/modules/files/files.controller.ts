@@ -1,4 +1,3 @@
-import { FileTypes } from '@contactApp/shared/utils/types/files.type';
 import {
   Controller,
   Delete,
@@ -21,8 +20,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { FileStorageService } from '../file-storage/file-storage.service';
+import { FileTypes } from '@contactApp/shared/utils/types/files.type';
 
+import { FileStorageService } from '../file-storage/file-storage.service';
+import { User } from '../users/entity/user.entity';
+
+import { FileEntity } from './entities/file.entity';
 import { FilesService } from './files.service';
 
 import type { Response } from 'express';
@@ -39,7 +42,10 @@ export class FilesController {
   ) {}
 
   @Get(':file')
-  getFile(@Param('file') filepath: string, @Res() res: Response) {
+  getFile(
+    @Param('file') filepath: string,
+    @Res() res: Response,
+  ): Promise<Response> {
     return this.fileStorageService.getFile(filepath, res);
   }
 
@@ -60,14 +66,20 @@ export class FilesController {
     },
   })
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@Request() request, @UploadedFile() file) {
+  async uploadFile(
+    @Request() request: { user: User },
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ path: string }> {
     return this.filesService.uploadFile(request.user, file);
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Delete('remove/:id')
-  remove(@Request() request, @Param('id') file: string) {
+  remove(
+    @Request() request: { user: User },
+    @Param('id') file: string,
+  ): Promise<FileEntity> {
     return this.filesService.removeFile(request.user, file);
   }
 }

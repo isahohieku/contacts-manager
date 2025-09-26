@@ -10,7 +10,7 @@ const base = {
 
 export const userData = {
   ...base,
-  id: undefined,
+  id: undefined as number | undefined,
   role: { id: 2 },
   status: { id: 2 },
 };

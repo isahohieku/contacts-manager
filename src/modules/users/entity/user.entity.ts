@@ -1,11 +1,3 @@
-import { AuthProvider } from '@contactApp/modules/auth/entities/auth-providers.entity';
-import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
-import { Country } from '@contactApp/modules/countries/entities/country.entity';
-import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
-import { Role } from '@contactApp/modules/roles/entities/role.entity';
-import { Status } from '@contactApp/modules/statuses/entities/status.entity';
-import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
-import { EntityUser } from '@contactApp/shared/entities/entity-helper';
 import * as bcrypt from 'bcryptjs';
 import {
   Column,
@@ -19,18 +11,27 @@ import {
   ManyToOne,
 } from 'typeorm';
 
+import { AuthProvider } from '@contactApp/modules/auth/entities/auth-providers.entity';
+import { Contact } from '@contactApp/modules/contacts/entities/contact.entity';
+import { Country } from '@contactApp/modules/countries/entities/country.entity';
+import { FileEntity } from '@contactApp/modules/files/entities/file.entity';
+import { Role } from '@contactApp/modules/roles/entities/role.entity';
+import { Status } from '@contactApp/modules/statuses/entities/status.entity';
+import { Tag } from '@contactApp/modules/tags/entities/tag.entity';
+import { EntityUser } from '@contactApp/shared/entities/entity-helper';
+
 @Entity('users')
 export class User extends EntityUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ type: 'varchar', unique: true, nullable: true })
   email: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   avatar: string | null;
 
   public previousPassword: string;
@@ -42,7 +43,7 @@ export class User extends EntityUser {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async setPassword() {
+  async setPassword(): Promise<void> {
     if (this.previousPassword !== this.password && this.password) {
       const salt = await bcrypt.genSalt();
       this.password = await bcrypt.hash(this.password, salt);
@@ -55,11 +56,11 @@ export class User extends EntityUser {
   provider?: AuthProvider;
 
   @Index()
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   firstName: string | null;
 
   @Index()
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   lastName: string | null;
 
   @ManyToOne(() => Role, {
@@ -77,7 +78,7 @@ export class User extends EntityUser {
   })
   country: Country;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   @Index()
   hash: string | null;
 

@@ -26,12 +26,17 @@ LABEL description="Picking only necessary modules to run app"
 WORKDIR /usr/app
 
 COPY --from=yarn-migration ["/tmp/app/jest-e2e.json", \
+    "/tmp/app/jest-unit.json", \
+    "/tmp/app/jest-integration.json", \
+    "/tmp/app/.nycrc.json", \
     "/tmp/app/package.json", \
     "/tmp/app/tsconfig.json", \
     "/tmp/app/tsconfig.path.json", \
     "/tmp/app/nest-cli.json", \
     "/tmp/app/.env", \
     "./"]
+
+COPY --from=yarn-migration ["/tmp/app/scripts", "./scripts"]
 
 COPY --from=yarn-migration ["/tmp/app/src", "./src"]
 COPY --from=yarn-migration ["/tmp/app/test", "./test"]

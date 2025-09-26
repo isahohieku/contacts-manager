@@ -1,5 +1,12 @@
 import stream from 'stream';
 
+import { Parser } from '@json2csv/plainjs';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import set from 'lodash/set';
+import { CsvParser, ParsedData } from 'nest-csv-parser';
+import { FindManyOptions, ILike, Repository } from 'typeorm';
+
 import { ContactErrorCodes } from '@contactApp/shared/utils/constants/contacts/errors';
 import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
 import {
@@ -11,23 +18,29 @@ import {
   searchTypes,
 } from '@contactApp/shared/utils/contact/helper';
 import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
-import { genericFindManyWithPagination } from '@contactApp/shared/utils/infinity-pagination';
+import {
+  genericFindManyWithPagination,
+  IPaginationResult,
+} from '@contactApp/shared/utils/infinity-pagination';
 import { SearchTypes } from '@contactApp/shared/utils/types/contacts.type';
 import { IPaginationOptions } from '@contactApp/shared/utils/types/pagination-options';
-import { Parser } from '@json2csv/plainjs';
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import set from 'lodash/set';
-import { CsvParser, ParsedData } from 'nest-csv-parser';
-import { FindManyOptions, ILike, Repository } from 'typeorm';
 
+import { CacheService } from '../../common/services/cache.service';
 import { FilesService } from '../files/files.service';
+import { Tag } from '../tags/entities/tag.entity';
 import { TagsService } from '../tags/tags.service';
 import { User } from '../users/entity/user.entity';
 
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { Contact } from './entities/contact.entity';
+
+interface MulterFile {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
+}
 
 @Injectable()
 export class ContactsService {
@@ -45,6 +58,7 @@ export class ContactsService {
     private readonly tagsService: TagsService,
     private readonly fileService: FilesService,
     private readonly csvParser: CsvParser,
+    private readonly cacheService: CacheService,
   ) {}
 
   /**
@@ -54,40 +68,64 @@ export class ContactsService {
    * @param {CreateContactDto} createContactDto - The data transfer object containing the contact's details.
    * @return {Promise<Contact>} The newly created contact.
    */
-  async create(user: User, createContactDto: CreateContactDto) {
+  async create(
+    user: User,
+    createContactDto: CreateContactDto,
+  ): Promise<Contact> {
     const contact = await this.contactsRepository.save(
       this.contactsRepository.create({
         ...createContactDto,
         owner: user,
       }),
     );
+
+    // Invalidate contacts cache for this user
+    await this.cacheService.invalidateContactsCache(user.id);
+
     return contact;
   }
 
   /**
    * Retrieves a list of contacts with pagination, filtered by the provided search term and type.
    *
-   * @param {IPaginationOptions} options - The pagination options.
-   * @param {string} search - The search term to filter contacts by.
-   * @param {SearchTypes} type - The type of search to perform.
-   * @param {User} user - The user who owns the contacts.
-   * @return {Promise<Contact[]>} The list of contacts matching the search criteria.
+   * @param options - The pagination options.
+   * @param search - The search term to filter contacts by.
+   * @param type - The type of search to perform.
+   * @param user - The user who owns the contacts.
+   * @return The paginated list of contacts matching the search criteria.
    */
   async findAllWithPagination(
     options: IPaginationOptions,
     search: string,
     type: SearchTypes,
     user: User,
-  ) {
+  ): Promise<IPaginationResult<Contact>> {
+    // Generate cache key
+    const cacheKey = this.cacheService.generateContactsCacheKey(
+      user.id,
+      options.page,
+      options.limit,
+      search,
+      type,
+    );
+
+    // Try to get from cache first
+    const cachedResult =
+      await this.cacheService.get<IPaginationResult<Contact>>(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
     const baseQuery: FindManyOptions<Contact> = {
       where: {
         owner: {
           id: user.id,
         },
       },
+      relations: ['phone_numbers', 'emails', 'addresses', 'tags', 'avatar'], // Optimize relations loading
     };
 
-    // TODO: Improve search performance
+    // TODO: Improve search performance with database indexes
     // TODO: Add sorting feature
     if (search && !type) {
       baseQuery.where = [
@@ -113,11 +151,16 @@ export class ContactsService {
       ];
     }
 
-    return genericFindManyWithPagination(
+    const result = await genericFindManyWithPagination(
       this.contactsRepository,
       baseQuery,
       options,
     );
+
+    // Cache the result for 5 minutes
+    await this.cacheService.set(cacheKey, result, 300);
+
+    return result;
   }
 
   /**
@@ -128,7 +171,16 @@ export class ContactsService {
    * @returns {Contact | undefined} The contact if found, or undefined if not found.
    * @throws {Error} If the contact is not found, with a NOT_FOUND status code.
    */
-  async findOne(user: User, id: number) {
+  async findOne(user: User, id: number): Promise<Contact> {
+    // Generate cache key
+    const cacheKey = this.cacheService.generateContactCacheKey(id);
+
+    // Try to get from cache first
+    const cachedContact = await this.cacheService.get<Contact>(cacheKey);
+    if (cachedContact) {
+      return cachedContact;
+    }
+
     const contact = await this.contactsRepository.findOne({
       where: {
         id,
@@ -136,9 +188,12 @@ export class ContactsService {
           id: user.id,
         },
       },
+      relations: ['phone_numbers', 'emails', 'addresses', 'tags', 'avatar'],
     });
 
     if (contact) {
+      // Cache the contact for 10 minutes
+      await this.cacheService.set(cacheKey, contact, 600);
       return contact;
     }
 
@@ -161,16 +216,21 @@ export class ContactsService {
    * @param {UpdateContactDto} updateContactDto - The updated contact data.
    * @returns {Promise<Contact | undefined>} The updated contact if found, or undefined if not found.
    */
-  async update(user: User, id: number, updateContactDto: UpdateContactDto) {
+  async update(
+    user: User,
+    id: number,
+    updateContactDto: UpdateContactDto,
+  ): Promise<Contact> {
     const existingContact = await this.findOne(user, id);
-
     const tags = updateContactDto.tags;
 
+    // Validate and fetch full tag entities if tags are being updated
+    let validatedTags: Tag[] | undefined;
     if (tags?.length) {
-      await Promise.all(
-        updateContactDto.tags.map((tag) =>
+      validatedTags = await Promise.all(
+        updateContactDto.tags?.map((tag) =>
           this.tagsService.findOne(user, tag.id),
-        ),
+        ) || [],
       );
     }
 
@@ -183,12 +243,21 @@ export class ContactsService {
       }
     }
 
-    await this.contactsRepository.save(
-      this.contactsRepository.create({
-        id,
-        ...updateContactDto,
-      }),
+    // Merge the existing contact with the update data
+    const updateData = { ...updateContactDto };
+
+    // If tags were validated, use the full tag entities instead of just IDs
+    if (validatedTags) {
+      updateData.tags = validatedTags;
+    }
+
+    const updatedContact = this.contactsRepository.merge(
+      existingContact,
+      updateData,
     );
+
+    await this.contactsRepository.save(updatedContact);
+
     return this.findOne(user, id);
   }
 
@@ -199,7 +268,7 @@ export class ContactsService {
    * @param {number} id - The ID of the contact to remove.
    * @return {Contact | undefined} The removed contact if found, or undefined if not found.
    */
-  async remove(user: User, id: number) {
+  async remove(user: User, id: number): Promise<Contact> {
     const contact = await this.findOne(user, id);
 
     await this.contactsRepository.softDelete(id);
@@ -267,12 +336,12 @@ export class ContactsService {
   /**
    * Asynchronously imports contacts from a CSV file and associates them with a user.
    *
-   * @param {User} user - The user to associate the imported contacts with.
-   * @param {Buffer|File} file - The CSV file containing the contacts to import.
-   * @return {Promise<{message: string}>} A promise that resolves to an object with a success message.
    * @throws {Error} If there is an error importing the contacts.
    */
-  async importContacts(user: User, file) {
+  async importContacts(
+    user: User,
+    file: MulterFile | Buffer,
+  ): Promise<{ message: string }> {
     // Creates an initial buffer stream for separator detection
     const bufferStreamForSeparator = new stream.PassThrough();
     bufferStreamForSeparator.end(file instanceof Buffer ? file : file.buffer);
@@ -285,9 +354,15 @@ export class ContactsService {
       const separator = await detectSeparator(bufferStreamForSeparator);
 
       const { list: contacts }: ParsedData<Contact> =
-        await this.csvParser.parse(bufferStreamForParser, Contact, null, null, {
-          separator,
-        });
+        await this.csvParser.parse(
+          bufferStreamForParser,
+          Contact,
+          undefined,
+          undefined,
+          {
+            separator,
+          },
+        );
 
       const parsedContacts = processContactCleanup<Contact[]>(contacts);
 

@@ -1,5 +1,3 @@
-import { User } from '@contactApp/modules/users/entity/user.entity';
-import { EntityHelper } from '@contactApp/shared/entities/entity-helper';
 import { Allow } from 'class-validator';
 import {
   Column,
@@ -10,6 +8,9 @@ import {
   PrimaryGeneratedColumn,
   DeleteDateColumn,
 } from 'typeorm';
+
+import { User } from '@contactApp/modules/users/entity/user.entity';
+import { EntityHelper } from '@contactApp/shared/entities/entity-helper';
 
 @Entity()
 export class Forgot extends EntityHelper {

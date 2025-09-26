@@ -2,24 +2,53 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import compression from 'compression';
+import helmet from 'helmet';
 
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { CompressionInterceptor } from './common/interceptors/compression.interceptor';
 import { SerializerInterceptor } from './common/interceptors/serializer.interceptor';
 import validationOptions from './common/pipes/validation-options.pipe';
+import { LoggerService } from './common/services/logger.service';
+import { MetricsService } from './common/services/metrics.service';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule, {
+    logger: new LoggerService(),
+  });
   const configService = app.get(ConfigService);
+  const logger = app.get(LoggerService);
+  const metricsService = app.get(MetricsService);
+
+  // Security middleware
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
+      },
+    }),
+  );
+  app.use(compression());
 
   app.enableShutdownHooks();
-  app.setGlobalPrefix(configService.get('app.apiPrefix'), {
-    exclude: ['/'],
+  app.setGlobalPrefix(configService.get('app.apiPrefix') ?? 'api', {
+    exclude: ['/', '/health', '/health/ready', '/health/live'],
   });
   app.enableVersioning({
     type: VersioningType.URI,
   });
 
-  app.useGlobalInterceptors(new SerializerInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter(logger, metricsService));
+  app.useGlobalInterceptors(
+    new SerializerInterceptor(),
+    new CompressionInterceptor(),
+  );
   app.useGlobalPipes(new ValidationPipe(validationOptions));
 
   const options = new DocumentBuilder()
@@ -36,6 +65,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(configService.get('app.port'));
+  await app.listen(configService.get('app.port') ?? 3000);
 }
 bootstrap();

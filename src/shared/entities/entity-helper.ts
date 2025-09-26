@@ -11,7 +11,7 @@ export class EntityHelper extends BaseEntity {
   __entity?: string;
 
   @AfterLoad()
-  setEntityName() {
+  setEntityName(): void {
     this.__entity = this.constructor.name;
   }
 }
@@ -32,7 +32,7 @@ export class EntityUser extends EntityBase {
 
   @AfterLoad()
   @AfterInsert()
-  setEntityName() {
+  setEntityName(): void {
     this.__entity = this.constructor.name;
   }
 }

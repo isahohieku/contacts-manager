@@ -1,8 +1,9 @@
-import { DeepPartial } from '@contactApp/shared/utils/types/deep-partial.type';
-import { FindOptions } from '@contactApp/shared/utils/types/find-options.type';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { DeepPartial } from '@contactApp/shared/utils/types/deep-partial.type';
+import { FindOptions } from '@contactApp/shared/utils/types/find-options.type';
 
 import { Forgot } from './entities/forgot.entity';
 
@@ -13,13 +14,13 @@ export class ForgotService {
     private forgotRepository: Repository<Forgot>,
   ) {}
 
-  async findOne(options: FindOptions<Forgot>) {
+  async findOne(options: FindOptions<Forgot>): Promise<Forgot | null> {
     return this.forgotRepository.findOne({
       where: options.where,
     });
   }
 
-  async create(data: DeepPartial<Forgot>) {
+  async create(data: DeepPartial<Forgot>): Promise<Forgot> {
     return this.forgotRepository.save(this.forgotRepository.create(data));
   }
 

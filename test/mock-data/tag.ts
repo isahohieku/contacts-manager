@@ -1,4 +1,4 @@
 export const tagData = {
   name: 'Friends',
-  id: undefined,
+  id: undefined as number | undefined,
 };

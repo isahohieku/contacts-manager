@@ -29,7 +29,7 @@ export class MailConfigService implements MailerOptionsFactory {
       },
       template: {
         dir: path.join(
-          this.configService.get('app.workingDirectory'),
+          this.configService.get('app.workingDirectory') || process.cwd(),
           'src',
           'common',
           'mail',

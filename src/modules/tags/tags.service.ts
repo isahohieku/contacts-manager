@@ -1,9 +1,10 @@
-import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
-import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
-import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { ERROR_MESSAGES } from '@contactApp/shared/utils/constants/generic/errors';
+import { TagErrorCodes } from '@contactApp/shared/utils/constants/tags/errors';
+import { handleError } from '@contactApp/shared/utils/handlers/error.handler';
 
 import { User } from '../users/entity/user.entity';
 
@@ -18,7 +19,7 @@ export class TagsService {
     private tagsRepository: Repository<Tag>,
   ) {}
 
-  async create(user: User, createTagDto: CreateTagDto) {
+  async create(user: User, createTagDto: CreateTagDto): Promise<Tag> {
     const tag = await this.tagsRepository.save(
       this.tagsRepository.create({
         ...createTagDto,
@@ -28,7 +29,7 @@ export class TagsService {
     return tag;
   }
 
-  async findAll(user: User) {
+  async findAll(user: User): Promise<Tag[]> {
     const tags = await this.tagsRepository.find({
       where: {
         owner: {
@@ -39,7 +40,7 @@ export class TagsService {
     return tags;
   }
 
-  async findOne(user: User, id: number) {
+  async findOne(user: User, id: number): Promise<Tag> {
     const tag = await this.tagsRepository.findOne({
       where: {
         id,
@@ -64,7 +65,11 @@ export class TagsService {
     );
   }
 
-  async update(user: User, id: number, updateTagDto: UpdateTagDto) {
+  async update(
+    user: User,
+    id: number,
+    updateTagDto: UpdateTagDto,
+  ): Promise<Tag> {
     await this.findOne(user, id);
 
     await this.tagsRepository.save(
@@ -76,7 +81,7 @@ export class TagsService {
     return this.findOne(user, id);
   }
 
-  async remove(user: User, id: number) {
+  async remove(user: User, id: number): Promise<Tag> {
     const tag = await this.findOne(user, id);
     await this.tagsRepository.softDelete(id);
     return tag;
